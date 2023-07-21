@@ -1,6 +1,6 @@
-import { verifyClientToken } from "../auth/auth.service";
-import { adminAuth, adminDb } from "../firebase/admin.init";
-import { Protocol, STATUS_CODE } from "../util/protocol.module";
+import { verifyClientToken } from "@/server/auth/auth.service";
+import { adminAuth, UserCollection } from "@/server/firebase/admin.init";
+import { Service_Response, STATUS_CODE } from "@/server/util/protocol.module";
 import {
 	castInputToUser,
 	castToProfile,
@@ -8,19 +8,16 @@ import {
 	castToUsers,
 	User_Input,
 	User_Private,
+    User_Public,
 } from "./user.module";
-import { castToCommunity } from "../community/community.module";
-const UserCollection = adminDb.collection("Users");
-const CommunityCollection = adminDb.collection("Communities");
-export const RequestCollection = adminDb.collection("Requests");
 
-export async function searchUsers(search_string: string): Promise<Protocol> {
+export async function searchUsersByName(search_string: string): Promise<Service_Response<null | { users: User_Public[] }>> {
 	try {
 		console.log(search_string);
 		const documents = await UserCollection.orderBy("name")
-			.limit(25)
 			.where("name", ">=", search_string)
-			.where("name", "<=", search_string + "\uf8ff")
+            .where("name", "<=", search_string + "\uf8ff")
+            .limit(25)
 			.get();
 		if (documents.empty) {
 			return {
@@ -47,12 +44,13 @@ export async function searchUsers(search_string: string): Promise<Protocol> {
 	}
 }
 
-export async function getProfile(token: string): Promise<Protocol> {
+export async function getProfileFromToken(token: string): Promise<Service_Response<null | {
+    user: User_Private
+}>> {
 	try {
 		const verification = await verifyClientToken(token);
-		if (verification.code != STATUS_CODE.OK) {
-			return verification;
-		}
+		if (!verification.data)
+			return verification as Service_Response<null>;
 		const email: string = verification.data.email;
 		const document = await UserCollection.where("email", "==", email).limit(1).get();
 		if (document.empty) {
@@ -67,7 +65,7 @@ export async function getProfile(token: string): Promise<Protocol> {
 			code: STATUS_CODE.OK,
 			message: `User found for ${email}`,
 			data: {
-				...user,
+				user
 			},
 		};
 	} catch (error) {
@@ -80,7 +78,7 @@ export async function getProfile(token: string): Promise<Protocol> {
 	}
 }
 
-export async function addUser(input: Omit<User_Input, "joined">): Promise<Protocol> {
+export async function addUser(input: Omit<User_Input, "joined">): Promise<Service_Response<null|{user: User_Private}>> {
 	try {
 		if (!input.name || !input.email) {
 			return {
@@ -92,13 +90,13 @@ export async function addUser(input: Omit<User_Input, "joined">): Promise<Protoc
 		if (!input.bio) input.bio = "";
 		if (!input.address) input.address = "";
 		const user = castInputToUser({ ...input, joined: new Date() });
-		const document = await (await UserCollection.add(user)).get();
+        const document = await (await UserCollection.add(user)).get();
 		const newuser: User_Private = castToProfile(document);
 		return {
 			code: STATUS_CODE.OK,
 			message: `User added with id ${document.id}`,
 			data: {
-				...newuser,
+				user: newuser,
 			},
 		};
 	} catch (error) {
@@ -111,12 +109,11 @@ export async function addUser(input: Omit<User_Input, "joined">): Promise<Protoc
 	}
 }
 
-export async function updateUser(input: User_Input, token: string): Promise<Protocol> {
+export async function updateUser(input: User_Input, token: string): Promise<Service_Response<null|{user: User_Private}>> {
 	try {
 		const verification = await verifyClientToken(token);
-		if (verification.code != STATUS_CODE.OK) {
-			return verification;
-		}
+		if (!verification.data)
+			return verification as Service_Response<null>;
 		const email = verification.data.email;
 		const user_doc = await UserCollection.where("email", "==", email).limit(1).get();
 		if (user_doc.empty) {
@@ -129,12 +126,12 @@ export async function updateUser(input: User_Input, token: string): Promise<Prot
 		const user_id = user_doc.docs[0].id;
 		input.email = email;
 		await UserCollection.doc(user_id).update(input);
-		const newuser: User_Private = castToProfile(await UserCollection.doc(user_id).get());
+		const newuser = castToProfile(await UserCollection.doc(user_id).get());
 		return {
 			code: STATUS_CODE.OK,
 			message: `User updated with email ${input.email}`,
 			data: {
-				...newuser,
+				user: newuser,
 			},
 		};
 	} catch (error) {
@@ -147,11 +144,11 @@ export async function updateUser(input: User_Input, token: string): Promise<Prot
 	}
 }
 
-export async function deleteUser(token: string): Promise<Protocol> {
+export async function deleteUser(token: string): Promise<Service_Response<null>> {
 	try {
 		const verification = await verifyClientToken(token);
-		if (verification.code != STATUS_CODE.OK) {
-			return verification;
+		if (!verification.data) {
+			return verification as Service_Response<null>;
 		}
 		const email = verification.data.email;
 		const user_doc = await UserCollection.where("email", "==", email).limit(1).get();
@@ -180,7 +177,7 @@ export async function deleteUser(token: string): Promise<Protocol> {
 	}
 }
 
-export async function getUser(user_id: string): Promise<Protocol> {
+export async function getUser(user_id: string): Promise<Service_Response<null | { user: User_Public }>> {
 	try {
 		const document = await UserCollection.doc(user_id).get();
 		if (!document.exists) {
@@ -195,7 +192,7 @@ export async function getUser(user_id: string): Promise<Protocol> {
 			code: STATUS_CODE.OK,
 			message: `User found ${user.email}`,
 			data: {
-				...user,
+				user,
 			},
 		};
 	} catch (error) {

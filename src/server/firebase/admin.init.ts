@@ -23,4 +23,10 @@ if (admin.apps.length == 0) {
 
 console.log("Firebase Admin Initialized", adminApp.name);
 export const adminAuth = getAuth(adminApp);
-export const adminDb = getFirestore(adminApp);
+export const adminDb = getFirestore(adminApp); 
+
+export const UserCollection = adminDb.collection("users");
+export const CommunityCollection = adminDb.collection("communities");
+export const RequestCollection = adminDb.collection("requests");
+export const MessageCollection = adminDb.collection("messages");
+export const ContactCollection = adminDb.collection("contacts");

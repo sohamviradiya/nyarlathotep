@@ -1,11 +1,11 @@
-import { adminDb } from "../firebase/admin.init";
-import { Protocol, STATUS_CODE } from "../util/protocol.module";
-import { castToUser } from "../user/user.module";
-import { castToCommunity } from "../community/community.module";
-const UserCollection = adminDb.collection("Users");
-const CommunityCollection = adminDb.collection("Communities");
+import { UserCollection,CommunityCollection } from "@/server/firebase/admin.init";
+import { Service_Response, STATUS_CODE } from "@/server/util/protocol.module";
+import { castToUser } from "@/server/user/user.module";
+import { Community_Public, castToCommunity } from "@/server/community/community.module";
 
-export async function getUserCommunities(user_id: string): Promise<Protocol> {
+export async function getUserCommunities(user_id: string): Promise<Service_Response<null | {
+    communities: Community_Public[]
+} >> {
 	try {
 		const document = await UserCollection.doc(user_id).get();
 		if (!document.exists) {
@@ -23,16 +23,18 @@ export async function getUserCommunities(user_id: string): Promise<Protocol> {
 				message: `User ${user.email} is not a member of any community`,
 				data: null,
 			};
-		const community_details = await Promise.all(
-			community_list.map(async (community_id) => {
-				return await CommunityCollection.doc(community_id).get();
-			})
-		);
+        const community_details = await Promise.all(
+            community_list.map(async (community_id) => {
+                return await CommunityCollection.doc(community_id).get();
+            })
+        );
 		return {
 			code: STATUS_CODE.OK,
 			message: `Communities found for ${user.email}`,
-			data: community_details.map((community) => castToCommunity(community)),
-		};
+            data: {
+                communities:    community_details.map((community) => castToCommunity(community)) as Community_Public[],
+            }
+            };
 	} catch (error) {
 		console.log(error);
 		return {

@@ -7,8 +7,8 @@ export enum STATUS_CODE {
 	INTERNAL_ERROR = 500,
 }
 
-export type Protocol = {
+export type Service_Response<T> = {
 	code: STATUS_CODE;
 	message: string;
-	data?: any;
+	data?: T;
 };

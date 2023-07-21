@@ -15,7 +15,7 @@ export type User_Private = {
 
 export type User_Public = Omit<User_Private, "contacts" | "requests" | "invitations">;
 
-export type User_Input = Omit<User_Public, "id" | "communities">;
+export type User_Input = Omit<User_Public, "id" | "communities" >;
 
 export function castToUser(document: FirebaseFirestore.DocumentSnapshot): User_Public {
 	const id = document.id;

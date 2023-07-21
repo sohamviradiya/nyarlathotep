@@ -1,4 +1,4 @@
-import { Message } from "@/src/message/message.module";
+import { Message } from "@/server/message/message.module";
 
 export type Contact = {
 	id: string;

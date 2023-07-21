@@ -1,4 +1,4 @@
-import { User_Private, User_Public } from "@/src/user/user.module";
+import { User_Private, User_Public } from "@/server/user/user.module";
 
 export type Announcement = {
 	title: string;

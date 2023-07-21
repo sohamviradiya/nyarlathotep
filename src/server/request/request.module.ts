@@ -1,4 +1,4 @@
-import { User_Private } from "@/src/user/user.module";
+import { User_Private } from "@/server/user/user.module";
 import { DocumentReference } from "firebase-admin/firestore";
 export enum REQEST_STATUS {
 	PENDING = 0,
