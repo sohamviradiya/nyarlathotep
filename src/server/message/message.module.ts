@@ -1,32 +1,24 @@
 export enum MESSAGE_STATUS {
-	DRAFT = 0,
-	SENT = 1,
-	READ = 2,
-	APPROVED = 3,
-	REJECTED = 4,
+    DRAFT = "DRAFT",
+    SENT = "SENT",
+    READ = "READ",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED",
 }
 
+export type MESSAGE_STATUS_TYPE = keyof typeof MESSAGE_STATUS;
+
 export enum MESSAGE_DIRECTION {
-	OUTGOING = 0,
-	INCOMING = 1,
+    OUTGOING = "OUTGOING",
+    INCOMING = "INCOMING",
 }
 
 export type Message = {
-	id: string;
-	content: string;
-	direction: MESSAGE_DIRECTION;
-	status: MESSAGE_STATUS;
-	status_changed: Date;
+    id: string;
+    content: string;
+    direction: keyof typeof MESSAGE_DIRECTION;
+    status: keyof typeof MESSAGE_STATUS;
+    status_changed: Date;
 };
 
-export function castMessage(message: FirebaseFirestore.DocumentSnapshot): Message {
-	const id = message.id;
-	const data = message.data()?.content;
-	return {
-		id,
-		content: data.content,
-		direction: data.direction,
-		status: data.status,
-		status_changed: data.status_changed.toDate(),
-	};
-}
+

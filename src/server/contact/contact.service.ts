@@ -1,113 +1,89 @@
 import { RequestCollection, ContactCollection, UserCollection } from "@/server/firebase/admin.init";
 import { FieldValue } from "firebase-admin/firestore";
-import { Service_Response, STATUS_CODE } from "@/server/util/protocol.module";
-import { Contact, castContact } from "./contact.module";
-import { getProfileFromToken } from "@/server/user/user.service";
-import { getUserIDFromToken, verifyClientToken } from "../auth/auth.service";
+import { Service_Response, STATUS_CODE } from "@/server/response/response.module";
+import { Contact } from "@/server/contact/contact.module";
+import { castToContact } from "@/server/contact/contact.util";
+import { castToRequest } from "@/server/request/request.util";
+import { getUserIDFromToken } from "@/server/auth/auth.service";
 
-export async function eastablishContact(request_id: string): Promise<Service_Response<null | { contact: Contact }>> {
-    const request = await RequestCollection.doc(request_id).get();
-    if (!request.exists) throw new Error("Request does not exist");
-    const request_details = request.data();
-    if (!request_details) throw new Error("Request does not exist");
-    const contactref = await ContactCollection.add({
-        sender: request_details.sender,
-        receiver: request_details.receiver,
+export async function establishContact(request_id: string): Promise<Service_Response<null | { contact: Contact }>> {
+    const requestRef = await RequestCollection.doc(request_id);
+    const request = castToRequest(await requestRef.get());
+    const contactRef = await ContactCollection.add({
+        sender: await UserCollection.doc(request.sender),
+        receiver: await UserCollection.doc(request.receiver),
         messages: [],
-        eastablished: new Date(),
+        established: new Date(),
     });
-    await UserCollection.doc(request_details.sender.id).update({
-        contacts: FieldValue.arrayUnion(contactref),
+    await UserCollection.doc(request.sender).update({
+        contacts: FieldValue.arrayUnion(contactRef),
     });
-    await UserCollection.doc(request_details.receiver.id).update({
-        contacts: FieldValue.arrayUnion(contactref),
+
+    await UserCollection.doc(request.receiver).update({
+        contacts: FieldValue.arrayUnion(contactRef),
     });
-    const contact = await contactref.get();
+    const contact = await contactRef.get();
     await RequestCollection.doc(request_id).delete();
     return {
         code: STATUS_CODE.OK,
-        message: "Contact Eastablished",
+        message: "Contact Established",
         data: {
-            contact: castContact(contact)
+            contact: castToContact(contact)
         }
     }
-}
+};
 
 export async function deleteContact(contact_id: string, token: string): Promise<Service_Response<null>> {
-    const contact = await ContactCollection.doc(contact_id).get();
-    if (!contact.exists) throw new Error("Contact does not exist");
-    const contact_details = contact.data();
-    if (!contact_details) throw new Error("Contact does not exist");
+    const contactRef = await ContactCollection.doc(contact_id);
+    const contact = castToContact(await contactRef.get());
 
-    const auth_service_response = await getUserIDFromToken(token);
-    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-    const id = auth_service_response.data.id;
-    if (contact_details.sender.id != token && contact_details.receiver.id != token)
-        throw new Error("User does not have access to this contact");
-
-    await UserCollection.doc(contact_details.sender.id).update({
-        contacts: FieldValue.arrayRemove(contact.ref),
-    });
-    await UserCollection.doc(contact_details.receiver.id).update({
-        contacts: FieldValue.arrayRemove(contact.ref),
+    await UserCollection.doc(contact.sender).update({
+        contacts: FieldValue.arrayRemove(contactRef),
     });
 
-    await ContactCollection.doc(contact_id).delete();
+    await UserCollection.doc(contact.receiver).update({
+        contacts: FieldValue.arrayRemove(contactRef),
+    });
+
+    await contactRef.delete();
     return {
         code: STATUS_CODE.OK,
         message: "Contact Deleted",
-        data: null,
     };
-}
+};
 
-export async function getContact(contact_id: string, token: string): Promise<Service_Response<null | {
-    contact: Contact;
-}>> {
-    const contact = await ContactCollection.doc(contact_id).get();
-    if (!contact.exists) throw new Error("Contact does not exist");
-    const contact_details = contact.data();
-    if (!contact_details) throw new Error("Contact does not exist");
-    const auth_response = await getUserIDFromToken(token);
-    if (!auth_response.data) return auth_response as Service_Response<null>;
-    const id = auth_response.data.id;
-    if (contact_details.sender.id != id && contact_details.receiver.id != id) {
-        return {
-            code: STATUS_CODE.UNAUTHORIZED,
-            message: "User does not have access to this contact",
-            data: null,
-        };
-    }
+export async function getContact(contact_id: string): Promise<Service_Response<null | { contact: Contact }>> {
+    const contactRef = await ContactCollection.doc(contact_id);
+    const contact = await contactRef.get();
     return {
         code: STATUS_CODE.OK,
         message: "Contact Retrieved",
         data: {
-            contact: castContact(contact)
+            contact: castToContact(contact)
         },
     };
-}
+};
 
-export async function getContacts(token: string): Promise<Service_Response<null | {
-    contacts: Contact[];
-}>> {
-    const profile_service_response = await getProfileFromToken(token);
-    if (!profile_service_response.data) return profile_service_response as Service_Response<null>;
-    const contact_list = profile_service_response.data.user.contacts;
-    if (contact_list.length == 0)
-        return {
-            code: STATUS_CODE.NOT_FOUND,
-            message: `No Contacts for ${profile_service_response.data.user.name}`,
-        };
-    const contact_details = await Promise.all(
-        contact_list.map(async (contact_id: string) => {
-            const contact_data = await ContactCollection.doc(contact_id).get();
-            return castContact(contact_data);
+export async function getContacts(token: string): Promise<Service_Response<null | { contacts: Contact[] }>> {
+    const auth_service_response = await getUserIDFromToken(token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+    const profile = (await UserCollection.doc(auth_service_response.data.id).get()).data();
+    if (!profile) return {
+        code: STATUS_CODE.NOT_FOUND,
+        message: "User Profile Not Found",
+    };
+    const contacts = await Promise.all(
+        profile.contacts.map(async (contactRef: FirebaseFirestore.DocumentReference) => {
+            return castToContact(await contactRef.get());
         })
     );
     return {
         code: STATUS_CODE.OK,
         message: "Contacts Retrieved",
         data: {
-            contacts: contact_details
+            contacts
         }
     };
-}
+};
+
+

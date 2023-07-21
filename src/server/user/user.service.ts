@@ -1,15 +1,17 @@
-import { verifyClientToken } from "@/server/auth/auth.service";
 import { adminAuth, UserCollection } from "@/server/firebase/admin.init";
-import { Service_Response, STATUS_CODE } from "@/server/util/protocol.module";
+import { Service_Response, STATUS_CODE } from "@/server/response/response.module";
+import {
+    User_Input,
+    User_Private,
+    User_Public,
+} from "@/server/user/user.module";
 import {
     castInputToUser,
     castToProfile,
     castToUser,
-    castToUsers,
-    User_Input,
-    User_Private,
-    User_Public,
-} from "./user.module";
+    castToUsers
+} from "@/server/user/user.util";
+import { getUserIDFromToken } from "@/server/auth/auth.service";
 
 export async function searchUsersByName(search_string: string): Promise<Service_Response<null | { users: User_Public[] }>> {
     const documents = await UserCollection.orderBy("name")
@@ -21,7 +23,6 @@ export async function searchUsersByName(search_string: string): Promise<Service_
         return {
             code: STATUS_CODE.NOT_FOUND,
             message: `No users found for ${search_string}`,
-            data: null,
         };
     }
     const users = castToUsers(documents);
@@ -34,25 +35,21 @@ export async function searchUsersByName(search_string: string): Promise<Service_
     }
 }
 
-export async function getProfileFromToken(token: string): Promise<Service_Response<null | {
-    user: User_Private
-}>> {
-    const verification = await verifyClientToken(token);
-    if (!verification.data)
-        return verification as Service_Response<null>;
-    const email: string = verification.data.email;
-    const document = await UserCollection.where("email", "==", email).limit(1).get();
-    if (document.empty) {
+export async function getProfileFromToken(token: string): Promise<Service_Response<null | { user: User_Private }>> {
+    const auth_service_response = await getUserIDFromToken(token);
+    if (!auth_service_response.data)
+        return auth_service_response as Service_Response<null>;
+    const document = await UserCollection.doc(auth_service_response.data.id).get();
+    if (!document.exists) {
         return {
             code: STATUS_CODE.NOT_FOUND,
-            message: `No user found for ${email}`,
-            data: null,
+            message: `No user found for ${auth_service_response.data.id}`,
         };
     }
-    const user: User_Private = castToProfile(document.docs[0]);
+    const user: User_Private = castToProfile(document);
     return {
         code: STATUS_CODE.OK,
-        message: `User found for ${email}`,
+        message: `User found for ${auth_service_response.data.id}`,
         data: {
             user
         },
@@ -64,70 +61,55 @@ export async function addUser(input: Omit<User_Input, "joined">): Promise<Servic
         return {
             code: STATUS_CODE.BAD_REQUEST,
             message: "Name, email and  are required",
-            data: null,
         };
     }
     if (!input.bio) input.bio = "";
     if (!input.address) input.address = "";
     const user = castInputToUser({ ...input, joined: new Date() });
     const document = await (await UserCollection.add(user)).get();
-    const newuser: User_Private = castToProfile(document);
+    const new_user: User_Private = castToProfile(document);
     return {
         code: STATUS_CODE.OK,
         message: `User added with id ${document.id}`,
         data: {
-            user: newuser,
+            user: new_user,
         },
     }
 }
 
 export async function updateUser(input: User_Input, token: string): Promise<Service_Response<null | { user: User_Private }>> {
-    const verification = await verifyClientToken(token);
-    if (!verification.data)
-        return verification as Service_Response<null>;
-    const email = verification.data.email;
-    const user_doc = await UserCollection.where("email", "==", email).limit(1).get();
-    if (user_doc.empty) {
+    const auth_service_response = await getUserIDFromToken(token);
+    if (!auth_service_response.data)
+        return auth_service_response as Service_Response<null>;
+    const userRef = await UserCollection.doc(auth_service_response.data.id);
+    if (!userRef) {
         return {
             code: STATUS_CODE.NOT_FOUND,
             message: "User not found",
-            data: null,
         };
     }
-    const user_id = user_doc.docs[0].id;
-    input.email = email;
-    await UserCollection.doc(user_id).update(input);
-    const newuser = castToProfile(await UserCollection.doc(user_id).get());
+    await userRef.update(input);
+    const new_user = castToProfile(await userRef.get());
     return {
         code: STATUS_CODE.OK,
         message: `User updated with email ${input.email}`,
         data: {
-            user: newuser,
+            user: new_user,
         },
     };
 }
 
 export async function deleteUser(token: string): Promise<Service_Response<null>> {
-    const verification = await verifyClientToken(token);
-    if (!verification.data) {
-        return verification as Service_Response<null>;
-    }
-    const email = verification.data.email;
-    const user_doc = await UserCollection.where("email", "==", email).limit(1).get();
-    if (user_doc.empty) {
-        return {
-            code: STATUS_CODE.NOT_FOUND,
-            message: "User not found",
-            data: null,
-        };
-    }
-    const user_id = user_doc.docs[0].id;
-    await UserCollection.doc(user_id).delete();
-    await adminAuth.deleteUser(verification.data.uid);
+    const auth_service_response = await getUserIDFromToken(token);
+    if (!auth_service_response.data)
+        return auth_service_response as Service_Response<null>;
+    const userRef = await UserCollection.doc(auth_service_response.data.id);
+
+    await userRef.delete();
+    await adminAuth.deleteUser(auth_service_response.data.uid);
     return {
         code: STATUS_CODE.OK,
-        message: `User deleted with email ${email}`,
-        data: null,
+        message: `User deleted with id ${auth_service_response.data.id}`,
     };
 }
 
@@ -137,7 +119,6 @@ export async function getUser(user_id: string): Promise<Service_Response<null | 
         return {
             code: STATUS_CODE.NOT_FOUND,
             message: `No user found for ${user_id}`,
-            data: null,
         };
     }
     const user = castToUser(document);

@@ -8,18 +8,18 @@ import {
 import { adminAuth, UserCollection } from "@/server/firebase/admin.init";
 import ClientApp from "@/server/firebase/client.init";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Service_Response, STATUS_CODE } from "@/server/util/protocol.module";
-import { Credential } from "./auth.module";
+import { Service_Response, STATUS_CODE } from "@/server/response/response.module";
+import { Credential } from "@/server/auth/auth.module";
 import { IncomingHttpHeaders } from "http2";
 
-export function extractToken(headers: IncomingHttpHeaders): string | null {
+function extractToken(headers: IncomingHttpHeaders): string | null {
     if (!(headers.authorization && headers.authorization.startsWith("Bearer "))) {
         return null;
     }
     return headers.authorization.split("Bearer ")[1];
 };
 
-export async function verifyClientToken(token: string): Promise<Service_Response<{ uid: string; email: string } | null>> {
+async function verifyClientToken(token: string): Promise<Service_Response<{ uid: string; email: string } | null>> {
     const userCredential: UserCredential = await signInWithCustomToken(ClientApp.clientAuth, token);
     signOut(ClientApp.clientAuth);
     if (userCredential?.user?.email) {
@@ -40,7 +40,7 @@ export async function verifyClientToken(token: string): Promise<Service_Response
     }
 };
 
-export const getUserIDFromToken = async (token: string): Promise<Service_Response<{ id: string } | null>> => {
+export const getUserIDFromToken = async (token: string): Promise<Service_Response<{ id: string, uid: string } | null>> => {
     const token_verification_response = await verifyClientToken(token);
     if (!token_verification_response.data) return token_verification_response as Service_Response<null>;
     const email = token_verification_response.data.email;
@@ -56,6 +56,7 @@ export const getUserIDFromToken = async (token: string): Promise<Service_Respons
         message: "User ID fetched",
         data: {
             id: user.docs[0].id,
+            uid: token_verification_response.data.uid,
         },
     };
 };
@@ -112,21 +113,21 @@ export async function addCredentials(credential: Credential): Promise<Service_Re
             code: STATUS_CODE.BAD_REQUEST,
             message: "Unable to fetch Password",
         };
-        const userCredential: UserCredential = await createUserWithEmailAndPassword(
-            ClientApp.clientAuth,
-            email,
-            password
-        );
-        const uid = userCredential.user.uid;
-        const token = await adminAuth.createCustomToken(uid);
-        signOut(ClientApp.clientAuth);
-        return {
-            code: STATUS_CODE.OK,
-            message: `Credentials Added for ${email}`,
-            data: {
-                token: token,
-            },
-        };
+    const userCredential: UserCredential = await createUserWithEmailAndPassword(
+        ClientApp.clientAuth,
+        email,
+        password
+    );
+    const uid = userCredential.user.uid;
+    const token = await adminAuth.createCustomToken(uid);
+    signOut(ClientApp.clientAuth);
+    return {
+        code: STATUS_CODE.OK,
+        message: `Credentials Added for ${email}`,
+        data: {
+            token: token,
+        },
+    };
 };
 
 export async function updateCredentials(
@@ -148,21 +149,21 @@ export async function updateCredentials(
         return {
             code: STATUS_CODE.BAD_REQUEST,
             message: "Unable to fetch New Password",
-        };const userCredential: UserCredential = await signInWithEmailAndPassword(
+        }; const userCredential: UserCredential = await signInWithEmailAndPassword(
             ClientApp.clientAuth,
             email,
             currentPassword
         );
-        signOut(ClientApp.clientAuth);
-        const uid = userCredential.user.uid;
-        await updatePassword(userCredential.user, newPassword);
-        const token = await adminAuth.createCustomToken(uid);
-        return {
-            code: STATUS_CODE.OK,
-            message: `Credentials Updated for ${email}`,
-            data: {
-                token: token,
-            },
-        };
+    signOut(ClientApp.clientAuth);
+    const uid = userCredential.user.uid;
+    await updatePassword(userCredential.user, newPassword);
+    const token = await adminAuth.createCustomToken(uid);
+    return {
+        code: STATUS_CODE.OK,
+        message: `Credentials Updated for ${email}`,
+        data: {
+            token: token,
+        },
+    };
 };
 

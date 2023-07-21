@@ -1,62 +1,77 @@
 import { getProfileFromToken } from "@/server/user/user.service";
 import {
-    castToRequest,
-    REQEST_STATUS,
+    REQUEST_STATUS,
     Request,
     Request_Input,
-    REQUEST_TYPE,
-} from "./request.module";
-import { adminDb } from "@/server/firebase/admin.init";
-import { Service_Response, STATUS_CODE } from "@/server/util/protocol.module";
-import { User_Private } from "@/server/user/user.module";
+} from "@/server/request/request.module";
+import { castToRequest } from "@/server/request/request.util";
+import { CommunityCollection, adminDb } from "@/server/firebase/admin.init";
+import { Service_Response, STATUS_CODE } from "@/server/response/response.module";
 import { FieldValue } from "firebase-admin/firestore";
-import { eastablishContact } from "@/server/contact/contact.service";
-import { Contact } from "../contact/contact.module";
-import { getUserIDFromToken } from "../auth/auth.service";
+import { establishContact } from "@/server/contact/contact.service";
+import { checkModerationAccessWithToken, getMemberRole } from "@/server/community/community.service";
+import { castToCommunityPrivate } from "@/server/community/community.util";
 
 const UserCollection = adminDb.collection("Users");
 const RequestCollection = adminDb.collection("Requests");
 
-export async function sendConnectionRequest(
-    token: string,
-    receiver_id: string,
-    message: string
+export async function sendRequest(
+    request: Request_Input
 ): Promise<Service_Response<null | Request>> {
-    if (!message) message = "";
-    const profile_service_response = await getProfileFromToken(token);
-    if (!profile_service_response.data)
-        return profile_service_response as Service_Response<null>;
-    const user: User_Private = profile_service_response.data.user;
-    const request_input: Request_Input = {
-        type: REQUEST_TYPE.CONNECT,
-        status: REQEST_STATUS.PENDING,
-        status_changed: new Date(),
-        message: message,
-    };
-    const senderRef = UserCollection.doc(user.id);
-    const receiverRef = UserCollection.doc(receiver_id);
-    console.log(request_input);
-    const requestRef = await RequestCollection.add({
-        ...request_input,
-        sender: senderRef,
-        receiver: receiverRef,
-        status_changed: FieldValue.serverTimestamp(),
-    });
-    await UserCollection.doc(receiver_id).update({
-        invitations: FieldValue.arrayUnion(requestRef),
-    });
-    await UserCollection.doc(user.id).update({
-        requests: FieldValue.arrayUnion(requestRef),
-    });
-    const request = await requestRef.get();
-    return {
-        code: STATUS_CODE.OK,
-        message: `Request Sent to ${receiver_id} from ${user.id}`,
-        data: castToRequest(request),
+    const senderRef = await UserCollection.doc(request.sender as string);
+
+    if (request.type == "CONNECT") {
+        const receiverRef = await UserCollection.doc(request.receiver as string);
+        const requestRef = await RequestCollection.add({
+            sender: senderRef,
+            type: request.type,
+            status: REQUEST_STATUS.PENDING,
+            message: request.message,
+            status_changed: FieldValue.serverTimestamp(),
+            receiver: receiverRef,
+        });
+        senderRef.update({
+            requests: FieldValue.arrayUnion(requestRef)
+        });
+        receiverRef.update({
+            invitations: FieldValue.arrayUnion(requestRef)
+        });
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request to connect to ${receiverRef.id} sent`,
+            data: castToRequest(await requestRef.get()),
+        };
+    }
+    else {
+        const receiverRef = await CommunityCollection.doc(request.receiver as string);
+        if (request.type == "MODERATE" || request.type == "ANNOUNCE") {
+            const community = castToCommunityPrivate(await receiverRef.get());
+            const role_service_response = await getMemberRole(community, senderRef.id);
+            if (!role_service_response.data) return role_service_response as Service_Response<null>;
+        };
+        const requestRef = await RequestCollection.add({
+            sender: senderRef,
+            type: request.type,
+            status: REQUEST_STATUS.PENDING,
+            message: request.message,
+            status_changed: FieldValue.serverTimestamp(),
+            receiver: receiverRef,
+        });
+        senderRef.update({
+            requests: FieldValue.arrayUnion(requestRef)
+        });
+        receiverRef.update({
+            requests: FieldValue.arrayUnion(requestRef)
+        });
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request to ${request.type} in ${receiverRef.id} community sent`,
+            data: castToRequest(await requestRef.get()),
+        };
     }
 }
 
-export async function withdrawConnectionRequest(request_id: string): Promise<Service_Response<null>> {
+export async function withdrawRequest(request_id: string): Promise<Service_Response<null>> {
     const requestRef = RequestCollection.doc(request_id);
     const request = castToRequest(await requestRef.get());
     if (!request) {
@@ -64,54 +79,71 @@ export async function withdrawConnectionRequest(request_id: string): Promise<Ser
             code: STATUS_CODE.NOT_FOUND,
             message: `No request found with id ${request_id}`,
         };
-    };
-
-    await UserCollection.doc(request.receiver as string).update({
-        invitations: FieldValue.arrayRemove(requestRef),
+    }
+    if (request.status != REQUEST_STATUS.PENDING) {
+        return {
+            code: STATUS_CODE.FORBIDDEN,
+            message: `Request ${request_id} cannot be withdrawn`,
+        };
+    }
+    const senderRef = await UserCollection.doc(request.sender as string);
+    senderRef.update({
+        requests: FieldValue.arrayRemove(requestRef)
     });
-    await UserCollection.doc(request.sender as string).update({
-        requests: FieldValue.arrayRemove(requestRef),
-    });
-
+    if (request.type == "CONNECT") {
+        const receiverRef = await UserCollection.doc(request.receiver as string);
+        receiverRef.update({
+            invitations: FieldValue.arrayRemove(requestRef)
+        });
+    }
+    else {
+        const receiverRef = await CommunityCollection.doc(request.receiver as string);
+        receiverRef.update({
+            requests: FieldValue.arrayRemove(requestRef)
+        });
+    }
     await requestRef.delete();
-
-    return await {
-        code: STATUS_CODE.OK,
-        message: "Request Withdrawn",
-    };
-}
-
-export async function getConnectionRequest(request_id: string): Promise<Service_Response<{
-    request: Request
-} | null>> {
-    const requestRef = RequestCollection.doc(request_id);
-    const request = await requestRef.get();
-    if (!request.exists) {
-        return {
-            code: STATUS_CODE.NOT_FOUND,
-            message: `No request found with id ${request_id}`,
-        };
-    }
     return {
         code: STATUS_CODE.OK,
-        message: `Request ${request_id} found`,
-        data: {
-            request: castToRequest(request)
-        }
+        message: `Request ${request_id} withdrawn`,
     };
+};
+
+export async function confirmConnectionRequest(request_id: string, decision: REQUEST_STATUS.ACCEPTED | REQUEST_STATUS.REJECTED, token: string): Promise<Service_Response<null>> {
+    const service_response = await getProfileFromToken(token);
+    if (!service_response.data)
+        return service_response as Service_Response<null>;
+    const requestRef = RequestCollection.doc(request_id);
+    const request = castToRequest(await requestRef.get());
+    if (decision == REQUEST_STATUS.ACCEPTED) {
+        await requestRef.update({
+            status: REQUEST_STATUS.ACCEPTED,
+            status_changed: FieldValue.serverTimestamp(),
+            message: "Your request to connect with " + request.receiver + " has been accepted",
+        });
+        const contact_service_response = await establishContact(request.id);
+        if (!contact_service_response.data) {
+            return contact_service_response as Service_Response<null>;
+        }
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request ${request_id} accepted`,
+        }
+    }
+    else {
+        await requestRef.update({
+            status: REQUEST_STATUS.REJECTED,
+            status_changed: FieldValue.serverTimestamp(),
+            message: "Your request to connect with " + request.receiver + " has been rejected",
+        });
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request ${request_id} rejected`,
+        }
+    }
 }
 
-export async function acceptConnectionRequest(
-    token: string,
-    request_id: string
-): Promise<Service_Response<null | {
-    contact: Contact
-}>> {
-    const service_response = await getProfileFromToken(token);
-    if (!service_response.data) 
-        return service_response as Service_Response<null>;
-    
-    const user = service_response.data.user;
+export async function confirmJoinRequest(request_id: string, decision: REQUEST_STATUS.ACCEPTED | REQUEST_STATUS.REJECTED, token: string): Promise<Service_Response<null>> {
     const requestRef = RequestCollection.doc(request_id);
     const request = castToRequest(await requestRef.get());
     if (!request) {
@@ -120,112 +152,135 @@ export async function acceptConnectionRequest(
             message: `No request found with id ${request_id}`,
         };
     }
-    if (request.receiver != user.id) {
+    const communityRef = CommunityCollection.doc(request.receiver as string);
+    const community = castToCommunityPrivate(await communityRef.get());
+
+    const auth_service_response = await checkModerationAccessWithToken(community, token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+
+    if (decision == REQUEST_STATUS.ACCEPTED) {
+        await requestRef.update({
+            status: REQUEST_STATUS.ACCEPTED,
+            status_changed: FieldValue.serverTimestamp(),
+            message: "Your request to join " + community.name + " has been accepted",
+        });
         return {
-            code: STATUS_CODE.FORBIDDEN,
-            message: `Request ${request_id} is not for ${user.id}`,
-        };
+            code: STATUS_CODE.OK,
+            message: `Request ${request_id} accepted`,
+        }
     }
-    await requestRef.update({
-        status: REQEST_STATUS.ACCEPTED,
-        status_changed: FieldValue.serverTimestamp(),
-    });
-    const contact_service_response = await eastablishContact(request.id);
-    if (!contact_service_response.data) {
-        return contact_service_response as Service_Response<null>;
-    }
-    return {
-        code: STATUS_CODE.OK,
-        message: `Request ${request_id} accepted`,
-        data: {
-            contact: contact_service_response.data.contact
+    else {
+        await requestRef.update({
+            status: REQUEST_STATUS.REJECTED,
+            status_changed: FieldValue.serverTimestamp(),
+            message: "Your request to join " + community.name + " has been rejected",
+        });
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request ${request_id} rejected`,
         }
     }
 }
 
-export async function rejectConnectionRequest(
-    token: string,
-    request_id: string
-): Promise<Service_Response<null>> {
-    const auth_service_response = await getUserIDFromToken(token);
-    if (!auth_service_response.data)
-        return auth_service_response as Service_Response<null>;
+export async function confirmModerateRequest(request_id: string, decision: REQUEST_STATUS.ACCEPTED | REQUEST_STATUS.REJECTED, token: string): Promise<Service_Response<null>> {
     const requestRef = RequestCollection.doc(request_id);
-    const request = await requestRef.get();
-    if (!request.exists) {
+    const request = castToRequest(await requestRef.get());
+    if (!request) {
         return {
             code: STATUS_CODE.NOT_FOUND,
             message: `No request found with id ${request_id}`,
         };
     }
-    const data = request.data();
-    if (!data) throw new Error("Request data is null");
-    if (data.receiver.id != auth_service_response.data.id) {
-        return {
-            code: STATUS_CODE.FORBIDDEN,
-            message: `Request ${request_id} is not for ${auth_service_response.data.id}`,
-        };
-    }
-    await requestRef.update({
-        status: REQEST_STATUS.REJECTED,
-        status_changed: FieldValue.serverTimestamp(),
-    });
-    return {
-        code: STATUS_CODE.OK,
-        message: `Request ${request_id} rejected`,
-    };
-}
+    const communityRef = CommunityCollection.doc(request.receiver as string);
+    const community = castToCommunityPrivate(await communityRef.get());
 
-export async function getInvitations(token: string): Promise<Service_Response<null | {
-    invitations: Request[]
-}>> {
-    const profile_service_response = await getProfileFromToken(token);
-    if (!profile_service_response.data) {
-        return profile_service_response as Service_Response<null>;
+    const auth_service_response = await checkModerationAccessWithToken(community, token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+
+    const senderRef = await UserCollection.doc(request.sender as string);
+    if (decision == REQUEST_STATUS.ACCEPTED) {
+        await requestRef.update({
+            status: REQUEST_STATUS.ACCEPTED,
+            status_changed: FieldValue.serverTimestamp(),
+            message: "Your request to moderate " + community.name + " has been accepted",
+        });
+        await communityRef.update({
+            members: FieldValue.arrayRemove({
+                user: senderRef,
+                role: "MEMBER",
+            })
+        });
+        await communityRef.update({
+            members: FieldValue.arrayUnion({
+                user: senderRef,
+                role: "MODERATOR",
+            })
+        });
+
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request ${request_id} accepted`,
+        }
     }
-    const user = profile_service_response.data.user;
-    const invitation_list = user.invitations;
-    if (invitation_list.length == 0)
+    else {
+        await requestRef.update({
+            status: REQUEST_STATUS.REJECTED,
+            status_changed: FieldValue.serverTimestamp(),
+            message: "Your request to moderate " + community.name + " has been rejected",
+        });
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request ${request_id} rejected`,
+        }
+    }
+};
+
+export async function confirmAnnouncementRequest(request_id: string, decision: REQUEST_STATUS.ACCEPTED | REQUEST_STATUS.REJECTED, token: string) {
+
+    const requestRef = RequestCollection.doc(request_id);
+    const request = castToRequest(await requestRef.get());
+    if (!request) {
         return {
             code: STATUS_CODE.NOT_FOUND,
-            message: `User ${user.email} has no pending invitations`,
-            data: null,
+            message: `No request found with id ${request_id}`,
         };
-    const invitation_details: FirebaseFirestore.DocumentSnapshot[] = await Promise.all(
-        invitation_list.map(
-            async (invitation_id: string): Promise<FirebaseFirestore.DocumentSnapshot> => {
-                return await RequestCollection.doc(invitation_id).get();
-            }
-        )
-    );
-    return {
-        code: STATUS_CODE.OK,
-        message: `Invitations found for ${user.email}`,
-        data: {
-            invitations: invitation_details.map((invitation) => castToRequest(invitation)),
-        }
     }
-}
+    const communityRef = CommunityCollection.doc(request.receiver as string);
+    const community = castToCommunityPrivate(await communityRef.get());
 
-export async function getRequests(token: string): Promise<Service_Response<null | {
-    requests: Request[]
-}>> {
-    const profile_service_response = await getProfileFromToken(token);
-    if (!profile_service_response.data) {
-        return profile_service_response as Service_Response<null>;
-    }
-    const user = profile_service_response.data.user;
-    const request_list = user.requests;
-    const request_details = await Promise.all(
-        request_list.map(async (request_id: string) => {
-            return await RequestCollection.doc(request_id).get();
-        })
-    );
-    return {
-        code: STATUS_CODE.OK,
-        message: `Requests found for ${user.email}`,
-        data: {
-            requests: request_details.map((request) => castToRequest(request)),
+    const auth_service_response = await checkModerationAccessWithToken(community, token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+
+    const senderRef = await UserCollection.doc(request.sender as string);
+    if (decision == REQUEST_STATUS.ACCEPTED) {
+        await requestRef.update({
+            status: REQUEST_STATUS.ACCEPTED,
+            status_changed: FieldValue.serverTimestamp(),
+            message: "Your request to announce in " + community.name + " has been accepted",
+        });
+
+        await communityRef.update({
+            announcements: FieldValue.arrayUnion({
+                content: request.message,
+                user: senderRef,
+                time: FieldValue.serverTimestamp(),
+            })
+        });
+
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request ${request_id} accepted`,
         }
-    };
+    }
+    else {
+        await requestRef.update({
+            status: REQUEST_STATUS.REJECTED,
+            status_changed: FieldValue.serverTimestamp(),
+            message: "Your request to announce in " + community.name + " has been rejected",
+        });
+        return {
+            code: STATUS_CODE.OK,
+            message: `Request ${request_id} rejected`,
+        }
+    }
 }
