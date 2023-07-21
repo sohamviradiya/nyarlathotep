@@ -7,31 +7,22 @@ import { FieldValue } from "firebase-admin/firestore";
 import { getUserIDFromToken } from "../auth/auth.service";
 
 export async function getMessages(contact_id: string): Promise<Service_Response<null | { messages: Message[] }>> {
-    try {
-        const contact = await ContactCollection.doc(contact_id).get();
-        if (!contact.exists) throw new Error("Contact does not exist");
-        const message_list = contact.data()?.messages;
-        if (message_list.length === 0) throw new Error("No messages found");
-        const messages_details_list = await Promise.all(
-            message_list.map(async (message_ref: FirebaseFirestore.DocumentReference) => {
-                return castMessage(await message_ref.get());
-            })
-        );
-        return {
-            code: STATUS_CODE.OK,
-            message: `Messages fetched for ${contact_id}`,
-            data: {
-                messages: messages_details_list,
-            }
-        };
-    } catch (error: any) {
-        console.log(error);
-        return {
-            code: STATUS_CODE.INTERNAL_ERROR,
-            message: "Internal Error",
-            data: null,
-        };
-    }
+    const contact = await ContactCollection.doc(contact_id).get();
+    if (!contact.exists) throw new Error("Contact does not exist");
+    const message_list = contact.data()?.messages;
+    if (message_list.length === 0) throw new Error("No messages found");
+    const messages_details_list = await Promise.all(
+        message_list.map(async (message_ref: FirebaseFirestore.DocumentReference) => {
+            return castMessage(await message_ref.get());
+        })
+    );
+    return {
+        code: STATUS_CODE.OK,
+        message: `Messages fetched for ${contact_id}`,
+        data: {
+            messages: messages_details_list,
+        }
+    };
 }
 
 export async function addMessage(
@@ -80,33 +71,24 @@ export async function addMessage(
     };
 }
 
-export async function updateMessage(message_id: string, status: MESSAGE_STATUS): Promise<Service_Response<null|{message: Message}>> {
-    try {
-        if (!message_id || !status)
-            return {
-                code: STATUS_CODE.BAD_REQUEST,
-                message: "Invalid request",
-                data: null,
-            };
-        const messageRef = await MessageCollection.doc(message_id);
-        await messageRef.update({
-            status,
-            status_changed: FieldValue.serverTimestamp(),
-        });
-        const message = castMessage(await messageRef.get());
+export async function updateMessage(message_id: string, status: MESSAGE_STATUS): Promise<Service_Response<null | { message: Message }>> {
+    if (!message_id || !status)
         return {
-            code: STATUS_CODE.OK,
-            message: `Message ${message_id} updated`,
-            data: {
-                message,
-            }
-        };
-    } catch (error: any) {
-        console.log(error);
-        return {
-            code: STATUS_CODE.INTERNAL_ERROR,
-            message: "Internal Error",
+            code: STATUS_CODE.BAD_REQUEST,
+            message: "Invalid request",
             data: null,
         };
-    }
+    const messageRef = await MessageCollection.doc(message_id);
+    await messageRef.update({
+        status,
+        status_changed: FieldValue.serverTimestamp(),
+    });
+    const message = castMessage(await messageRef.get());
+    return {
+        code: STATUS_CODE.OK,
+        message: `Message ${message_id} updated`,
+        data: {
+            message,
+        }
+    };
 }
