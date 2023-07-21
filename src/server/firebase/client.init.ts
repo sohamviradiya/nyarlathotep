@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import clientConfig from "./client.config.json";
+import clientConfig from "@/server/firebase/client.config.json";
 import { FirebaseApp,getApps,getApp } from "firebase/app";
 var clientApp: FirebaseApp = {} as FirebaseApp;
 if (getApps().length > 0) {

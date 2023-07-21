@@ -3,7 +3,7 @@ import { App, initializeApp } from "firebase-admin/app";
 import admin from "firebase-admin";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-import adminConfig from "./admin.config.json";
+import adminConfig from "@/server/firebase/admin.config.json";
 var adminApp: App = {} as App;
 
 if (admin.apps.length == 0) {
