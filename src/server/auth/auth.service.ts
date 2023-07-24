@@ -8,23 +8,15 @@ import {
 import { adminAuth, UserCollection } from "@/server/firebase/admin.init";
 import ClientApp from "@/server/firebase/client.init";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Service_Response, STATUS_CODE } from "@/server/response/response.module";
-import { Credential } from "@/server/auth/auth.module";
-import { IncomingHttpHeaders } from "http2";
-
-function extractToken(headers: IncomingHttpHeaders): string | null {
-    if (!(headers.authorization && headers.authorization.startsWith("Bearer "))) {
-        return null;
-    }
-    return headers.authorization.split("Bearer ")[1];
-};
+import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
+import { Credential, Verification, UpdateCredential } from "@/server/auth/auth.module";
 
 async function verifyClientToken(token: string): Promise<Service_Response<{ uid: string; email: string } | null>> {
     const userCredential: UserCredential = await signInWithCustomToken(ClientApp.clientAuth, token);
     signOut(ClientApp.clientAuth);
     if (userCredential?.user?.email) {
         return {
-            code: STATUS_CODE.OK,
+            code: STATUS_CODES.OK,
             message: `Token Verified for ${userCredential.user.email}`,
             data: {
                 uid: userCredential.user.uid,
@@ -34,43 +26,44 @@ async function verifyClientToken(token: string): Promise<Service_Response<{ uid:
     }
     else {
         return {
-            code: STATUS_CODE.BAD_REQUEST,
+            code: STATUS_CODES.BAD_REQUEST,
             message: "Invalid Token",
         };
     }
 };
 
-export const getUserIDFromToken = async (token: string): Promise<Service_Response<{ id: string, uid: string } | null>> => {
+export const getUserIDFromToken = async (token: string): Promise<Service_Response<{ id: string, uid: string, email: string } | null>> => {
     const token_verification_response = await verifyClientToken(token);
     if (!token_verification_response.data) return token_verification_response as Service_Response<null>;
     const email = token_verification_response.data.email;
-    const user = await UserCollection.where("email", "==", email).select("id").get();
+    const user = await UserCollection.where("email", "==", email).select("id", "email").get();
     if (user.empty) {
         return {
-            code: STATUS_CODE.BAD_REQUEST,
+            code: STATUS_CODES.BAD_REQUEST,
             message: "User does not exist",
         };
     }
     return {
-        code: STATUS_CODE.OK,
+        code: STATUS_CODES.OK,
         message: "User ID fetched",
         data: {
             id: user.docs[0].id,
             uid: token_verification_response.data.uid,
+            email: user.docs[0].data().email,
         },
     };
 };
 
-export async function generateClientToken(credential: Credential): Promise<Service_Response<{ token: string } | null>> {
+export async function generateClientToken(credential: Credential): Promise<Service_Response<Verification | null>> {
     const { email, password } = credential;
     if (!email)
         return {
-            code: STATUS_CODE.BAD_REQUEST,
+            code: STATUS_CODES.BAD_REQUEST,
             message: "Unable to fetch Email",
         }
     if (!password)
         return {
-            code: STATUS_CODE.BAD_REQUEST,
+            code: STATUS_CODES.BAD_REQUEST,
             message: "Unable to fetch Password",
         };
     const userCredential: UserCredential = await signInWithEmailAndPassword(
@@ -82,10 +75,10 @@ export async function generateClientToken(credential: Credential): Promise<Servi
     const token = await adminAuth.createCustomToken(uid);
     signOut(ClientApp.clientAuth);
     return {
-        code: STATUS_CODE.OK,
+        code: STATUS_CODES.OK,
         message: `Token Generated for ${email}`,
         data: {
-            token: token,
+            token,
         },
     }
 };
@@ -95,75 +88,89 @@ export async function invalidateClientToken(token: string): Promise<Service_Resp
     await adminAuth.revokeRefreshTokens(userCredential.user.uid);
     signOut(ClientApp.clientAuth);
     return {
-        code: STATUS_CODE.OK,
+        code: STATUS_CODES.OK,
         message: `Token Invalidated for ${userCredential.user.email}`,
     };
 };
 
-export async function addCredentials(credential: Credential): Promise<Service_Response<{ token: string } | null>> {
+export async function addCredentials(credential: Credential): Promise<Service_Response<Verification | null>> {
     const { email, password } = credential;
-    if (!email)
-        return {
-            code: STATUS_CODE.BAD_REQUEST,
-            message: "Unable to fetch Email",
-        };
 
-    if (!password)
+    const user = await UserCollection.where("email", "==", email).select("id").get();
+    if (user.empty) {
         return {
-            code: STATUS_CODE.BAD_REQUEST,
-            message: "Unable to fetch Password",
+            code: STATUS_CODES.BAD_REQUEST,
+            message: "Invalid Email",
         };
-    const userCredential: UserCredential = await createUserWithEmailAndPassword(
-        ClientApp.clientAuth,
-        email,
-        password
-    );
-    const uid = userCredential.user.uid;
-    const token = await adminAuth.createCustomToken(uid);
-    signOut(ClientApp.clientAuth);
-    return {
-        code: STATUS_CODE.OK,
-        message: `Credentials Added for ${email}`,
-        data: {
-            token: token,
-        },
-    };
-};
-
-export async function updateCredentials(
-    email: string,
-    currentPassword: string,
-    newPassword: string
-): Promise<Service_Response<{ token: string } | null>> {
-    if (!email)
+    }
+    if (password.length < 8)
         return {
-            code: STATUS_CODE.BAD_REQUEST,
-            message: "Unable to fetch Email",
+            code: STATUS_CODES.BAD_REQUEST,
+            message: "Invalid Password",
         };
-    if (!currentPassword)
-        return {
-            code: STATUS_CODE.BAD_REQUEST,
-            message: "Unable to fetch Current Password",
-        };
-    if (!newPassword)
-        return {
-            code: STATUS_CODE.BAD_REQUEST,
-            message: "Unable to fetch New Password",
-        }; const userCredential: UserCredential = await signInWithEmailAndPassword(
+    try {
+        const userCredential: UserCredential = await createUserWithEmailAndPassword(
             ClientApp.clientAuth,
             email,
-            currentPassword
+            password
         );
-    signOut(ClientApp.clientAuth);
-    const uid = userCredential.user.uid;
-    await updatePassword(userCredential.user, newPassword);
-    const token = await adminAuth.createCustomToken(uid);
-    return {
-        code: STATUS_CODE.OK,
-        message: `Credentials Updated for ${email}`,
-        data: {
-            token: token,
-        },
-    };
+        const uid = userCredential.user.uid;
+        const token = await adminAuth.createCustomToken(uid);
+        signOut(ClientApp.clientAuth);
+        return {
+            code: STATUS_CODES.OK,
+            message: `Credentials Added for ${email}`,
+            data: {
+                token: token,
+            },
+        };
+    }
+    catch (error: any) {
+        return {
+            code: STATUS_CODES.BAD_REQUEST,
+            message: error.message,
+        };
+    }
 };
 
+export async function updateCredentials({ email, newPassword, currentPassword }: UpdateCredential): Promise<Service_Response<Verification | null>> {
+    try {
+        const userCredential: UserCredential = await signInWithEmailAndPassword(ClientApp.clientAuth, email, currentPassword);
+        signOut(ClientApp.clientAuth);
+        const uid = userCredential.user.uid;
+        await updatePassword(userCredential.user, newPassword);
+        const token = await adminAuth.createCustomToken(uid);
+        return {
+            code: STATUS_CODES.OK,
+            message: `Credentials Updated for ${email}`,
+            data: {
+                token: token,
+            },
+        };
+    }
+    catch (error: any) {
+        return {
+            code: STATUS_CODES.BAD_REQUEST,
+            message: error.message,
+        };
+    }
+};
+
+export async function deleteCredentials(token: string) {
+    try {
+        const userCredential: UserCredential = await signInWithCustomToken(ClientApp.clientAuth, token);
+        await adminAuth.deleteUser(userCredential.user.uid);
+        signOut(ClientApp.clientAuth);
+
+        return {
+            code: STATUS_CODES.OK,
+            message: `Credentials Deleted for ${userCredential.user.email}`,
+        };
+    }
+    catch (error: any) {
+        return {
+            code: STATUS_CODES.BAD_REQUEST,
+            message: error.message,
+        };
+    }
+}
