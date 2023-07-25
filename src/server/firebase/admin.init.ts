@@ -28,7 +28,7 @@ export default (() => {
     const adminDb = getFirestore(adminApp);
     return {
         adminAuth,
-        UserCollection : adminDb.collection("Users"),
+        UserCollection: adminDb.collection("Users"),
         CommunityCollection: adminDb.collection("Communities"),
         RequestCollection: adminDb.collection("Requests"),
         MessageCollection: adminDb.collection("Messages"),
