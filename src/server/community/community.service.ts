@@ -12,8 +12,8 @@ import {
 } from "@/server/community/community.module";
 import { castToCommunity, castToCommunityPrivate, checkModerationAccess, generateHexString } from "@/server/community/community.util";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { sendRequest } from "../request/request.service";
-import { REQUEST_TYPE, Request } from "../request/request.module";
+import { sendRequest } from "../appeal/appeal.service";
+import { APPEAL_TYPE, Appeal } from "../appeal/appeal.module";
 import { verifyClientToken } from "../auth/auth.service";
 
 const {
@@ -105,7 +105,7 @@ export async function createCommunity(community: Community_Input, token: string)
             role: MEMBER_ROLE.ADMIN
         }],
         founded: Timestamp.now(),
-        requests: [],
+        appeals: [],
         announcements: [],
     });
     await userRef.update({
@@ -141,7 +141,7 @@ export async function updateCommunity(community: Community_Public, token: string
     }
 };
 
-export async function announceInCommunity(announcement: Announcement_Input, token: string, community_id: string): Promise<Service_Response<null | Request>> {
+export async function announceInCommunity(announcement: Announcement_Input, token: string, community_id: string): Promise<Service_Response<null | Appeal>> {
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
@@ -152,16 +152,14 @@ export async function announceInCommunity(announcement: Announcement_Input, toke
     const role_service_response = await getMemberRole(community, auth_service_response.data.email);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
 
-    const role = role_service_response.data.role;
-
-    if (role == MEMBER_ROLE.PARTICIPANT) {
+    if (role_service_response.data.role == MEMBER_ROLE.PARTICIPANT) {
         return await sendRequest({
             message: announcement.content,
-            type: REQUEST_TYPE.ANNOUNCE,
+            type: APPEAL_TYPE.ANNOUNCE,
             receiver: community_id
         }, token)
     }
-    if (role == MEMBER_ROLE.BANNED) {
+    if (role_service_response.data.role == MEMBER_ROLE.BANNED) {
         return {
             code: STATUS_CODES.FORBIDDEN,
             message: `You are not allowed to post announcements in community ${community.name}`,

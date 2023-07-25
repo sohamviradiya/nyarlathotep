@@ -1,29 +1,29 @@
-export enum REQUEST_STATUS {
+export enum APPEAL_STATUS {
     PENDING = "PENDING",
     RECEIVED = "RECEIVED",
     ACCEPTED = "ACCEPTED",
     REJECTED = "REJECTED",
 };
 
-export enum REQUEST_TYPE {
+export enum APPEAL_TYPE {
     JOIN = "JOIN",
     MODERATE = "MODERATE",
     CONNECT = "CONNECT",
     ANNOUNCE = "ANNOUNCE",
 };
 
-export type REQUEST_STATUS_TYPE = keyof typeof REQUEST_STATUS;
+export type APPEAL_STATUS_TYPE = keyof typeof APPEAL_STATUS;
 
-export type Request = {
+export type Appeal = {
     id: string;
     sender: string;
-    type: keyof typeof REQUEST_TYPE;
-    status: REQUEST_STATUS_TYPE;
+    type: keyof typeof APPEAL_TYPE;
+    status: APPEAL_STATUS_TYPE;
     message: string;
     status_changed: Date;
     receiver: string;
 };
 
-export type Request_Input = Omit<Request, "id" | "sender" | "status" | "status_changed">;
+export type Appeal_Input = Omit<Appeal, "id" | "sender" | "status" | "status_changed">;
 
 

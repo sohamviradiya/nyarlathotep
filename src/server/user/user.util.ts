@@ -36,7 +36,7 @@ export function castToProfile(document: FirebaseFirestore.DocumentSnapshot): Use
         joined: new Date(data.joined._seconds * 1000),
         communities: data.communities.map((community: DocumentReference) => community.id),
         contacts: data.contacts.map((contact: DocumentReference) => contact.id),
-        requests: data.requests.map((request: DocumentReference) => request.id),
+        appeals: data.appeals.map((appeal: DocumentReference) => appeal.id),
         invitations: data.invitations.map((invitation: DocumentReference) => invitation.id),
         last_online: new Date(data.last_online._seconds * 1000),
     };
@@ -50,7 +50,7 @@ export function castInputToUser(input: User_Input): Omit<User_Private, "id" | "j
         bio: input.bio || "",
         communities: [],
         contacts: [],
-        requests: [],
+        appeals: [],
         invitations: []
     };
 }

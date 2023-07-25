@@ -9,12 +9,12 @@ export type User_Private = {
     joined: Date;
     communities: string[];
     contacts: string[];
-    requests: string[];
+    appeals: string[];
     invitations: string[];
     last_online: Date;
 };
 
-export type User_Public = Omit<User_Private, "contacts" | "requests" | "invitations">;
+export type User_Public = Omit<User_Private, "contacts" | "appeals" | "invitations">;
 
 export type User_Input = Omit<User_Public, "id" | "communities" | "joined" | "last_online"> & {
     password: string;

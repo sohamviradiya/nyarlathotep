@@ -13,6 +13,9 @@ import {
 } from "@/server/user/user.util";
 import { Timestamp } from "firebase-admin/firestore";
 import { addCredentials, verifyClientToken } from "../auth/auth.service";
+import { Appeal } from "../appeal/appeal.module";
+import { castToAppeal } from "../appeal/appeal.util";
+import { doc } from "firebase/firestore";
 
 const {
     UserCollection,
@@ -63,6 +66,29 @@ export async function getProfileFromToken(token: string): Promise<Service_Respon
     }
 }
 
+export async function getAppealsFromToken(token: string): Promise<Service_Response<null | { appeals: Appeal[] }>> {
+    const auth_service_response = await verifyClientToken(token);
+    if (!auth_service_response.data)
+        return auth_service_response as Service_Response<null>;
+    const document = await AdminApp.UserCollection.doc(auth_service_response.data.email).get();
+    if (!document.exists)
+        return {
+            code: STATUS_CODES.NOT_FOUND,
+            message: `No user found for ${auth_service_response.data.email}`,
+        };
+    const appeal_refs = document.data()?.invitations as FirebaseFirestore.DocumentReference[];
+    const appeals = await Promise.all(appeal_refs.map(async (ref) => {
+        const appeal = castToAppeal(await ref.get());
+        return appeal;
+    }));
+    return {
+        code: STATUS_CODES.OK,
+        message: `Found appeals for ${auth_service_response.data.email}`,
+        data: {
+            appeals,
+        }
+    };
+}
 export async function addUser(input: User_Input): Promise<Service_Response<null | { user: User_Private }>> {
     const credentials_service_response = await addCredentials({
         email: input.email,

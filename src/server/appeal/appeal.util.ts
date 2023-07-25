@@ -1,10 +1,10 @@
-import { Request } from "@/server/request/request.module";
+import { Appeal } from "@/server/appeal/appeal.module";
 
 
-export function castToRequest(document: FirebaseFirestore.DocumentSnapshot): Request {
+export function castToAppeal(document: FirebaseFirestore.DocumentSnapshot): Appeal {
     const id = document.id;
     const data = document.data();
-    if (!data) return {} as Request;
+    if (!data) return {} as Appeal;
     return {
         id,
         sender: data.sender.id,

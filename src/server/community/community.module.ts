@@ -37,11 +37,11 @@ export type Community_Private = {
     description: string;
     members: Member[];
     founded: Date;
-    requests: string[];
+    appeals: string[];
     announcements: Announcement[];
 };
 
-export type Community_Member_Level = Omit<Community_Private, "requests">;
+export type Community_Member_Level = Omit<Community_Private, "appeals">;
 
 export type Community_Public = Omit<Community_Member_Level, "members" | "announcements">;
 

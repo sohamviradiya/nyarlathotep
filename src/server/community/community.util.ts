@@ -44,7 +44,7 @@ export function castToCommunityPrivate(document: FirebaseFirestore.DocumentSnaps
                 role: member.role
             }
         }),
-        requests: data.requests.map((request: DocumentReference) => request.id),
+        appeals: data.appeals.map((appeal: DocumentReference) => appeal.id),
     };
 }
 
