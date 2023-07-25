@@ -12,7 +12,7 @@ import {
 } from "@/server/community/community.module";
 import { castToCommunity, castToCommunityPrivate, checkModerationAccess, generateHexString } from "@/server/community/community.util";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { sendRequest } from "../appeal/appeal.service";
+import { sendAppeal } from "../appeal/appeal.service";
 import { APPEAL_TYPE, Appeal } from "../appeal/appeal.module";
 import { verifyClientToken } from "../auth/auth.service";
 
@@ -141,7 +141,9 @@ export async function updateCommunity(community: Community_Public, token: string
     }
 };
 
-export async function announceInCommunity(announcement: Announcement_Input, token: string, community_id: string): Promise<Service_Response<null | Appeal>> {
+export async function announceInCommunity(announcement: Announcement_Input, token: string, community_id: string): Promise<Service_Response<null | {
+    appeal: Appeal
+}>> {
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
@@ -153,7 +155,7 @@ export async function announceInCommunity(announcement: Announcement_Input, toke
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
 
     if (role_service_response.data.role == MEMBER_ROLE.PARTICIPANT) {
-        return await sendRequest({
+        return await sendAppeal({
             message: announcement.content,
             type: APPEAL_TYPE.ANNOUNCE,
             receiver: community_id

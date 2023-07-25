@@ -129,10 +129,45 @@ export async function withdrawAppeal(receiver: string, token: string): Promise<S
     };
 };
 
-export async function confirmAppeal(appeal_id: string, decision: string, token: string): Promise<Service_Response<null>> {
+export async function markAppeal(appeal_id: string, token: string): Promise<Service_Response<null | {
+    appeal: Appeal
+}>> {
     const appealRef = AppealCollection.doc(appeal_id);
     const appeal = castToAppeal(await appealRef.get());
+    if (!appeal) {
+        return {
+            code: STATUS_CODES.NOT_FOUND,
+            message: `No appeal found with id ${appeal_id}`,
+        };
+    }
+    const auth_service_response = await verifyClientToken(token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+    if (auth_service_response.data.email != appeal.receiver) {
+        return {
+            code: STATUS_CODES.FORBIDDEN,
+            message: `You are not authorized to mark appeal ${appeal_id}`,
+        };
+    }
+    else {
+        await appealRef.update({
+            status: APPEAL_STATUS.UNDER_REVIEW,
+            status_changed: Timestamp.now(),
+        });
+        return {
+            code: STATUS_CODES.OK,
+            message: `Appeal ${appeal_id} marked for review`,
+            data: {
+                appeal
+            }
+        };
+    }
+}
 
+
+export async function acceptAppeal(appeal_id: string, token: string): Promise<Service_Response<null>> {
+    const appealRef = AppealCollection.doc(appeal_id);
+    const appeal = castToAppeal(await appealRef.get());
+    var message = "";
     if (appeal.type == APPEAL_TYPE.CONNECT) {
         const auth_service_response = await verifyClientToken(token);
         if (!auth_service_response.data)
@@ -142,173 +177,119 @@ export async function confirmAppeal(appeal_id: string, decision: string, token: 
                 code: STATUS_CODES.FORBIDDEN,
                 message: `You are not authorized to confirm appeal ${appeal_id}`,
             };
-      
-        if (decision == APPEAL_STATUS.ACCEPTED) {  
-            await appealRef.update({
-                status: APPEAL_STATUS.ACCEPTED,
-                status_changed: Timestamp.now(),
-                message: "Your appeal to connect with " + appeal.receiver + " has been accepted",
-            });
-        
-            const contact_service_response = await establishContact(appeal);
-        
-            if (!contact_service_response.data)
-                return contact_service_response as Service_Response<null>;
-        
-            return {
-                code: STATUS_CODES.OK,
-                message: `Appeal ${appeal_id} accepted`,
-            }
-        
-        }
-        else {
-        
-            await appealRef.update({
-                status: APPEAL_STATUS.REJECTED,
-                status_changed: Timestamp.now(),
-                message: "Your appeal to connect with " + appeal.receiver + " has been rejected",
-            });
-        
-            return {
-                code: STATUS_CODES.OK,
-                message: `Appeal ${appeal_id} rejected`,
-            }
-        }
+        message = "Your appeal to connect with " + appeal.receiver + " has been accepted";
+
+        const contact_service_response = await establishContact(appeal);
+
+        if (!contact_service_response.data)
+            return contact_service_response as Service_Response<null>;
     }
     else {
         const communityRef = AdminApp.CommunityCollection.doc(appeal.receiver as string);
         const community = castToCommunityPrivate(await communityRef.get());
-        
+
         const auth_service_response = await checkModerationAccessWithToken(community, token);
         if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-        
+
         const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
-        
+
         if (appeal.type == APPEAL_TYPE.JOIN) {
+            message = "Your appeal to join " + community.name + " has been accepted";
+            await communityRef.update({
+                members: FieldValue.arrayRemove({
+                    user: senderRef,
+                    role: MEMBER_ROLE.BANNED
+                } as Member_Document)
+            });
+            await communityRef.update({
+                members: FieldValue.arrayUnion({
+                    user: senderRef,
+                    role: MEMBER_ROLE.PARTICIPANT,
+                } as Member_Document)
+            });
 
-            if (decision == APPEAL_STATUS.ACCEPTED) {
-
-                await appealRef.update({
-                    status: APPEAL_STATUS.ACCEPTED,
-                    status_changed: Timestamp.now(),
-                    message: "Your appeal to join " + community.name + " has been accepted",
-                });
-        
-                await communityRef.update({
-                    members: FieldValue.arrayRemove({
-                        user: senderRef,
-                        role: MEMBER_ROLE.BANNED
-                    } as Member_Document)
-                });
-
-                await communityRef.update({
-                    members: FieldValue.arrayUnion({
-                        user: senderRef,
-                        role: MEMBER_ROLE.PARTICIPANT,
-                    } as Member_Document)
-                });
-
-                return {
-                    code: STATUS_CODES.OK,
-                    message: `Appeal ${appeal_id} accepted`,
-                }
-            }
-            else {
-
-                await appealRef.update({
-                    status: APPEAL_STATUS.REJECTED,
-                    status_changed: Timestamp.now(),
-                    message: "Your appeal to join " + community.name + " has been rejected",
-                });
-        
-                return {
-                    code: STATUS_CODES.OK,
-                    message: `Appeal ${appeal_id} rejected`,
-                }
-            }
         }
         else if (appeal.type == APPEAL_TYPE.MODERATE) {
-           
-            if (decision == APPEAL_STATUS.ACCEPTED) {
+            message = "Your appeal to moderate " + community.name + " has been accepted";
 
-                await appealRef.update({
-                    status: APPEAL_STATUS.ACCEPTED,
-                    status_changed: Timestamp.now(),
-                    message: "Your appeal to moderate " + community.name + " has been accepted",
-                });
+            await communityRef.update({
+                members: FieldValue.arrayRemove({
+                    user: senderRef,
+                    role: MEMBER_ROLE.PARTICIPANT
+                } as Member_Document)
+            });
 
-                await communityRef.update({
-                    members: FieldValue.arrayRemove({
-                        user: senderRef,
-                        role: MEMBER_ROLE.PARTICIPANT
-                    } as Member_Document)
-                });
-
-                await communityRef.update({
-                    members: FieldValue.arrayUnion({
-                        user: senderRef,
-                        role: MEMBER_ROLE.MODERATOR,
-                    } as Member_Document)
-                });
-
-                return {
-                    code: STATUS_CODES.OK,
-                    message: `Appeal ${appeal_id} accepted`,
-                }
-            }
-            else {
-            
-                await appealRef.update({
-                    status: APPEAL_STATUS.REJECTED,
-                    status_changed: Timestamp.now(),
-                    message: "Your appeal to moderate " + community.name + " has been rejected",
-                });
-            
-                return {
-                    code: STATUS_CODES.OK,
-                    message: `Appeal ${appeal_id} rejected`,
-                }
-            }
+            await communityRef.update({
+                members: FieldValue.arrayUnion({
+                    user: senderRef,
+                    role: MEMBER_ROLE.MODERATOR,
+                } as Member_Document)
+            });
         }
         else {
             const role_service_response = await getMemberRole(community, senderRef.id);
             if (!role_service_response.data) return role_service_response as Service_Response<null>;
-            
-            if (decision == APPEAL_STATUS.ACCEPTED) {
-            
-                await appealRef.update({
-                    status: APPEAL_STATUS.ACCEPTED,
-                    status_changed: Timestamp.now(),
-                    message: "Your appeal to announce in " + community.name + " has been accepted",
-                });
 
-                await communityRef.update({
-                    announcements: FieldValue.arrayUnion({
-                        content: appeal.message,
-                        user: senderRef,
-                        time: Timestamp.now(),
-                    } as Announcement_Document)
-                });
+            message = "Your appeal to announce in " + community.name + " has been accepted";
 
-                return {
-                    code: STATUS_CODES.OK,
-                    message: `Appeal ${appeal_id} accepted`,
-                }
-            }
-            else {
-            
-                await appealRef.update({
-                    status: APPEAL_STATUS.REJECTED,
-                    status_changed: Timestamp.now(),
-                    message: "Your appeal to announce in " + community.name + " has been rejected",
-                });
-            
-                return {
-                    code: STATUS_CODES.OK,
-                    message: `Appeal ${appeal_id} rejected`,
-                }
-            }
+            await communityRef.update({
+                announcements: FieldValue.arrayUnion({
+                    content: appeal.message,
+                    user: senderRef,
+                    time: Timestamp.now(),
+                } as Announcement_Document)
+            });
         }
     }
+    await appealRef.update({
+        status: APPEAL_STATUS.ACCEPTED,
+        status_changed: Timestamp.now(),
+        message
+    });
+
+    return {
+        code: STATUS_CODES.OK,
+        message
+    }
+
 }
 
+export async function rejectAppeal(appeal_id: string, token: string): Promise<Service_Response<null>> {
+    const appealRef = AppealCollection.doc(appeal_id);
+    const appeal = castToAppeal(await appealRef.get());
+    if (!appeal) {
+        return {
+            code: STATUS_CODES.NOT_FOUND,
+            message: `No appeal found with id ${appeal_id}`,
+        };
+    }
+    const auth_service_response = await verifyClientToken(token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+    if (auth_service_response.data.email == appeal.receiver) {
+        return {
+            code: STATUS_CODES.FORBIDDEN,
+            message: `You are not authorized to reject appeal ${appeal_id}`,
+        };
+    }
+
+    var message = "";
+    if (appeal.type == APPEAL_TYPE.CONNECT)
+        message = "Your appeal to connect with " + appeal.receiver + " has been rejected";
+    else if (appeal.type == APPEAL_TYPE.JOIN)
+        message = "Your appeal to join " + appeal.receiver + " has been rejected";
+    else if (appeal.type == APPEAL_TYPE.MODERATE)
+        message = "Your appeal to moderate " + appeal.receiver + " has been rejected";
+    else
+        message = "Your appeal to announce in " + appeal.receiver + " has been rejected";
+    await appealRef.update({
+        status: APPEAL_STATUS.REJECTED,
+        status_changed: Timestamp.now(),
+        message
+    });
+
+    return {
+        code: STATUS_CODES.OK,
+        message: `Appeal ${appeal_id} rejected`,
+    }
+
+}
