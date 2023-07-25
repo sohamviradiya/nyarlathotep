@@ -27,7 +27,7 @@ export async function sendRequest(
     const senderRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
     if (request.type == "CONNECT") {
         const receiverRef = await AdminApp.UserCollection.doc(request.receiver as string);
-        const requestRef = await RequestCollection.add({
+        await RequestCollection.doc(`${senderRef.id}~${receiverRef.id}`).set({
             sender: senderRef,
             type: request.type,
             status: REQUEST_STATUS.PENDING,
@@ -35,6 +35,7 @@ export async function sendRequest(
             status_changed: Timestamp.now(),
             receiver: receiverRef,
         });
+        const requestRef = await RequestCollection.doc(`${senderRef.id}~${receiverRef.id}`);
         senderRef.update({
             requests: FieldValue.arrayUnion(requestRef)
         });
@@ -54,7 +55,7 @@ export async function sendRequest(
             const role_service_response = await getMemberRole(community, senderRef.id);
             if (!role_service_response.data) return role_service_response as Service_Response<null>;
         };
-        const requestRef = await RequestCollection.add({
+        RequestCollection.doc(`${senderRef.id}~${receiverRef.id}`).set({
             sender: senderRef,
             type: request.type,
             status: REQUEST_STATUS.PENDING,
@@ -62,6 +63,7 @@ export async function sendRequest(
             status_changed: Timestamp.now(),
             receiver: receiverRef,
         });
+        const requestRef = await RequestCollection.doc(`${senderRef.id}~${receiverRef.id}`);
         senderRef.update({
             requests: FieldValue.arrayUnion(requestRef)
         });
