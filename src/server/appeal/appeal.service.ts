@@ -143,8 +143,7 @@ export async function confirmAppeal(appeal_id: string, decision: string, token: 
                 message: `You are not authorized to confirm appeal ${appeal_id}`,
             };
       
-        if (decision == APPEAL_STATUS.ACCEPTED) {
-        
+        if (decision == APPEAL_STATUS.ACCEPTED) {  
             await appealRef.update({
                 status: APPEAL_STATUS.ACCEPTED,
                 status_changed: Timestamp.now(),
