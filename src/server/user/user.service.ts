@@ -1,5 +1,5 @@
-import { adminAuth, UserCollection } from "@/server/firebase/admin.init";
-import { Service_Response, STATUS_CODE } from "@/server/response/response.module";
+import AdminApp from "@/server/firebase/admin.init";
+import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import {
     User_Input,
     User_Private,
@@ -11,23 +11,30 @@ import {
     castToUser,
     castToUsers
 } from "@/server/user/user.util";
-import { getUserIDFromToken } from "@/server/auth/auth.service";
+import { Timestamp } from "firebase-admin/firestore";
+import { addCredentials, verifyClientToken } from "../auth/auth.service";
 
-export async function searchUsersByName(search_string: string): Promise<Service_Response<null | { users: User_Public[] }>> {
-    const documents = await UserCollection.orderBy("name")
+const {
+    UserCollection,
+    adminAuth,
+} = AdminApp;
+
+export async function searchUsersByName(search_string: string, limit: number): Promise<Service_Response<null | { users: User_Public[] }>> {
+    const documents = await AdminApp.UserCollection
         .where("name", ">=", search_string)
         .where("name", "<=", search_string + "\uf8ff")
-        .limit(25)
+        .limit(limit)
+        .select("id", "name", "email", "bio", "address", "joined", "communities", "last_online")
         .get();
     if (documents.empty) {
         return {
-            code: STATUS_CODE.NOT_FOUND,
+            code: STATUS_CODES.NOT_FOUND,
             message: `No users found for ${search_string}`,
         };
     }
     const users = castToUsers(documents);
     return {
-        code: STATUS_CODE.OK,
+        code: STATUS_CODES.OK,
         message: `Users found for ${search_string}`,
         data: {
             users,
@@ -36,40 +43,43 @@ export async function searchUsersByName(search_string: string): Promise<Service_
 }
 
 export async function getProfileFromToken(token: string): Promise<Service_Response<null | { user: User_Private }>> {
-    const auth_service_response = await getUserIDFromToken(token);
+    const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const document = await UserCollection.doc(auth_service_response.data.id).get();
+    const document = await AdminApp.UserCollection.doc(auth_service_response.data.email).get();
     if (!document.exists) {
         return {
-            code: STATUS_CODE.NOT_FOUND,
-            message: `No user found for ${auth_service_response.data.id}`,
+            code: STATUS_CODES.NOT_FOUND,
+            message: `No user found for ${auth_service_response.data.email}`,
         };
     }
     const user: User_Private = castToProfile(document);
     return {
-        code: STATUS_CODE.OK,
-        message: `User found for ${auth_service_response.data.id}`,
+        code: STATUS_CODES.OK,
+        message: `User found for ${auth_service_response.data.email}`,
         data: {
             user
         },
     }
 }
 
-export async function addUser(input: Omit<User_Input, "joined">): Promise<Service_Response<null | { user: User_Private }>> {
-    if (!input.name || !input.email) {
-        return {
-            code: STATUS_CODE.BAD_REQUEST,
-            message: "Name, email and  are required",
-        };
-    }
-    if (!input.bio) input.bio = "";
-    if (!input.address) input.address = "";
-    const user = castInputToUser({ ...input, joined: new Date() });
-    const document = await (await UserCollection.add(user)).get();
+export async function addUser(input: User_Input): Promise<Service_Response<null | { user: User_Private }>> {
+    const credentials_service_response = await addCredentials({
+        email: input.email,
+        password: input.password,
+    });
+    if (!credentials_service_response.data)
+        return credentials_service_response as Service_Response<null>;
+    const user = castInputToUser(input);
+    await AdminApp.UserCollection.doc(user.email).set({
+        ...user,
+        joined: Timestamp.now(),
+        last_online: Timestamp.now(),
+    });
+    const document = await AdminApp.UserCollection.doc(user.email).get();
     const new_user: User_Private = castToProfile(document);
     return {
-        code: STATUS_CODE.OK,
+        code: STATUS_CODES.OK,
         message: `User added with id ${document.id}`,
         data: {
             user: new_user,
@@ -78,20 +88,20 @@ export async function addUser(input: Omit<User_Input, "joined">): Promise<Servic
 }
 
 export async function updateUser(input: User_Input, token: string): Promise<Service_Response<null | { user: User_Private }>> {
-    const auth_service_response = await getUserIDFromToken(token);
+    const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const userRef = await UserCollection.doc(auth_service_response.data.id);
+    const userRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
     if (!userRef) {
         return {
-            code: STATUS_CODE.NOT_FOUND,
+            code: STATUS_CODES.NOT_FOUND,
             message: "User not found",
         };
     }
     await userRef.update(input);
     const new_user = castToProfile(await userRef.get());
     return {
-        code: STATUS_CODE.OK,
+        code: STATUS_CODES.OK,
         message: `User updated with email ${input.email}`,
         data: {
             user: new_user,
@@ -100,34 +110,32 @@ export async function updateUser(input: User_Input, token: string): Promise<Serv
 }
 
 export async function deleteUser(token: string): Promise<Service_Response<null>> {
-    const auth_service_response = await getUserIDFromToken(token);
+    const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const userRef = await UserCollection.doc(auth_service_response.data.id);
-
+    const userRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
     await userRef.delete();
     await adminAuth.deleteUser(auth_service_response.data.uid);
     return {
-        code: STATUS_CODE.OK,
-        message: `User deleted with id ${auth_service_response.data.id}`,
+        code: STATUS_CODES.OK,
+        message: `User deleted with id ${auth_service_response.data.email}`,
     };
 }
 
-export async function getUser(user_id: string): Promise<Service_Response<null | { user: User_Public }>> {
-    const document = await UserCollection.doc(user_id).get();
+export async function getUserByID(id: string): Promise<Service_Response<null | { user: User_Public }>> {
+    const document = await AdminApp.UserCollection.doc(id).get();
     if (!document.exists) {
         return {
-            code: STATUS_CODE.NOT_FOUND,
-            message: `No user found for ${user_id}`,
+            code: STATUS_CODES.NOT_FOUND,
+            message: `No user found for ${id}`,
         };
     }
     const user = castToUser(document);
     return {
-        code: STATUS_CODE.OK,
+        code: STATUS_CODES.OK,
         message: `User found ${user.email}`,
         data: {
             user,
         },
     };
 }
-
