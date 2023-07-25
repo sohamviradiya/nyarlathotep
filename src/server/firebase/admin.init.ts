@@ -2,7 +2,7 @@
 import { App, initializeApp } from "firebase-admin/app";
 import admin from "firebase-admin";
 import { getAuth } from "firebase-admin/auth";
-import { CollectionReference, getFirestore } from "firebase-admin/firestore";
+import { getFirestore } from "firebase-admin/firestore";
 import adminConfig from "@/server/firebase/admin.config.json";
 
 var adminApp: App = {} as ReturnType<typeof initializeApp>;
@@ -30,7 +30,7 @@ export default (() => {
         adminAuth,
         UserCollection: adminDb.collection("Users"),
         CommunityCollection: adminDb.collection("Communities"),
-        RequestCollection: adminDb.collection("Requests"),
+        AppealCollection: adminDb.collection("Appeals"),
         MessageCollection: adminDb.collection("Messages"),
         ContactCollection: adminDb.collection("Contacts"),
     }

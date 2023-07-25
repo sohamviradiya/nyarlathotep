@@ -1,4 +1,3 @@
-import { getProfileFromToken } from "@/server/user/user.service";
 import {
     APPEAL_STATUS,
     APPEAL_TYPE,
