@@ -1,11 +1,11 @@
 import { DocumentReference } from "firebase-admin/firestore";
 import { User_Public, User_Private, User_Input } from "@/server/user/user.module";
 
-
 export function castToUser(document: FirebaseFirestore.DocumentSnapshot): User_Public {
     const id = document.id;
     const data = document.data();
     if (!data) throw new Error("No data found for user: " + id);
+    console.log(data);
     return {
         id,
         email: data.email,
@@ -14,6 +14,7 @@ export function castToUser(document: FirebaseFirestore.DocumentSnapshot): User_P
         bio: data.bio,
         joined: new Date(data.joined._seconds * 1000),
         communities: data.communities.map((community: DocumentReference) => community.id),
+        last_online: new Date(data.last_online._seconds * 1000),
     };
 }
 
@@ -25,6 +26,7 @@ export function castToProfile(document: FirebaseFirestore.DocumentSnapshot): Use
     const id = document.id;
     const data = document.data();
     if (!data) throw new Error("No data found for user: " + id);
+
     return {
         id,
         email: data.email,
@@ -36,19 +38,19 @@ export function castToProfile(document: FirebaseFirestore.DocumentSnapshot): Use
         contacts: data.contacts.map((contact: DocumentReference) => contact.id),
         requests: data.requests.map((request: DocumentReference) => request.id),
         invitations: data.invitations.map((invitation: DocumentReference) => invitation.id),
+        last_online: new Date(data.last_online._seconds * 1000),
     };
 }
 
-export function castInputToUser(input: User_Input): Omit<User_Private, "id"> {
+export function castInputToUser(input: User_Input): Omit<User_Private, "id" | "joined" | "last_online"> {
     return {
         email: input.email,
         name: input.name,
-        address: input.address,
-        bio: input.bio,
-        joined: input.joined,
+        address: input.address || "",
+        bio: input.bio || "",
         communities: [],
         contacts: [],
         requests: [],
-        invitations: [],
+        invitations: []
     };
 }
