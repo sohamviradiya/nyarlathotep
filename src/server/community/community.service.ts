@@ -2,7 +2,6 @@ import AdminApp from "@/server/firebase/admin.init";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { castToUser } from "@/server/user/user.util";
 import {
-    Announcement,
     Announcement_Document,
     Announcement_Input,
     Community_Input,
@@ -17,8 +16,13 @@ import { sendRequest } from "../request/request.service";
 import { REQUEST_TYPE, Request } from "../request/request.module";
 import { verifyClientToken } from "../auth/auth.service";
 
+const {
+    CommunityCollection,
+    UserCollection,
+} = AdminApp;
+
 export async function searchCommunitiesByName(search_string: string, limit: number): Promise<Service_Response<null | { communities: Community_Public[] }>> {
-    const documents = await AdminApp.CommunityCollection
+    const documents = await CommunityCollection
         .where("name", ">=", search_string)
         .where("name", "<=", search_string + "\uf8ff")
         .limit(limit)
@@ -43,7 +47,7 @@ export async function searchCommunitiesByName(search_string: string, limit: numb
 export async function getUserCommunities(user_id: string): Promise<Service_Response<null | {
     communities: Community_Public[]
 }>> {
-    const document = await AdminApp.UserCollection.doc(user_id).get();
+    const document = await UserCollection.doc(user_id).get();
     if (!document.exists) {
         return {
             code: STATUS_CODES.NOT_FOUND,
@@ -54,7 +58,7 @@ export async function getUserCommunities(user_id: string): Promise<Service_Respo
     const community_list = user.communities;
     const community_details = await Promise.all(
         community_list.map(async (community_id) => {
-            return await AdminApp.CommunityCollection.doc(community_id).get();
+            return await CommunityCollection.doc(community_id).get();
         })
     );
     return {
@@ -69,7 +73,7 @@ export async function getUserCommunities(user_id: string): Promise<Service_Respo
 export async function getCommunityByID(community_id: string): Promise<Service_Response<null | {
     community: Community_Public
 }>> {
-    const communityRef = await AdminApp.CommunityCollection.doc(community_id);
+    const communityRef = await CommunityCollection.doc(community_id);
     const community_document = await communityRef.get();
     if (!community_document.exists) {
         return {
@@ -92,8 +96,8 @@ export async function createCommunity(community: Community_Input, token: string)
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const userRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
-    const communityRef = await AdminApp.CommunityCollection.add({
+    const userRef = await UserCollection.doc(auth_service_response.data.email);
+    const communityRef = await CommunityCollection.add({
         name: community.name,
         description: community.description,
         members: [{
@@ -103,6 +107,9 @@ export async function createCommunity(community: Community_Input, token: string)
         founded: Timestamp.now(),
         requests: [],
         announcements: [],
+    });
+    await userRef.update({
+        communities: FieldValue.arrayUnion(communityRef)
     });
     const community_document = await communityRef.get();
     return {
@@ -120,7 +127,7 @@ export async function updateCommunity(community: Community_Public, token: string
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const communityRef = await AdminApp.CommunityCollection.doc(community.id);
+    const communityRef = await CommunityCollection.doc(community.id);
     const community_document = castToCommunityPrivate(await communityRef.get());
     const access_service_response = await checkModerationAccess(community_document, auth_service_response.data.email);
     if (!access_service_response.data) return access_service_response as Service_Response<null>;
@@ -138,8 +145,8 @@ export async function announceInCommunity(announcement: Announcement_Input, toke
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const userRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
-    const communityRef = await AdminApp.CommunityCollection.doc(community_id);
+    const userRef = await UserCollection.doc(auth_service_response.data.email);
+    const communityRef = await CommunityCollection.doc(community_id);
     const community = castToCommunityPrivate(await communityRef.get());
 
     const role_service_response = await getMemberRole(community, auth_service_response.data.email);
@@ -192,7 +199,7 @@ export async function getMemberRole(community: Community_Private, user_id: strin
 }
 
 export async function getCommunityAnnouncements(id: string, token: string) {
-    const community = castToCommunityPrivate(await AdminApp.CommunityCollection.doc(id).get());
+    const community = castToCommunityPrivate(await CommunityCollection.doc(id).get());
     const role_service_response = await getMemberRole(community, token);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
     const announcements = community.announcements;
@@ -206,7 +213,7 @@ export async function getCommunityAnnouncements(id: string, token: string) {
 }
 
 export async function getCommunityModerators(id: string, token: string) {
-    const community = castToCommunityPrivate(await AdminApp.CommunityCollection.doc(id).get());
+    const community = castToCommunityPrivate(await CommunityCollection.doc(id).get());
     const role_service_response = await getMemberRole(community, token);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
     const moderators = community.members.filter(member => member.role == MEMBER_ROLE.MODERATOR);
