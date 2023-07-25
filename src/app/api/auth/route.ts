@@ -1,25 +1,25 @@
-import { generateClientToken, verifyClientToken, updateCredentials } from '@/server/auth/auth.service';
-import { extractToken } from '@/server/auth/auth.util';
-import { STATUS_CODES } from '@/server/response/response.module';
-import { returnError, returnResponse } from '@/server/response/response.util';
-import { NextRequest } from 'next/server';
+import { generateClientToken, verifyClientToken, updateCredentials } from "@/server/auth/auth.service";
+import { extractToken } from "@/server/auth/auth.util";
+import { STATUS_CODES } from "@/server/response/response.module";
+import { BadReq, ApiResponse, Unauthorized } from "@/server/response/response.util";
+import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     const token = extractToken(request.headers);
-    if (!token) return returnError({ message: 'Missing token' });
+    if (!token) return Unauthorized({ message: "Missing token" });
     try {
-        return returnResponse(await verifyClientToken(token));
+        return ApiResponse(await verifyClientToken(token));
     }
     catch (error: any) {
-        return returnError(error);
+        return BadReq(error);
     }
 };
 
 export async function POST(request: NextRequest) {
     const { auth } = await request.json();
-    if (!auth.email || !auth.password) return returnError({ message: 'Missing credentials' });
+    if (!auth.email || !auth.password) return BadReq({ message: "Missing credentials" });
     try {
-        return returnResponse(
+        return ApiResponse(
             await generateClientToken({
                 email: auth.email,
                 password: auth.password,
@@ -27,15 +27,15 @@ export async function POST(request: NextRequest) {
         );
     }
     catch (error: any) {
-        return returnError(error);
+        return BadReq(error);
     }
 };
 
 export async function PUT(request: NextRequest) {
     const { auth } = await request.json();
-    if (!auth.email || !auth.currentPassword || !auth.newPassword) return returnError({ message: 'Missing credentials' });
+    if (!auth.email || !auth.currentPassword || !auth.newPassword) return BadReq({ message: "Missing credentials" });
     try {
-        return returnResponse(
+        return ApiResponse(
             await updateCredentials({
                 email: auth.email,
                 currentPassword: auth.currentPassword,
@@ -44,6 +44,6 @@ export async function PUT(request: NextRequest) {
         );
     }
     catch (error: any) {
-        return returnError(error);
+        return BadReq(error);
     }
 }
