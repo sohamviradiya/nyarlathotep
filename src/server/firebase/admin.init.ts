@@ -2,31 +2,36 @@
 import { App, initializeApp } from "firebase-admin/app";
 import admin from "firebase-admin";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+import { CollectionReference, getFirestore } from "firebase-admin/firestore";
 import adminConfig from "@/server/firebase/admin.config.json";
-var adminApp: App = {} as App;
+
+var adminApp: App = {} as ReturnType<typeof initializeApp>;
 
 if (admin.apps.length == 0) {
-	adminApp = initializeApp(
-		{
-			credential: admin.credential.cert({
-				projectId: adminConfig.project_id,
-				clientEmail: adminConfig.client_email,
-				privateKey: adminConfig.private_key,
-			}),
-		},
-		"adminApp"
-	);
+    adminApp = initializeApp(
+        {
+            credential: admin.credential.cert({
+                projectId: adminConfig.project_id,
+                clientEmail: adminConfig.client_email,
+                privateKey: adminConfig.private_key,
+            }),
+        },
+        "adminApp"
+    );
+    console.log("Firebase Admin Initialized", adminApp.name);
 } else {
-	adminApp = admin.apps[0] as App;
+    adminApp = admin.apps[0] as App;
 }
 
-console.log("Firebase Admin Initialized", adminApp.name);
-export const adminAuth = getAuth(adminApp);
-export const adminDb = getFirestore(adminApp); 
-
-export const UserCollection = adminDb.collection("users");
-export const CommunityCollection = adminDb.collection("communities");
-export const RequestCollection = adminDb.collection("requests");
-export const MessageCollection = adminDb.collection("messages");
-export const ContactCollection = adminDb.collection("contacts");
+export default (() => {
+    const adminAuth = getAuth(adminApp);
+    const adminDb = getFirestore(adminApp);
+    return {
+        adminAuth,
+        UserCollection : adminDb.collection("Users"),
+        CommunityCollection: adminDb.collection("Communities"),
+        RequestCollection: adminDb.collection("Requests"),
+        MessageCollection: adminDb.collection("Messages"),
+        ContactCollection: adminDb.collection("Contacts"),
+    }
+})();
