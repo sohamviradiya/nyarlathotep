@@ -41,9 +41,11 @@ export async function sendAppeal(
         senderRef.update({
             appeals: FieldValue.arrayUnion(appealRef)
         });
+
         receiverRef.update({
             invitations: FieldValue.arrayUnion(appealRef)
         });
+
         return {
             code: STATUS_CODES.OK,
             message: `Appeal to connect to ${receiverRef.id} sent`,
@@ -67,13 +69,16 @@ export async function sendAppeal(
             status_changed: Timestamp.now(),
             receiver: receiverRef,
         });
+
         const appealRef = await AppealCollection.doc(`${senderRef.id}~${receiverRef.id}`);
+
         senderRef.update({
             appeals: FieldValue.arrayUnion(appealRef)
         });
         receiverRef.update({
             appeals: FieldValue.arrayUnion(appealRef)
         });
+
         return {
             code: STATUS_CODES.OK,
             message: `Appeal to ${appeal.type} in ${receiverRef.id} community sent`,
@@ -106,10 +111,12 @@ export async function withdrawAppeal(receiver: string, token: string): Promise<S
             message: `Appeal ${appeal_id} cannot be withdrawn`,
         };
     }
+
     const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
     senderRef.update({
         appeals: FieldValue.arrayRemove(appealRef)
     });
+
     if (appeal.type == "CONNECT") {
         const receiverRef = await AdminApp.UserCollection.doc(appeal.receiver as string);
         receiverRef.update({
@@ -196,7 +203,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
         if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
 
         const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
-        
+
         if (appeal.type == APPEAL_TYPE.JOIN) {
             await communityRef.update({
                 members: FieldValue.arrayRemove({
@@ -210,7 +217,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
                     role: MEMBER_ROLE.PARTICIPANT,
                 } as Member_Document)
             });
-            
+
         }
         else if (appeal.type == APPEAL_TYPE.MODERATE) {
             message = "Your appeal to moderate " + community.name + " has been accepted";

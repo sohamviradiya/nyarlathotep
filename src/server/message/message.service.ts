@@ -26,13 +26,9 @@ export async function addMessage(contact_id: string, content: string, token: str
             status_changed: Timestamp.now(),
             direction: MESSAGE_DIRECTION.OUTGOING,
         });
-        await contactRef.set({
-            messages: {
-                outgoing: {
-                    draft: FieldValue.arrayUnion(messageRef)
-                }
-            }
-        }, {  merge: true });
+        await contactRef.update({
+            "messages.outgoing.draft": FieldValue.arrayUnion(messageRef)
+        });
 
         return {
             code: STATUS_CODES.OK,
@@ -51,13 +47,9 @@ export async function addMessage(contact_id: string, content: string, token: str
             direction: MESSAGE_DIRECTION.INCOMING,
         });
 
-        await contactRef.set({
-            messages: {
-                incoming: {
-                    draft: FieldValue.arrayUnion(messageRef)
-                }
-            }
-        }, { merge: true });
+        await contactRef.update({
+            "messages.incoming.draft": FieldValue.arrayUnion(messageRef)
+        });
         return {
             code: STATUS_CODES.OK,
             message: `Message added to ${contact_id}`,

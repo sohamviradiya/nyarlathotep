@@ -5,7 +5,8 @@ export function castToContact(document: FirebaseFirestore.DocumentSnapshot) {
     const id = document.id;
     const data = document.data();
     if (!data) return {} as Contact;
-    return JSON.parse(JSON.stringify({
+    
+    return {
         id,
         sender: data.sender.id,
         receiver: data.receiver.id,
@@ -17,7 +18,7 @@ export function castToContact(document: FirebaseFirestore.DocumentSnapshot) {
             return tag;
         }, {} as { [key: string]: { [key: string]: string[] } }) as Contact["messages"],
         established: new Date(data.established._seconds * 1000),
-    }));
+    };
 }
 
 export function castInputToDocument(input: Contact_Input): Contact_Document {
