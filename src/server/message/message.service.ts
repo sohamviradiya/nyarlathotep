@@ -107,9 +107,11 @@ export async function confirmMessage(message_id: string, status: MESSAGE_STATUS_
     const auth_response = await verifyClientToken(token);
     if (!auth_response.data)
         return auth_response as Service_Response<null>;
+    
     const current_status = message.status;
     const direction = message.direction;
     const status_service_response = await checkStatus(message, contact, auth_response.data.email, status);
+
     if (!status_service_response.data)
         return status_service_response as Service_Response<null>;
     await messageRef.update({

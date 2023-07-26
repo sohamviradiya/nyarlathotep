@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     const token = extractToken(request.headers);
-    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     try {
         return ApiResponse(await getMessages(params.id, token));
     } catch (error: any) {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
     const token = extractToken(request.headers);
-    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     const { content } = await request.json();
     if (!content) return ApiResponse(BadReq({ message: "Missing content" }));
     try {
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
     const token = extractToken(request.headers);
-    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     try {
         return ApiResponse(await deleteContact(params.id, token));
     } catch (error: any) {

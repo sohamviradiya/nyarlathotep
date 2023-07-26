@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     const token = extractToken(request.headers);
-    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     try {
         return ApiResponse(await getProfileFromToken(token));
     } catch (error: any) {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
     const { user } = await request.json();
     const token = extractToken(request.headers);
-    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     if (!user) return ApiResponse(BadReq({ message: "Missing user" }));
     try {
         return ApiResponse(await updateUser(user, token));
@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
     const token = extractToken(request.headers);
-    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     try {
         return ApiResponse(await deleteUser(token));
     }

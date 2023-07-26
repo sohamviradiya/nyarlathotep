@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     const token = extractToken(request.headers);
-    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     try {
         return ApiResponse(await getContactsFromToken(token));
     } catch (error: any) {

@@ -19,6 +19,7 @@ export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Mess
 
 export async function checkStatus(message: Message, contact: Contact, user: string, new_status: MESSAGE_STATUS_TYPE): Promise<Service_Response<null | { status: MESSAGE_STATUS_TYPE }>> {
     const received_status_array = [MESSAGE_STATUS.READ, MESSAGE_STATUS.APPROVED, MESSAGE_STATUS.REJECTED];
+    
     if (contact.sender != user && contact.receiver != user)
         return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
     
