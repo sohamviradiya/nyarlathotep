@@ -10,9 +10,10 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { establishContact } from "@/server/contact/contact.service";
 import { checkModerationAccessWithToken, getMemberRole } from "@/server/community/community.service";
 import { castToCommunityPrivate } from "@/server/community/community.util";
-import { Announcement_Document, MEMBER_ROLE, Member_Document } from "@/server/community/community.module";
+import { Announcement, Announcement_Document, MEMBER_ROLE, Member_Document } from "@/server/community/community.module";
 import { verifyClientToken } from "@/server/auth/auth.service";
 import AdminApp from "@/server/firebase/admin.init";
+import { Contact } from "../contact/contact.module";
 
 const {
     AppealCollection
@@ -163,10 +164,13 @@ export async function markAppeal(appeal_id: string, token: string): Promise<Serv
 }
 
 
-export async function acceptAppeal(appeal_id: string, token: string): Promise<Service_Response<null>> {
+export async function acceptAppeal(appeal_id: string, token: string): Promise<Service_Response<null | {
+    contact: Contact
+}>> {
     const appealRef = AppealCollection.doc(appeal_id);
     const appeal = castToAppeal(await appealRef.get());
     var message = "";
+    var data = null;
     if (appeal.type == APPEAL_TYPE.CONNECT) {
         const auth_service_response = await verifyClientToken(token);
         if (!auth_service_response.data)
@@ -182,6 +186,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
 
         if (!contact_service_response.data)
             return contact_service_response as Service_Response<null>;
+        data = contact_service_response.data;
     }
     else {
         const communityRef = AdminApp.CommunityCollection.doc(appeal.receiver as string);
@@ -191,9 +196,8 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
         if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
 
         const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
-
+        
         if (appeal.type == APPEAL_TYPE.JOIN) {
-            message = "Your appeal to join " + community.name + " has been accepted";
             await communityRef.update({
                 members: FieldValue.arrayRemove({
                     user: senderRef,
@@ -206,7 +210,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
                     role: MEMBER_ROLE.PARTICIPANT,
                 } as Member_Document)
             });
-
+            
         }
         else if (appeal.type == APPEAL_TYPE.MODERATE) {
             message = "Your appeal to moderate " + community.name + " has been accepted";
@@ -248,7 +252,8 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
 
     return {
         code: STATUS_CODES.OK,
-        message
+        message,
+        data
     }
 
 }
