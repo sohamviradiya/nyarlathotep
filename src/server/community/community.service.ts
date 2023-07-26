@@ -212,7 +212,7 @@ export async function getCommunityAnnouncements(id: string, token: string) {
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
     const role_service_response = await getMemberRole(community, auth_service_response.data.email);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
-    const announcements =  await Promise.all(communityDoc.data()?.announcements.map(async (announcement: DocumentReference) => {
+    const announcements = await Promise.all(communityDoc.data()?.announcements.map(async (announcement: DocumentReference) => {
         return castToAnnouncement(await announcement.get());
     }));
     return {
@@ -226,9 +226,11 @@ export async function getCommunityAnnouncements(id: string, token: string) {
 
 export async function getCommunityModerators(id: string, token: string) {
     const community = castToCommunityPrivate(await CommunityCollection.doc(id).get());
-    const role_service_response = await getMemberRole(community, token);
+    const auth_service_response = await verifyClientToken(token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+    const role_service_response = await getMemberRole(community, auth_service_response.data.email);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
-    const moderators = community.members.filter(member => member.role == MEMBER_ROLE.MODERATOR);
+    const moderators = community.members.filter(member => member.role == MEMBER_ROLE.MODERATOR || member.role == MEMBER_ROLE.ADMIN);
     return {
         code: STATUS_CODES.OK,
         message: `Moderators found for community ${id}`,

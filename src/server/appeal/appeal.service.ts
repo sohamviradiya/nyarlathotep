@@ -62,7 +62,7 @@ export async function sendAppeal(
             const role_service_response = await getMemberRole(community, senderRef.id);
             if (!role_service_response.data) return role_service_response as Service_Response<null>;
         };
-        AppealCollection.doc(`${senderRef.id}~${receiverRef.id}`).set({
+        AppealCollection.doc(`${senderRef.id}~${receiverRef.id}.${appeal.type}`).set({
             sender: senderRef,
             type: appeal.type,
             status: APPEAL_STATUS.PENDING,
