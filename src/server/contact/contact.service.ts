@@ -1,17 +1,15 @@
 import AdminApp from "@/server/firebase/admin.init";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { DocumentReference, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { Contact } from "@/server/contact/contact.module";
 import { castInputToDocument, castToContact } from "@/server/contact/contact.util";
 import { verifyClientToken } from "../auth/auth.service";
 import { Appeal, APPEAL_STATUS } from "../appeal/appeal.module";
-import { castToMessage } from "../message/message.util";
-import { Message } from "../message/message.module";
+import { getMessagesFromReference } from "../message/message.util";
 
 const {
     AppealCollection,
     ContactCollection,
-    MessageCollection,
     UserCollection
 } = AdminApp;
 
@@ -50,7 +48,7 @@ export async function deleteContact(contact_id: string, token: string): Promise<
             code: STATUS_CODES.UNAUTHORIZED,
             message: "Unauthorized",
         };
-    
+
     await UserCollection.doc(contact.sender).update({
         contacts: FieldValue.arrayRemove(contactRef),
     });
@@ -79,13 +77,13 @@ export async function getContact(contact_id: string, token: string): Promise<Ser
 
     const contactRef = await ContactCollection.doc(contact_id);
     const contact = castToContact(await contactRef.get());
-    
+
     if (contact.sender !== auth_service_response.data.email && contact.receiver !== auth_service_response.data.email)
-    return {
-        code: STATUS_CODES.UNAUTHORIZED,
-        message: "Unauthorized",
-    };
-    
+        return {
+            code: STATUS_CODES.UNAUTHORIZED,
+            message: "Unauthorized",
+        };
+
     return {
         code: STATUS_CODES.OK,
         message: "Contact Retrieved",
@@ -95,29 +93,40 @@ export async function getContact(contact_id: string, token: string): Promise<Ser
     };
 };
 
-export async function getMessages(contact_id: string, token: string): Promise<Service_Response<null | { messages: Message[] }>> {
+export async function getMessages(contact_id: string, token: string): Promise<Service_Response<null | { messages: Contact["messages"] }>> {
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
 
-    const contactDoc = await ContactCollection.doc(contact_id).get();
+    const contactDoc = (await ContactCollection.doc(contact_id).get());
     const contact = castToContact(contactDoc);
-    
-    if (contact.sender !== auth_service_response.data.email && contact.receiver !== auth_service_response.data.email)
-    return {
-        code: STATUS_CODES.UNAUTHORIZED,
-        message: "Unauthorized",
-    };
-    const messages = await Promise.all(contactDoc.data()?.messages.map(async (messageRef: FirebaseFirestore.DocumentReference) => {
-        const message = await messageRef.get();
-        return castToMessage(message);
-    }));
 
+    if (contact.sender !== auth_service_response.data.email && contact.receiver !== auth_service_response.data.email)
+        return {
+            code: STATUS_CODES.UNAUTHORIZED,
+            message: "Unauthorized",
+        };
+    const messages = {
+        incoming: {
+            draft: await getMessagesFromReference(contactDoc.data()?.messages.incoming.draft),
+            sent: await getMessagesFromReference(contactDoc.data()?.messages.incoming.sent),
+            read: await getMessagesFromReference(contactDoc.data()?.messages.incoming.read),
+            approved: await getMessagesFromReference(contactDoc.data()?.messages.incoming.approved),
+            rejected: await getMessagesFromReference(contactDoc.data()?.messages.incoming.rejected),
+        },
+        outgoing: {
+            draft: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.draft),
+            sent: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.sent),
+            read: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.read),
+            approved: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.approved),
+            rejected: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.rejected),
+        },
+    }
     return {
         code: STATUS_CODES.OK,
         message: "Messages Retrieved",
         data: {
-            messages
-        },
+            messages,
+        }
     };
 }
 

@@ -3,6 +3,7 @@ import { STATUS_CODES, Service_Response } from "@/server/response/response.modul
 import { Message } from "@/server/message/message.module";
 import { Unauthorized } from "../response/response.util";
 import { Contact } from "../contact/contact.module";
+import { DocumentReference } from "firebase-admin/firestore";
 export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Message {
     const data = message.data();
     const id = message.id;
@@ -15,6 +16,11 @@ export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Mess
         contact: data.contact.id,
         direction: data.direction,
     };
+}
+
+export async function getMessagesFromReference(messages: DocumentReference[]) {
+    if(!messages?.length) return [];
+    return await Promise.all(messages.map(async (messageRef: DocumentReference) => castToMessage(await messageRef.get())));
 }
 
 export async function checkStatus(message: Message, contact: Contact, user: string, new_status: MESSAGE_STATUS_TYPE): Promise<Service_Response<null | { status: MESSAGE_STATUS_TYPE }>> {
