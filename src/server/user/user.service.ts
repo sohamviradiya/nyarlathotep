@@ -15,7 +15,8 @@ import { Timestamp } from "firebase-admin/firestore";
 import { addCredentials, verifyClientToken } from "../auth/auth.service";
 import { Appeal } from "../appeal/appeal.module";
 import { castToAppeal } from "../appeal/appeal.util";
-import { doc } from "firebase/firestore";
+import { Contact } from "../contact/contact.module";
+import { castToContact } from "../contact/contact.util";
 
 const {
     UserCollection,
@@ -89,6 +90,32 @@ export async function getAppealsFromToken(token: string): Promise<Service_Respon
         }
     };
 }
+
+export async function getContactsFromToken(token: string): Promise<Service_Response<null | { contacts: Contact[] }>> {
+    const auth_service_response = await verifyClientToken(token);
+    if (!auth_service_response.data)
+        return auth_service_response as Service_Response<null>;
+    const document = await AdminApp.UserCollection.doc(auth_service_response.data.email).get();
+    if (!document.exists)
+        return {
+            code: STATUS_CODES.NOT_FOUND,
+            message: `No user found for ${auth_service_response.data.email}`,
+        };
+    const contact_refs = document.data()?.contacts as FirebaseFirestore.DocumentReference[];
+    const contacts = await Promise.all(contact_refs.map(async (ref) => {
+        const contact = castToContact(await ref.get());
+        return contact;
+    }));
+    return {
+        code: STATUS_CODES.OK,
+        message: `Found contacts for ${auth_service_response.data.email}`,
+        data: {
+            contacts,
+        }
+    };
+}
+
+
 export async function addUser(input: User_Input): Promise<Service_Response<null | { user: User_Private }>> {
     const credentials_service_response = await addCredentials({
         email: input.email,

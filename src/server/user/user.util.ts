@@ -5,7 +5,6 @@ export function castToUser(document: FirebaseFirestore.DocumentSnapshot): User_P
     const id = document.id;
     const data = document.data();
     if (!data) throw new Error("No data found for user: " + id);
-    console.log(data);
     return {
         id,
         email: data.email,
