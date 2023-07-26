@@ -17,6 +17,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return ApiResponse(await sendAppeal({
         receiver: params.id,
         type: APPEAL_TYPE.JOIN,
-        message: body.message,
+        message: body.message || "User wants to join your community",
     }, token));
 }

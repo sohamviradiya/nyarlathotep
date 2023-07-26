@@ -206,6 +206,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
         const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
 
         if (appeal.type == APPEAL_TYPE.JOIN) {
+            message = "Your appeal to join " + community.name + " has been accepted";
             await communityRef.update({
                 members: FieldValue.arrayRemove({
                     user: senderRef,
