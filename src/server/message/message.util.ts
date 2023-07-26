@@ -1,6 +1,8 @@
 import { MESSAGE_STATUS, MESSAGE_STATUS_TYPE } from "@/server/message/message.module";
 import { STATUS_CODES, Service_Response } from "@/server/response/response.module";
 import { Message } from "@/server/message/message.module";
+import { Unauthorized } from "../response/response.util";
+import { Contact } from "../contact/contact.module";
 export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Message {
     const data = message.data();
     const id = message.id;
@@ -15,30 +17,25 @@ export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Mess
     };
 }
 
-export async function checkStatus(current_status: MESSAGE_STATUS_TYPE, status: MESSAGE_STATUS_TYPE, message_id: string): Promise<Service_Response<null | { status: MESSAGE_STATUS_TYPE }>> {
-    if (current_status == MESSAGE_STATUS.READ || current_status == MESSAGE_STATUS.APPROVED || current_status == MESSAGE_STATUS.REJECTED)
-        if (status != MESSAGE_STATUS.APPROVED && status != MESSAGE_STATUS.REJECTED)
-            return {
-                code: STATUS_CODES.UNAUTHORIZED,
-                message: `You are not authorized to update message ${message_id} to ${status}`,
-            };
-    if (current_status == MESSAGE_STATUS.DRAFT && status != MESSAGE_STATUS.SENT)
-        return {
-            code: STATUS_CODES.UNAUTHORIZED,
-            message: `You are not authorized to update message ${message_id} to ${status}`,
-        };
-    if (current_status == MESSAGE_STATUS.SENT && status != MESSAGE_STATUS.READ)
-
-        return {
-            code: STATUS_CODES.UNAUTHORIZED,
-            message: `You are not authorized to update message ${message_id} to ${status}`,
-        };
+export async function checkStatus(message: Message, contact: Contact, user: string, new_status: MESSAGE_STATUS_TYPE): Promise<Service_Response<null | { status: MESSAGE_STATUS_TYPE }>> {
+    const received_status_array = [MESSAGE_STATUS.READ, MESSAGE_STATUS.APPROVED, MESSAGE_STATUS.REJECTED];
+    if (contact.sender != user && contact.receiver != user)
+        return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
+    
+    if (message.status == MESSAGE_STATUS.DRAFT && new_status != MESSAGE_STATUS.SENT && contact.sender != user)
+        return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
+    
+    if (message.status in received_status_array && !(new_status in received_status_array) && contact.receiver != user)
+        return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
+    
+    if (message.status == MESSAGE_STATUS.SENT && new_status != MESSAGE_STATUS.READ && contact.receiver != user)
+        return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
 
     return {
         code: STATUS_CODES.OK,
-        message: `Message ${message_id} status changed to ${status}`,
+        message: `Message status changed to ${new_status}`,
         data: {
-            status: current_status,
+            status: message.status,
         }
     };
 }

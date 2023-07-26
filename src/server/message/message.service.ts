@@ -5,7 +5,6 @@ import { MESSAGE_DIRECTION, MESSAGE_STATUS, MESSAGE_STATUS_TYPE, Message } from 
 import { castToMessage, checkStatus } from "@/server/message/message.util";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { verifyClientToken } from "../auth/auth.service";
-import { arrayUnion, updateDoc } from "firebase/firestore";
 const {
     ContactCollection,
     MessageCollection,
@@ -99,6 +98,7 @@ export async function updateMessage(message_id: string, content: string, token: 
 }
 
 export async function confirmMessage(message_id: string, status: MESSAGE_STATUS_TYPE, token: string): Promise<Service_Response<null | { message: Message }>> {
+
     const messageRef = await MessageCollection.doc(message_id);
     const message = castToMessage(await messageRef.get());
 
@@ -107,16 +107,9 @@ export async function confirmMessage(message_id: string, status: MESSAGE_STATUS_
     const auth_response = await verifyClientToken(token);
     if (!auth_response.data)
         return auth_response as Service_Response<null>;
-    if (contact.sender !== auth_response.data.email) {
-        return {
-            code: STATUS_CODES.UNAUTHORIZED,
-            message: `You are not authorized to update messages to ${contactRef}`,
-        };
-    }
-
     const current_status = message.status;
     const direction = message.direction;
-    const status_service_response = await checkStatus(current_status, status, message_id);
+    const status_service_response = await checkStatus(message, contact, auth_response.data.email, status);
     if (!status_service_response.data)
         return status_service_response as Service_Response<null>;
     await messageRef.update({
