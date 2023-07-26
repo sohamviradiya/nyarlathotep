@@ -5,18 +5,18 @@ import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     const token = extractToken(request.headers);
-    if (!token) return Unauthorized({ message: "Missing token" });
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
     try {
         return ApiResponse(await getProfileFromToken(token));
     } catch (error: any) {
         console.log(error);
-        return BadReq(error);
+        return ApiResponse(BadReq(error));
     }
 };
 
 export async function POST(request: NextRequest) {
     const { user } = await request.json();
-    if (!user.email || !user.name || !user.password) return BadReq({ message: "Missing user" });
+    if (!user.email || !user.name || !user.password) return ApiResponse(BadReq({ message: "Missing user" }));
     try {
         const response = await addUser({
             name: user.name,
@@ -28,30 +28,30 @@ export async function POST(request: NextRequest) {
         return ApiResponse(response);
     }
     catch (error: any) {
-        return BadReq(error);
+        return ApiResponse(BadReq(error));
     }
 };
 
 export async function PUT(request: NextRequest) {
     const { user } = await request.json();
     const token = extractToken(request.headers);
-    if (!token) return Unauthorized({ message: "Missing token" });
-    if (!user) return BadReq({ message: "Missing user" });
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
+    if (!user) return ApiResponse(BadReq({ message: "Missing user" }));
     try {
         return ApiResponse(await updateUser(user, token));
     }
     catch (error: any) {
-        return BadReq(error);
+        return ApiResponse(BadReq(error));
     }
 };
 
 export async function DELETE(request: NextRequest) {
     const token = extractToken(request.headers);
-    if (!token) return Unauthorized({ message: "Missing token" });
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
     try {
         return ApiResponse(await deleteUser(token));
     }
     catch (error: any) {
-        return BadReq(error);
+        return ApiResponse(BadReq(error));
     }
 };

@@ -6,34 +6,34 @@ import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
     const token = extractToken(request.headers);
-    if (!token) return BadReq({ message: "Invalid Token" });
+    if (!token) return ApiResponse(BadReq({ message: "Invalid Token" }));
     try {
         return ApiResponse(await acceptAppeal(params.id, token));
     }
     catch (error: any) {
-        return BadReq({ message: error.message });
+        return ApiResponse(BadReq(error));
     }
 };
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
     const token = extractToken(request.headers);
-    if (!token) return BadReq({ message: "Invalid Token" });
+    if (!token) return ApiResponse(BadReq({ message: "Invalid Token" }));
     try {
         return ApiResponse(await markAppeal(params.id, token));
     }
     catch (error: any) {
-        return BadReq({ message: error.message });
+        return ApiResponse(BadReq(error));
     }
 };
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
     const token = extractToken(request.headers);
-    if (!token) return BadReq({ message: "Invalid Token" });
+    if (!token) return ApiResponse(BadReq({ message: "Invalid Token" }));
     try {
         return ApiResponse(await rejectAppeal(params.id, token));
     }
     catch (error: any) {
-        return BadReq({ message: error.message });
+        return ApiResponse(BadReq(error));
     }
 };
 

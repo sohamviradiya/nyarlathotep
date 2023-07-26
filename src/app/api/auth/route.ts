@@ -6,18 +6,18 @@ import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     const token = extractToken(request.headers);
-    if (!token) return Unauthorized({ message: "Missing token" });
+    if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));;
     try {
         return ApiResponse(await verifyClientToken(token));
     }
     catch (error: any) {
-        return BadReq(error);
+        return ApiResponse(BadReq(error));
     }
 };
 
 export async function POST(request: NextRequest) {
     const { auth } = await request.json();
-    if (!auth.email || !auth.password) return BadReq({ message: "Missing credentials" });
+    if (!auth.email || !auth.password) return ApiResponse(BadReq({ message: "Missing credentials" }));
     try {
         return ApiResponse(
             await generateClientToken({
@@ -27,13 +27,13 @@ export async function POST(request: NextRequest) {
         );
     }
     catch (error: any) {
-        return BadReq(error);
+        return ApiResponse(BadReq(error));
     }
 };
 
 export async function PUT(request: NextRequest) {
     const { auth } = await request.json();
-    if (!auth.email || !auth.currentPassword || !auth.newPassword) return BadReq({ message: "Missing credentials" });
+    if (!auth.email || !auth.currentPassword || !auth.newPassword) return ApiResponse(BadReq({ message: "Missing credentials" }));
     try {
         return ApiResponse(
             await updateCredentials({
@@ -44,6 +44,6 @@ export async function PUT(request: NextRequest) {
         );
     }
     catch (error: any) {
-        return BadReq(error);
+        return ApiResponse(BadReq(error));
     }
 }

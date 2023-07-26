@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
         return ApiResponse(await searchUsersByName(search_string, limit));
     }
     catch (error: any) {
-        return BadReq({ message: error.message });
+        return ApiResponse(BadReq(error));
     }
 };
 
