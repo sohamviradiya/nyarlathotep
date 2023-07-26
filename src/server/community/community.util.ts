@@ -1,9 +1,9 @@
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
-import { Announcement, Announcement_Document, Community_Private, MEMBER_ROLE, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
+import { Announcement, Community_Private, MEMBER_ROLE, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
 import { getMemberRole } from "@/server/community/community.service";
-import { Community_Input, Community_Public } from "@/server/community/community.module";
+import { Community_Public } from "@/server/community/community.module";
 
-import { DocumentReference } from "firebase-admin/firestore";
+import { DocumentReference, DocumentSnapshot } from "firebase-admin/firestore";
 export async function checkModerationAccess(community: Community_Private, user_id: string): Promise<Service_Response<null | { role: MEMBER_ROLE_TYPE; }>> {
     const role_service_response = await getMemberRole(community, user_id);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
@@ -37,7 +37,7 @@ export function castToCommunityPrivate(document: FirebaseFirestore.DocumentSnaps
         name: data.name,
         description: data.description,
         founded: new Date(data.founded._seconds * 1000),
-        announcements: castToAnnouncements(data.announcements),
+        announcements: data.announcements.map((announcement: DocumentReference) => announcement.id),
         members: data.members.map((member: any) => {
             return {
                 user: member.user.id,
@@ -48,14 +48,16 @@ export function castToCommunityPrivate(document: FirebaseFirestore.DocumentSnaps
     };
 }
 
-export function castToAnnouncements(announcements: Announcement_Document[]): Announcement[] {
-    return announcements.map((announcement) => {
-        return {
-            content: announcement.content,
-            user: announcement.user.id,
-            time: new Date(announcement.time.seconds * 1000)
-        }
-    })
+export function castToAnnouncement(announcement: DocumentSnapshot): Announcement {
+    const id = announcement.id;
+    const data = announcement.data();
+    if(!data) throw new Error("No data found for announcement: " + id);
+    return {
+        id,
+        content: data.content,
+        user: data.user.id,
+        time: new Date(data.time.seconds * 1000)
+    };
 }
 
 export function generateHexString(): string {

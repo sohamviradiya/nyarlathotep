@@ -1,12 +1,13 @@
 import { Timestamp } from "firebase-admin/firestore";
 
 export type Announcement = {
+    id: string;
     content: string;
     user: string;
     time: Date;
 };
 
-export type Announcement_Input = Omit<Announcement, "user" | "time">;
+export type Announcement_Input = Omit<Announcement, "user" | "time" | "id">;
 
 export type Announcement_Document = Omit<Announcement, "user" | "time"> & {
     user: FirebaseFirestore.DocumentReference;

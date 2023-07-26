@@ -16,7 +16,8 @@ import AdminApp from "@/server/firebase/admin.init";
 import { Contact } from "../contact/contact.module";
 
 const {
-    AppealCollection
+    AppealCollection,
+    AnnouncementCollection,
 } = AdminApp;
 
 export async function sendAppeal(
@@ -236,19 +237,26 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
                 } as Member_Document)
             });
         }
-        else {
+        else if (appeal.type == APPEAL_TYPE.ANNOUNCE) {
             const role_service_response = await getMemberRole(community, senderRef.id);
             if (!role_service_response.data) return role_service_response as Service_Response<null>;
 
             message = "Your appeal to announce in " + community.name + " has been accepted";
-
-            await communityRef.update({
-                announcements: FieldValue.arrayUnion({
-                    content: appeal.message,
-                    user: senderRef,
-                    time: Timestamp.now(),
-                } as Announcement_Document)
+            const id = `${community.id}.${Timestamp.now().seconds}`;
+            await AnnouncementCollection.doc(`${community.id}.${Timestamp.now().seconds}`).set({
+                content: appeal.message,
+                user: senderRef,
+                time: Timestamp.now(),
             });
+            await communityRef.update({
+                announcements: FieldValue.arrayUnion(AnnouncementCollection.doc(id))
+            });
+        }
+        else {
+            return {
+                code: STATUS_CODES.NOT_FOUND,
+                message: `No appeal found with id ${appeal_id}`,
+            };
         }
     }
     await appealRef.update({

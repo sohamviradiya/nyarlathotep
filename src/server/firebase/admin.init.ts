@@ -23,15 +23,20 @@ if (admin.apps.length == 0) {
     adminApp = admin.apps[0] as App;
 }
 
-export default (() => {
-    const adminAuth = getAuth(adminApp);
-    const adminDb = getFirestore(adminApp);
-    return {
-        adminAuth,
-        UserCollection: adminDb.collection("Users"),
-        CommunityCollection: adminDb.collection("Communities"),
-        AppealCollection: adminDb.collection("Appeals"),
-        MessageCollection: adminDb.collection("Messages"),
-        ContactCollection: adminDb.collection("Contacts"),
-    }
-})();
+const adminAuth = getAuth(adminApp);
+const adminDb = getFirestore(adminApp);
+const UserCollection = adminDb.collection("Users");
+const CommunityCollection = adminDb.collection("Communities");
+const AppealCollection = adminDb.collection("Appeals");
+const MessageCollection = adminDb.collection("Messages");
+const ContactCollection = adminDb.collection("Contacts");
+const AnnouncementCollection = adminDb.collection("Announcements");
+export default {
+    adminAuth,
+    UserCollection,
+    CommunityCollection,
+    AppealCollection,
+    MessageCollection,
+    ContactCollection,
+    AnnouncementCollection,
+} as const;

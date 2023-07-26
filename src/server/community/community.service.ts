@@ -2,6 +2,7 @@ import AdminApp from "@/server/firebase/admin.init";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { castToUser } from "@/server/user/user.util";
 import {
+    Announcement,
     Announcement_Document,
     Announcement_Input,
     Community_Input,
@@ -10,8 +11,8 @@ import {
     MEMBER_ROLE,
     MEMBER_ROLE_TYPE
 } from "@/server/community/community.module";
-import { castToCommunity, castToCommunityPrivate, checkModerationAccess, generateHexString } from "@/server/community/community.util";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import { castToAnnouncement, castToCommunity, castToCommunityPrivate, checkModerationAccess, generateHexString } from "@/server/community/community.util";
+import { DocumentReference, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { sendAppeal } from "../appeal/appeal.service";
 import { APPEAL_TYPE, Appeal } from "../appeal/appeal.module";
 import { verifyClientToken } from "../auth/auth.service";
@@ -19,6 +20,7 @@ import { verifyClientToken } from "../auth/auth.service";
 const {
     CommunityCollection,
     UserCollection,
+    AnnouncementCollection
 } = AdminApp;
 
 export async function searchCommunitiesByName(search_string: string, limit: number): Promise<Service_Response<null | { communities: Community_Public[] }>> {
@@ -114,7 +116,7 @@ export async function createCommunity(community: Community_Input, token: string)
     const community_document = await communityRef.get();
     return {
         code: STATUS_CODES.OK,
-        message: `Community ${community.name} created`,
+        message: `${community.name} created`,
         data: {
             community: castToCommunityPrivate(community_document)
         }
@@ -141,9 +143,7 @@ export async function updateCommunity(community: Community_Public, token: string
     }
 };
 
-export async function announceInCommunity(announcement: Announcement_Input, token: string, community_id: string): Promise<Service_Response<null | {
-    appeal: Appeal
-}>> {
+export async function announceInCommunity(announcement: Announcement_Input, token: string, community_id: string): Promise<Service_Response<null | { appeal: Appeal } | { announcement: Announcement }>> {
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
@@ -167,17 +167,24 @@ export async function announceInCommunity(announcement: Announcement_Input, toke
             message: `You are not allowed to post announcements in community ${community.name}`,
         }
     }
-    communityRef.update({
-        announcements: FieldValue.arrayUnion({
-            content: announcement.content,
-            user: userRef,
-            time: Timestamp.now()
-        } as Announcement_Document)
+    const id = `${community.id}.${Timestamp.now().seconds}`;
+    await AnnouncementCollection.doc(id).set({
+        id,
+        content: announcement.content,
+        user: userRef,
+        time: Timestamp.now()
     });
+    communityRef.update({
+        announcements: FieldValue.arrayUnion(AnnouncementCollection.doc(id))
+    });
+
     return {
         code: STATUS_CODES.OK,
         message: `Announcement posted in community ${community.name}`,
-    };
+        data: {
+            announcement: castToAnnouncement(await AnnouncementCollection.doc(id).get())
+        }
+    }
 }
 
 export async function getMemberRole(community: Community_Private, user_id: string): Promise<Service_Response<null | { role: MEMBER_ROLE_TYPE }>> {
@@ -199,10 +206,15 @@ export async function getMemberRole(community: Community_Private, user_id: strin
 }
 
 export async function getCommunityAnnouncements(id: string, token: string) {
-    const community = castToCommunityPrivate(await CommunityCollection.doc(id).get());
-    const role_service_response = await getMemberRole(community, token);
+    const communityDoc = await CommunityCollection.doc(id).get();
+    const community = castToCommunityPrivate(communityDoc);
+    const auth_service_response = await verifyClientToken(token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+    const role_service_response = await getMemberRole(community, auth_service_response.data.email);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
-    const announcements = community.announcements;
+    const announcements =  await Promise.all(communityDoc.data()?.announcements.map(async (announcement: DocumentReference) => {
+        return castToAnnouncement(await announcement.get());
+    }));
     return {
         code: STATUS_CODES.OK,
         message: `Announcements found for community ${id}`,
