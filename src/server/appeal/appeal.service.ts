@@ -118,7 +118,7 @@ export async function withdrawAppeal(receiver: string, token: string): Promise<S
         appeals: FieldValue.arrayRemove(appealRef)
     });
 
-    if (appeal.type == "CONNECT") {
+    if (appeal.type == APPEAL_TYPE.CONNECT) {
         const receiverRef = await AdminApp.UserCollection.doc(appeal.receiver as string);
         receiverRef.update({
             invitations: FieldValue.arrayRemove(appealRef)
