@@ -1,7 +1,8 @@
 .main {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: top;
+  gap: 6vh;
   align-items: center;
   padding: 6rem;
   min-height: 100vh;
