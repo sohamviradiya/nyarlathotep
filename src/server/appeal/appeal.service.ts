@@ -299,8 +299,13 @@ export async function rejectAppeal(appeal_id: string, token: string): Promise<Se
         message = "Your appeal to join " + appeal.receiver + " has been rejected";
     else if (appeal.type == APPEAL_TYPE.MODERATE)
         message = "Your appeal to moderate " + appeal.receiver + " has been rejected";
-    else
+    else if (appeal.type == APPEAL_TYPE.ANNOUNCE)
         message = "Your appeal to announce in " + appeal.receiver + " has been rejected";
+    else
+        return {
+            code: STATUS_CODES.BAD_REQUEST,
+            message: `Appeal ${appeal_id} is in an unknown state`,
+        };
     await appealRef.update({
         status: APPEAL_STATUS.REJECTED,
         status_changed: Timestamp.now(),
