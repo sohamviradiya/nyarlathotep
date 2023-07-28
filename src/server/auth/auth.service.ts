@@ -61,7 +61,7 @@ export async function addCredentials(credential: Credential): Promise<Service_Re
     if (user.exists) {
         return {
             code: STATUS_CODES.BAD_REQUEST,
-            message: "Invalid Email",
+            message: "Email Already in Use",
         };
     }
     if (password.length < 8)

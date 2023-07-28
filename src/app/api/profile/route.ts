@@ -18,14 +18,13 @@ export async function POST(request: NextRequest) {
     const { user } = await request.json();
     if (!user.email || !user.name || !user.password) return ApiResponse(BadReq({ message: "Missing user" }));
     try {
-        const response = await addUser({
+        return ApiResponse(await addUser({
             name: user.name,
             email: user.email,
             address: user?.address,
             bio: user?.bio,
             password: user.password,
-        });
-        return ApiResponse(response);
+        }));
     }
     catch (error: any) {
         return ApiResponse(BadReq(error));
