@@ -1,5 +1,4 @@
 import styles from "@/app/page.module.css";
-import { UserSearch } from "@/components/usersearch.main";
 
 export default function User({ params }: { params: { id: string } }) {
     return (

@@ -11,7 +11,7 @@ export function UserSearch() {
     const [users, setUsers] = useState<User_Public[]>([]);
     const [search_string, setSearchString] = useState<string>("");
     useEffect(() => {
-        SearchUsers(search_string).then((users: any[]) => {
+        searchUsers(search_string).then((users: any[]) => {
             setUsers(users);
         })
     }, [search_string]);
@@ -34,8 +34,8 @@ export function UserSearch() {
     );
 };
 
-async function SearchUsers(search_string: string) {
-    const response = await fetch(`api/user/?query=${encodeURIComponent(search_string)}&limit=20`);
+async function searchUsers(search_string: string) {
+    const response = await fetch(`/api/user/?query=${encodeURIComponent(search_string)}&limit=20`);
     const users = (await response.json()).payload.users;
     return users;
 }
