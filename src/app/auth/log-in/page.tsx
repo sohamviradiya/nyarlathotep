@@ -1,3 +1,4 @@
+import Login from "@/components/form.log-in";
 import SignUp from "@/components/form.sign-up";
 import { Metadata, ResolvingMetadata } from "next";
 
@@ -5,9 +6,9 @@ export default function Home() {
     return (
         <main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "20vh", flexDirection: "column", justifyContent: "top" }}>
             <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
-                Sign Up
+                Log in
             </h1>
-            <SignUp />
+            <Login />
         </main>
     )
 }
@@ -22,7 +23,7 @@ export async function generateMetadata(
     parent?: ResolvingMetadata
 ): Promise<Metadata> {
     return {
-        title: "Sign Up",
-        description: "Sign Up Page for NyarlaThotep",
+        title: "Log In",
+        description: "Log In Page for NyarlaThotep",
     };
 };
