@@ -12,14 +12,15 @@ if (getApps().length > 0) {
     clientApp = initializeApp(clientConfig);
     console.log("Firebase Client Initialized", clientApp.name);
 }
+const clientAuth = getAuth(clientApp);
+const clientDb = getFirestore(clientApp);
 
-export default (() => {
-    const clientAuth = getAuth(clientApp);
-    const clientDb = getFirestore(clientApp);
-    return {
-        clientAuth,
-        clientDb,
-    }
-})();
+export default {
+    clientAuth,
+    clientDb,
+} as {
+    clientAuth: ReturnType<typeof getAuth>,
+    clientDb: ReturnType<typeof getFirestore>,
+};
 
 

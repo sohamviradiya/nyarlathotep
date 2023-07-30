@@ -5,10 +5,10 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import adminConfig from "@/server/firebase/admin.config.json";
 
-var adminApp: App = {} as ReturnType<typeof initializeApp>;
+var adminFirebaseApp: App = {} as ReturnType<typeof initializeApp>;
 
 if (admin.apps.length == 0) {
-    adminApp = initializeApp(
+    adminFirebaseApp = initializeApp(
         {
             credential: admin.credential.cert({
                 projectId: adminConfig.project_id,
@@ -18,20 +18,20 @@ if (admin.apps.length == 0) {
         },
         "adminApp"
     );
-    console.log("Firebase Admin Initialized", adminApp.name);
+    console.log("Firebase Admin Initialized", adminFirebaseApp.name);
 } else {
-    adminApp = admin.apps[0] as App;
+    adminFirebaseApp = admin.apps[0] as App;
 }
 
-const adminAuth = getAuth(adminApp);
-const adminDb = getFirestore(adminApp);
+const adminAuth = getAuth(adminFirebaseApp);
+const adminDb = getFirestore(adminFirebaseApp);
 const UserCollection = adminDb.collection("Users");
 const CommunityCollection = adminDb.collection("Communities");
 const AppealCollection = adminDb.collection("Appeals");
 const MessageCollection = adminDb.collection("Messages");
 const ContactCollection = adminDb.collection("Contacts");
 const AnnouncementCollection = adminDb.collection("Announcements");
-export default {
+const AdminApp = {
     adminAuth,
     UserCollection,
     CommunityCollection,
@@ -39,4 +39,6 @@ export default {
     MessageCollection,
     ContactCollection,
     AnnouncementCollection,
-} as const;
+};
+
+export default AdminApp;
