@@ -47,4 +47,4 @@ export type Community_Member_Level = Omit<Community_Private, "appeals">;
 
 export type Community_Public = Omit<Community_Member_Level,  "announcements">;
 
-export type Community_Input = Omit<Community_Public, "id" | "founded">;
+export type Community_Input = Omit<Community_Public, "id" | "founded" | "members">;

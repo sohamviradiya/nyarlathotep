@@ -1,3 +1,4 @@
+import { Appeal } from "../appeal/appeal.module";
 import { Community_Public } from "../community/community.module";
 
 export type User_Private = {
@@ -9,8 +10,8 @@ export type User_Private = {
     joined: Date;
     communities: string[] | Community_Public[];
     contacts: string[];
-    appeals: string[];
-    invitations: string[];
+    appeals: string[] | Appeal[];
+    invitations: string[] | Appeal[];
     last_online: Date;
 };
 
