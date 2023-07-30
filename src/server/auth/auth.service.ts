@@ -40,6 +40,9 @@ export async function generateClientToken(credential: Credential): Promise<Servi
         message: `Token Generated for ${email}`,
         data: {
             token,
+            user: {
+                id: email,
+            }
         },
     }
 };
@@ -82,6 +85,9 @@ export async function addCredentials(credential: Credential): Promise<Service_Re
         message: `Credentials Added for ${email}`,
         data: {
             token: token,
+            user: {
+                id: email,
+            }
         },
     };
 };
@@ -97,6 +103,9 @@ export async function updateCredentials({ email, newPassword, currentPassword }:
         message: `Credentials Updated for ${email}`,
         data: {
             token: token,
+            user: {
+                id: email,
+            }
         },
     };
 };

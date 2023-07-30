@@ -1,10 +1,10 @@
 export type Identity = {
-	email: string;
-	user_id: string;
+	id: string;
 };
 
 export type Verification = {
-	token: string;
+    token: string;
+    user: Identity;
 };
 
 export type Credential = {
