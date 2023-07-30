@@ -16,7 +16,7 @@ export async function checkModerationAccess(community: Community_Private, user_i
 }
 
 
-export function castToCommunity(document: FirebaseFirestore.DocumentSnapshot): Community_Public {
+export function castToCommunity(document: FirebaseFirestore.DocumentSnapshot) {
     const id = document.id;
     const data = document.data();
     if (!data) throw new Error("No data found for community: " + id);

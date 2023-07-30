@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase-admin/firestore";
+import { User_Public } from "../user/user.module";
 
 export type Announcement = {
     id: string;
@@ -24,11 +25,11 @@ export enum MEMBER_ROLE {
 export type MEMBER_ROLE_TYPE = keyof typeof MEMBER_ROLE;
 
 export type Member = {
-    user: string;
+    user: string|User_Public;
     role: MEMBER_ROLE_TYPE;
 }
 
-export type Member_Document = Omit<Member, "user"> | {
+export type Member_Document = Omit<Member, "user"> & {
     user: FirebaseFirestore.DocumentReference;
 };
 
@@ -44,6 +45,6 @@ export type Community_Private = {
 
 export type Community_Member_Level = Omit<Community_Private, "appeals">;
 
-export type Community_Public = Omit<Community_Member_Level, "members" | "announcements">;
+export type Community_Public = Omit<Community_Member_Level,  "announcements">;
 
 export type Community_Input = Omit<Community_Public, "id" | "founded">;

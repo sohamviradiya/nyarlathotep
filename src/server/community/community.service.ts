@@ -8,6 +8,7 @@ import {
     Community_Input,
     Community_Private,
     Community_Public,
+    Member_Document,
     MEMBER_ROLE,
     MEMBER_ROLE_TYPE
 } from "@/server/community/community.module";
@@ -57,7 +58,7 @@ export async function getUserCommunities(user_id: string): Promise<Service_Respo
         };
     }
     const user = castToUser(document);
-    const community_list = user.communities;
+    const community_list = user.communities as string[];
     const community_details = await Promise.all(
         community_list.map(async (community_id) => {
             return await CommunityCollection.doc(community_id).get();
@@ -76,18 +77,31 @@ export async function getCommunityByID(community_id: string): Promise<Service_Re
     community: Community_Public
 }>> {
     const communityRef = await CommunityCollection.doc(community_id);
-    const community_document = await communityRef.get();
-    if (!community_document.exists) {
+    const communityDoc = await communityRef.get();
+    if (!communityDoc.exists) {
         return {
             code: STATUS_CODES.NOT_FOUND,
             message: `No community found for ${community_id}`
         };
     }
+    const community = castToCommunity(communityDoc);
+    const members = await Promise.all(
+        communityDoc.data()?.members.map(async (member: Member_Document) => {
+            const user = await member.user.get();
+            return {
+                user: castToUser(user),
+                role: member.role
+            };
+        }));
+    
     return {
         code: STATUS_CODES.OK,
         message: `Community found for ${community_id}`,
         data: {
-            community: castToCommunity(community_document)
+            community: {
+                ...community,
+                members
+            }
         }
     }
 }
