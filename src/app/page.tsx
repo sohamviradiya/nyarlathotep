@@ -1,13 +1,34 @@
-import styles from "@/app/page.module.css";
-import { UserSearch } from "@/components/usersearch.main";
+import HomeLink from "@/components/link.home";
+import { Metadata, ResolvingMetadata } from "next";
 
 export default function Home() {
     return (
-        <main className={styles.main}>
-            <h1 style={{backgroundColor: "darkblue", padding: "2rem"}}>
-                Welcome To NyarlaThotep 
+        <main style={{ backgroundColor: "#202020", height: "100vh", display:"flex",gap: "10vh" , flexDirection: "column", justifyContent: "top"  }}>
+            <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
+                Welcome To NyarlaThotep
             </h1>
-            <UserSearch />
+            <h2 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
+                Join Various Communities
+            </h2>
+            <h2 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
+                Connect With Other Users
+            </h2>
+            <HomeLink />
         </main>
     )
 }
+
+type Props = {
+    params: { id: string }
+    searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export async function generateMetadata(
+    { params, searchParams }: Props,
+    parent?: ResolvingMetadata
+): Promise<Metadata> {
+    return {
+        title: "NyarlaThotep",
+        description: "A social media platform",
+    };
+};
