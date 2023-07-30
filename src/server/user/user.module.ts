@@ -1,4 +1,4 @@
-import { UnionType } from "typescript";
+import { Community_Public } from "../community/community.module";
 
 export type User_Private = {
     id: string;
@@ -7,7 +7,7 @@ export type User_Private = {
     address?: string;
     bio?: string;
     joined: Date;
-    communities: string[];
+    communities: string[] | Community_Public[];
     contacts: string[];
     appeals: string[];
     invitations: string[];

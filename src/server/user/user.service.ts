@@ -17,6 +17,8 @@ import { Appeal } from "../appeal/appeal.module";
 import { castToAppeal } from "../appeal/appeal.util";
 import { Contact } from "../contact/contact.module";
 import { castToContact } from "../contact/contact.util";
+import { castToCommunity } from "../community/community.util";
+import { Community_Public } from "../community/community.module";
 
 const {
     UserCollection,
@@ -183,12 +185,18 @@ export async function getUserByID(id: string): Promise<Service_Response<null | {
             message: `No user found for ${id}`,
         };
     }
+    const communities = await Promise.all((document.data()?.communities as FirebaseFirestore.DocumentReference[]).map(async (ref) => {
+        return castToCommunity(await ref.get());
+    })) as Community_Public[];
     const user = castToUser(document);
     return {
         code: STATUS_CODES.OK,
         message: `User found ${user.email}`,
         data: {
-            user,
-        },
+            user: {
+                ...user,
+                communities,
+            }
+        }
     };
 }
