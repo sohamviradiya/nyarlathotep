@@ -22,7 +22,7 @@ export default function SignUp() {
         bio: "",
     });
     return (
-        <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "3rem", color: "black", width: "50%", alignSelf: "center" }}>
+        <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "3rem", color: "black", width: "70%", alignSelf: "center" }}>
             <form style={{ display: "flex", flexDirection: "column", gap: "1rem", }}>
                 <TextField
                     label="Name"

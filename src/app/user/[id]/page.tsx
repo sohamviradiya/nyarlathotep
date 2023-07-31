@@ -11,7 +11,7 @@ export default function User({ params }: { params: { id: string } }) {
         fetchUser({ id: params.id }).then((user) => setUser(user));
     }, [params.id]);
     return (<main style={{ height: "100vh", display: "flex", gap: "10vh", flexDirection: "column", justifyContent: "top", alignItems: "center" }} >
-        <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "70%" }}>
+        <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "50%" }}>
             {`${decodeURIComponent(params.id)}'s Profile Page`}
         </h1>
         {(user.email) ? (

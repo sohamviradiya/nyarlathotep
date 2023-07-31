@@ -1,4 +1,3 @@
-import { CommunitySearch } from "@/components/search.community";
 import { UserSearch } from "@/components/search.user";
 import { Metadata, ResolvingMetadata } from "next";
 
@@ -18,12 +17,7 @@ type Props = {
     searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export async function generateMetadata(
-    { params, searchParams }: Props,
-    parent?: ResolvingMetadata
-): Promise<Metadata> {
-    return {
-        title: "Search for Users",
-        description: "Search for Users",
-    };
+export const metadata: Metadata = {
+    title: "Search for Users",
+    description: "Search for Users",
 };

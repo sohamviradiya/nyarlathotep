@@ -19,7 +19,7 @@ export default function Login() {
     const [waiting, setWaiting] = useState<boolean>(false);
     const router = useRouter();
     return (
-        <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "3rem", color: "black", width: "50%", alignSelf: "center" }}>
+        <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "3rem", color: "black", width: "70%", alignSelf: "center" }}>
             <form style={{ display: "flex", flexDirection: "column", gap: "1rem", }}>
                 <TextField
                     label="Email"
@@ -36,7 +36,7 @@ export default function Login() {
                         }
                     }}
                 />
-                
+
                 <FormControl variant="filled">
                     <InputLabel htmlFor="filled-adornment-password" >Password</InputLabel>
                     <FilledInput
@@ -92,21 +92,26 @@ async function submitForm(user: {
     password: string,
 }, setErrors: (errors: string[]) => void, setWaiting: (waiting: boolean) => void) {
     setWaiting(true);
-    const response = await fetch("/auth/post", {
+    const response = await fetch("/api/auth", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            user
+            auth: {
+                email: user.email,
+                password: user.password,
+            }
         }),
     });
     if (response.ok) {
         const data = await response.json();
+        console.log(data);
         return `/user/${data.payload.user.id}`;
     }
     else {
         const data = await response.json();
+        console.log(data);
         setErrors([data.message]);
         setWaiting(false);
         return null;
