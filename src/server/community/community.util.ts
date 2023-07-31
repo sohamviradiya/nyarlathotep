@@ -1,6 +1,5 @@
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { Announcement, Community_Private, MEMBER_ROLE, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
-import { getMemberRole } from "@/server/community/community.service";
 import { Community_Public } from "@/server/community/community.module";
 
 import { DocumentReference, DocumentSnapshot } from "firebase-admin/firestore";
@@ -66,3 +65,21 @@ export function generateHexString(): string {
     return String("0").repeat(8 - random_number_string.length).concat(random_number_string);
 }
 
+
+export function getMemberRole(community: Community_Private, user_id: string): Service_Response<null | { role: MEMBER_ROLE_TYPE }> {
+    const member = community.members.find(member => member.user == user_id);
+    if (!member) {
+        return {
+            code: STATUS_CODES.UNAUTHORIZED,
+            message: `You are not member of community ${community.name}`,
+        }
+    }
+    const role = member.role;
+    return {
+        code: STATUS_CODES.OK,
+        message: `User role in community ${community.name}`,
+        data: {
+            role,
+        }
+    }
+}

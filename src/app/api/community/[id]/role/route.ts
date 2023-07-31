@@ -1,7 +1,6 @@
 import { extractToken } from "@/server/auth/auth.util";
-import { getCommunityModerators } from "@/server/community/community.service";
+import { getMemberRoleWithToken } from "@/server/community/community.service";
 import { APPEAL_TYPE } from "@/server/appeal/appeal.module";
-import { STATUS_CODES } from "@/server/response/response.module";
 import { ApiResponse, Unauthorized } from "@/server/response/response.util";
 import { NextRequest } from "next/server";
 import { sendAppeal } from "@/server/appeal/appeal.service";
@@ -9,7 +8,7 @@ import { sendAppeal } from "@/server/appeal/appeal.service";
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     const token = extractToken(request.headers);
     if (!token) return ApiResponse(Unauthorized({ message: "No token provided" }));
-    return ApiResponse(await getCommunityModerators(params.id, token));
+    return ApiResponse(await getMemberRoleWithToken(params.id, token));
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
