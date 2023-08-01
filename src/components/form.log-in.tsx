@@ -72,8 +72,9 @@ export default function Login() {
                 <Button variant="contained" sx={{ background: "green" }} onClick={(e) => {
                     e.preventDefault();
                     submitForm(user, setErrors, setWaiting).then((path) => {
+                        
                         if (path)
-                            router.push(path);
+                            router.push('/profile');
                     });
                 }} disableElevation disabled={errors.length > 0}>
                     Submit
@@ -106,12 +107,11 @@ async function submitForm(user: {
     });
     if (response.ok) {
         const data = await response.json();
-        console.log(data);
+        localStorage.setItem("token", data.payload.token);
         return `/user/${data.payload.user.id}`;
     }
     else {
         const data = await response.json();
-        console.log(data);
         setErrors([data.message]);
         setWaiting(false);
         return null;

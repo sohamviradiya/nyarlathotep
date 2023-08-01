@@ -49,7 +49,6 @@ async function fetchProfile(token: string): Promise<User_Private> {
         }
     });
     const data = await response.json();
-    console.log(data);
     if (!response.ok) throw new Error(data.message);
     return data.payload.user;
 }
