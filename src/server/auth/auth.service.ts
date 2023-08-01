@@ -10,11 +10,19 @@ import ClientApp from "@/server/firebase/client.init";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { Credential, Verification, UpdateCredential } from "@/server/auth/auth.module";
+import { Timestamp } from "firebase-admin/firestore";
+
+const {
+    UserCollection,
+} = AdminApp;
 
 export async function verifyClientToken(token: string): Promise<Service_Response<{ uid: string; email: string } | null>> {
     const userCredential: UserCredential = await signInWithCustomToken(ClientApp.clientAuth, token);
     signOut(ClientApp.clientAuth);
     if (!userCredential?.user?.email) throw new Error("Invalid Token");
+    await UserCollection.doc(userCredential.user.email).update({
+        last_online: Timestamp.now(),
+    });
     return {
         code: STATUS_CODES.OK,
         message: `Token Verified for ${userCredential.user.email}`,
