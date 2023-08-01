@@ -53,21 +53,13 @@ export async function getProfileFromToken(token: string): Promise<Service_Respon
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
     const document = await AdminApp.UserCollection.doc(auth_service_response.data.email).get();
+    
+    
+    
     const communities = await Promise.all((document.data()?.communities as FirebaseFirestore.DocumentReference[]).map(async (ref) => {
         return castToCommunity(await ref.get());
     })) as Community_Public[];
-    const invitations = await Promise.all((document.data()?.invitations as FirebaseFirestore.DocumentReference[]).map(async (ref) => {
-        return castToAppeal(await ref.get());
-    })) as Appeal[];
-    const appeals = await Promise.all((document.data()?.appeals as FirebaseFirestore.DocumentReference[]).map(async (ref) => {
-        return castToAppeal(await ref.get());
-    })) as Appeal[];
-    if (!document.exists) {
-        return {
-            code: STATUS_CODES.NOT_FOUND,
-            message: `No user found for ${auth_service_response.data.email}`,
-        };
-    }
+
     const user: User_Private = castToProfile(document);
     return {
         code: STATUS_CODES.OK,
@@ -76,8 +68,6 @@ export async function getProfileFromToken(token: string): Promise<Service_Respon
             user: {
                 ...user,
                 communities,
-                invitations,
-                appeals,
             },
         },
     }
