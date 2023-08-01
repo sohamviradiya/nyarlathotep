@@ -76,36 +76,29 @@ export async function getContact(contact_id: string, token: string): Promise<Ser
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
 
     const contactRef = await ContactCollection.doc(contact_id);
-    const contact = castToContact(await contactRef.get());
-
+    const contactDoc = await contactRef.get();
+    const contact = castToContact(contactDoc);
     if (contact.sender !== auth_service_response.data.email && contact.receiver !== auth_service_response.data.email)
         return {
             code: STATUS_CODES.UNAUTHORIZED,
             message: "Unauthorized",
         };
-
+    
+    const messages = await getMessages(contactDoc,);
     return {
         code: STATUS_CODES.OK,
         message: "Contact Retrieved",
         data: {
-            contact
-        },
+            contact: {
+                ...contact,
+                messages
+            },
+        }
     };
 };
 
-export async function getMessages(contact_id: string, token: string): Promise<Service_Response<null | { messages: Contact["messages"] }>> {
-    const auth_service_response = await verifyClientToken(token);
-    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-
-    const contactDoc = (await ContactCollection.doc(contact_id).get());
-    const contact = castToContact(contactDoc);
-
-    if (contact.sender !== auth_service_response.data.email && contact.receiver !== auth_service_response.data.email)
-        return {
-            code: STATUS_CODES.UNAUTHORIZED,
-            message: "Unauthorized",
-        };
-    const messages = {
+export async function getMessages(contactDoc: FirebaseFirestore.DocumentSnapshot) {
+    return {
         incoming: {
             draft: await getMessagesFromReference(contactDoc.data()?.messages.incoming.draft),
             sent: await getMessagesFromReference(contactDoc.data()?.messages.incoming.sent),
@@ -120,14 +113,5 @@ export async function getMessages(contact_id: string, token: string): Promise<Se
             approved: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.approved),
             rejected: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.rejected),
         },
-    }
-    return {
-        code: STATUS_CODES.OK,
-        message: "Messages Retrieved",
-        data: {
-            messages,
-        }
     };
-}
-
-
+};
