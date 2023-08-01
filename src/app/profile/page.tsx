@@ -1,5 +1,6 @@
 "use client";
 
+import AppealList from "@/components/appeal-list.profile";
 import UserInfo from "@/components/info.user";
 import InvitationList from "@/components/invitation-list";
 import SkeletonBundle from "@/components/skeleton-bundle";
@@ -33,7 +34,7 @@ export default function Profile() {
         {(waiting || !user) ? (<SkeletonBundle size={5} />) : (
             <>
                 <UserInfo user={user as User_Public} />
-                {/* <AppealList appeals = {user.appeals} /> */}
+                <AppealList appeals = {user.appeals as string[]} />
                 <InvitationList invitations={user.invitations as string[]} />
             </>
         )}
