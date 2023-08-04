@@ -10,6 +10,29 @@ const {
     MessageCollection,
 } = AdminApp;
 
+export async function getMessage(message_id: string, token: string): Promise<Service_Response<null | { message: Message }>> {
+    const auth_response = await verifyClientToken(token);
+    if (!auth_response.data)
+        return auth_response as Service_Response<null>;
+    const messageRef = MessageCollection.doc(message_id);
+    const messageDoc = await messageRef.get();
+    const message = castToMessage(messageDoc);
+    const contact = castToContact(await messageDoc.data()?.contact.get());
+    if (contact.sender != auth_response.data.email && contact.receiver != auth_response.data.email) {
+        return {
+            code: STATUS_CODES.UNAUTHORIZED,
+            message: "Unauthorized",
+        };
+    }
+    return {
+        code: STATUS_CODES.OK,
+        message: "Message retrieved",
+        data: {
+            message
+        }
+    };
+};
+
 export async function addMessage(contact_id: string, content: string, token: string): Promise<Service_Response<null | { message: Message }>> {
     const auth_response = await verifyClientToken(token);
     if (!auth_response.data)
@@ -26,7 +49,7 @@ export async function addMessage(contact_id: string, content: string, token: str
             direction: MESSAGE_DIRECTION.OUTGOING,
         });
         await contactRef.update({
-            "messages.outgoing.draft": FieldValue.arrayUnion(messageRef)
+            "messages.outgoing": FieldValue.arrayUnion(messageRef)
         });
 
         return {
@@ -47,7 +70,7 @@ export async function addMessage(contact_id: string, content: string, token: str
         });
 
         await contactRef.update({
-            "messages.incoming.draft": FieldValue.arrayUnion(messageRef)
+            "messages.incoming": FieldValue.arrayUnion(messageRef)
         });
         return {
             code: STATUS_CODES.OK,
@@ -65,7 +88,9 @@ export async function addMessage(contact_id: string, content: string, token: str
     }
 }
 
-export async function updateMessage(message_id: string, content: string, token: string): Promise<Service_Response<null>> {
+export async function updateMessage(message_id: string, content: string, token: string): Promise<Service_Response<null | {
+    message: Message
+}>> {
     const messageRef = await MessageCollection.doc(message_id);
     const message = castToMessage(await messageRef.get());
 
@@ -94,6 +119,9 @@ export async function updateMessage(message_id: string, content: string, token: 
     return {
         code: STATUS_CODES.OK,
         message: `Message ${message_id} updated`,
+        data: {
+            message: castToMessage(await messageRef.get())
+        }
     };
 }
 
@@ -107,9 +135,6 @@ export async function confirmMessage(message_id: string, status: MESSAGE_STATUS_
     const auth_response = await verifyClientToken(token);
     if (!auth_response.data)
         return auth_response as Service_Response<null>;
-    
-    const current_status = message.status;
-    const direction = message.direction;
     const status_service_response = await checkStatus(message, contact, auth_response.data.email, status);
 
     if (!status_service_response.data)
@@ -119,14 +144,6 @@ export async function confirmMessage(message_id: string, status: MESSAGE_STATUS_
         status_changed: Timestamp.now(),
     });
 
-    await contactRef.update({
-        messages: {
-            [direction.toLowerCase()]: {
-                [status.toLowerCase()]: FieldValue.arrayUnion(messageRef),
-                [current_status.toLowerCase()]: FieldValue.arrayRemove(messageRef),
-            }
-        }
-    });
     return {
         code: STATUS_CODES.OK,
         message: `Message ${message_id} status changed to ${status}`,

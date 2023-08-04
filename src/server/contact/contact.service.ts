@@ -1,11 +1,10 @@
 import AdminApp from "@/server/firebase/admin.init";
-import { DocumentReference, FieldValue, Timestamp } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { Contact } from "@/server/contact/contact.module";
 import { castInputToDocument, castToContact } from "@/server/contact/contact.util";
 import { verifyClientToken } from "../auth/auth.service";
 import { Appeal, APPEAL_STATUS } from "../appeal/appeal.module";
-import { getMessagesFromReference } from "../message/message.util";
 
 const {
     AppealCollection,
@@ -78,13 +77,24 @@ export async function getContact(contact_id: string, token: string): Promise<Ser
     const contactRef = await ContactCollection.doc(contact_id);
     const contactDoc = await contactRef.get();
     const contact = castToContact(contactDoc);
-    if (contact.sender !== auth_service_response.data.email && contact.receiver !== auth_service_response.data.email)
+    var messages = {
+        incoming: [] as string[],
+        outgoing: [] as string[],
+    };
+    if (contact.sender == auth_service_response.data.email) {
+        messages.incoming = contact.messages.incoming as string[];
+        messages.outgoing = contact.messages.outgoing as string[];
+    }
+    else if (contact.receiver == auth_service_response.data.email) {
+        messages.incoming = contact.messages.outgoing as string[];
+        messages.outgoing = contact.messages.incoming as string[];
+    }
+    else
         return {
             code: STATUS_CODES.UNAUTHORIZED,
             message: "Unauthorized",
         };
-    
-    const messages = await getMessages(contactDoc,);
+
     return {
         code: STATUS_CODES.OK,
         message: "Contact Retrieved",
@@ -97,21 +107,4 @@ export async function getContact(contact_id: string, token: string): Promise<Ser
     };
 };
 
-export async function getMessages(contactDoc: FirebaseFirestore.DocumentSnapshot) {
-    return {
-        incoming: {
-            draft: await getMessagesFromReference(contactDoc.data()?.messages.incoming.draft),
-            sent: await getMessagesFromReference(contactDoc.data()?.messages.incoming.sent),
-            read: await getMessagesFromReference(contactDoc.data()?.messages.incoming.read),
-            approved: await getMessagesFromReference(contactDoc.data()?.messages.incoming.approved),
-            rejected: await getMessagesFromReference(contactDoc.data()?.messages.incoming.rejected),
-        },
-        outgoing: {
-            draft: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.draft),
-            sent: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.sent),
-            read: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.read),
-            approved: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.approved),
-            rejected: await getMessagesFromReference(contactDoc.data()?.messages.outgoing.rejected),
-        },
-    };
-};
+

@@ -15,7 +15,7 @@ export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Mess
         status_changed: new Date(data.status_changed._seconds * 1000),
         contact: data.contact.id,
         direction: data.direction,
-    };
+    } as Message;
 }
 
 export async function getMessagesFromReference(messages: DocumentReference[]) {
