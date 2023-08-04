@@ -3,33 +3,28 @@ import { Member } from "@/server/community/community.module";
 import { User_Public } from "@/server/user/user.module";
 import Stack from "@mui/material/Stack";
 import Card from '@mui/material/Card';
-import CardActionArea from '@mui/material/CardActionArea';
-import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import { Link } from "@mui/material";
 
 export default function MemberList({ members }: { members: Member[] }) {
     return (<Stack spacing={2} padding="1rem" direction="row" flexWrap="wrap">
         {members.map((member) => {
             const user = member.user as User_Public;
             return (
-                <Card sx={{ maxWidth: 345 }} key={user.id}>
-                    <CardActionArea>
+                <Card key={user.id}>
                         <CardContent>
-                            <Typography gutterBottom variant="h4" component="div">
-                                {user.name}
+                            <Typography gutterBottom variant="h5" component="div">
+                                {user.name}, {member.role.toLocaleLowerCase()}
                             </Typography>
-                            <Typography variant="h5" component="div">
+                            <Link href={`/user/${user.id}`} underline="hover" variant="h6">
                                 {user.email}
+                            </Link>
+                            <Typography variant="body1" component="div">
+                                Last Seen: {(new Date(user.last_online)).toLocaleString()}
                             </Typography>
-                            <Typography variant="h6" component="div">
-                                Role: {member.role}
-                            </Typography>
-                            <Typography variant="h6" component="div">
-                                Last Online: {(new Date(user.last_online)).toLocaleString()}
-                            </Typography>
+                            
                         </CardContent>
-                    </CardActionArea>
                 </Card>
             );
         })}
