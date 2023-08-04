@@ -26,7 +26,7 @@ export default function Community({ params }: { params: { id: string } }) {
             </div>
         </>
         ) : (
-            <SkeletonBundle size={6} />
+            <SkeletonBundle size={4} />
         )}
     </main>
     );
