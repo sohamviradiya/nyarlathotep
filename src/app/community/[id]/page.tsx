@@ -1,5 +1,5 @@
 "use client";
-import MemberList from "@/components/member-list.community";
+import MemberList from "@/components/community/member-list.community";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Community_Public } from "@/server/community/community.module";
 import { Metadata, ResolvingMetadata } from "next";

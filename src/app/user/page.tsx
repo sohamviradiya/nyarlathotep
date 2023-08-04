@@ -1,4 +1,4 @@
-import { UserSearch } from "@/components/search.user";
+import { UserSearch } from "@/components/user/search.user";
 import { Metadata } from "next";
 
 export default function UsersPage() {

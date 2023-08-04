@@ -1,7 +1,7 @@
 "use client";
 
 import { User_Public } from "@/server/user/user.module";
-import CommunityList from "./community-list.profile";
+import CommunityList from "@/components/profile/community-list.profile";
 import { Community_Public } from "@/server/community/community.module";
 import RequestButton from "./request-button.connect";
 

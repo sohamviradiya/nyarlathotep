@@ -1,4 +1,4 @@
-import SignUp from "@/components/form.sign-up";
+import SignUp from "@/components/auth/form.sign-up";
 import { Metadata, } from "next";
 
 export default function Home() {

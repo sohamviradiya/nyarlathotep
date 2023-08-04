@@ -1,5 +1,5 @@
 "use client";
-import UserInfo from "@/components/info.user";
+import UserInfo from "@/components/user/info.user";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Public } from "@/server/user/user.module";
 import { useEffect, useState } from "react";
