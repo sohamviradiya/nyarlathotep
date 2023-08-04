@@ -18,15 +18,13 @@ export default function Profile() {
         else {
             fetchProfile(token)
                 .then((user) => {
-                    console.log(user);
                     if (!user) router.push("/auth/log-in");
                     setUser(user);
                     setWaiting(false);
                 })
                 .catch((error) => {
-                    console.error(error);
-                    router.push("/login");
                     setWaiting(false);
+                    router.push("/auth/log-in");
                 });
         }
     }, [router]);
