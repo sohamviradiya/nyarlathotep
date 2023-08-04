@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Contact } from "@/server/contact/contact.module";
 import MessageComponent from "@/components/contact/message.contact";
 import { MESSAGE_DIRECTION } from "@/server/message/message.module";
+import MessageInput from "@/components/contact/input.contact";
 export default function Contact({ params }: { params: { id: string } }) {
     const [contact, setContact] = useState<Contact | null>(null);
     const [direction, setDirection] = useState<keyof typeof MESSAGE_DIRECTION>("INCOMING");
@@ -33,7 +34,7 @@ export default function Contact({ params }: { params: { id: string } }) {
                 <h2>Outgoing</h2>
                 <MessageList messages={contact.messages.outgoing as string[]} />
             </div>
-            <MessageInput id={contact.id} direction={direction} />
+            <MessageInput id={contact.id} reload={() => fetchContact(params.id).then((contact) => setContact(contact))} />
         </div>
     );
 };
