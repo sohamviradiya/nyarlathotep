@@ -1,7 +1,7 @@
 "use client";
 
 import { MESSAGE_DIRECTION, MESSAGE_STATUS, MESSAGE_STATUS_TYPE, Message } from "@/server/message/message.module";
-import { useState, useEffect, lazy } from "react";
+import { useState, useEffect } from "react";
 import SkeletonBundle from "@/components/skeleton-bundle";
 
 export default function MessageComponent({ id }: { id: string }) {
@@ -122,10 +122,10 @@ function DislikeButton({ id, setMessage, disliked }: { id: string, setMessage: (
 
 async function fetchMessage(id: string) {
     const response = await fetch(`/api/message/${id}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         }
     });
     const data = await response.json();
@@ -140,10 +140,10 @@ async function fetchMessage(id: string) {
 
 async function editMessage(id: string, content: string) {
     const response = await fetch(`/api/message/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ content: content })
     });
@@ -159,10 +159,10 @@ async function editMessage(id: string, content: string) {
 
 async function deleteMessage(id: string) {
     const response = await fetch(`/api/message/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         }
     });
     const data = await response.json();
@@ -170,10 +170,10 @@ async function deleteMessage(id: string) {
 
 async function sendMessage(id: string) {
     const response = await fetch(`/api/message/${id}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ status: MESSAGE_STATUS.SENT })
     });
@@ -188,10 +188,10 @@ async function sendMessage(id: string) {
 
 async function markMessageRead(id: string) {
     const response = await fetch(`/api/message/${id}/read`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ status: MESSAGE_STATUS.READ })
     });
@@ -207,10 +207,10 @@ async function markMessageRead(id: string) {
 
 async function likeMessage(id: string) {
     const response = await fetch(`/api/message/${id}/read`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ status: MESSAGE_STATUS.APPROVED })
     });
@@ -225,10 +225,10 @@ async function likeMessage(id: string) {
 
 async function dislikeMessage(id: string) {
     const response = await fetch(`/api/message/${id}/read`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ status: MESSAGE_STATUS.REJECTED })
     });
