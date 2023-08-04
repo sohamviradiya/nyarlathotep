@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import TextField from "@mui/material/TextField";
 import { Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel } from "@mui/material";
@@ -18,6 +18,12 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [waiting, setWaiting] = useState<boolean>(false);
     const router = useRouter();
+
+    useEffect(() => {
+        localStorage.removeItem("email");
+        localStorage.removeItem("token");
+    }, []);
+
     return (
         <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "3rem", color: "black", width: "70%", alignSelf: "center" }}>
             <form style={{ display: "flex", flexDirection: "column", gap: "1rem", }}>
@@ -71,10 +77,11 @@ export default function Login() {
                 </FormControl>
                 <Button variant="contained" sx={{ background: "green" }} onClick={(e) => {
                     e.preventDefault();
-                    submitForm(user, setErrors, setWaiting).then((path) => {
-                        
-                        if (path)
+                    submitForm(user, setErrors, setWaiting).then((email) => {
+                        if (email) {
+                            localStorage.setItem("email", email);
                             router.push('/profile');
+                        }
                     });
                 }} disableElevation disabled={errors.length > 0}>
                     Submit
@@ -108,7 +115,7 @@ async function submitForm(user: {
     if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.payload.token);
-        return `/user/${data.payload.user.id}`;
+        return user.email;
     }
     else {
         const data = await response.json();

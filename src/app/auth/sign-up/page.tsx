@@ -1,5 +1,5 @@
 import SignUp from "@/components/form.sign-up";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata, } from "next";
 
 export default function Home() {
     return (
@@ -12,17 +12,7 @@ export default function Home() {
     )
 }
 
-type Props = {
-    params: { id: string }
-    searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export async function generateMetadata(
-    { params, searchParams }: Props,
-    parent?: ResolvingMetadata
-): Promise<Metadata> {
-    return {
+export const metadata: Metadata = {
         title: "Sign Up",
         description: "Sign Up Page for NyarlaThotep",
-    };
 };

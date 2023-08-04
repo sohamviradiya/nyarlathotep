@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ErrorList from "@/components/error-list.form";
 import { User_Input } from "@/server/user/user.module";
 import { Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
@@ -21,6 +21,12 @@ export default function SignUp() {
         address: "",
         bio: "",
     });
+
+    useEffect(() => {
+        localStorage.removeItem("email");
+        localStorage.removeItem("token");
+    }, []);
+
     return (
         <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "3rem", color: "black", width: "70%", alignSelf: "center" }}>
             <form style={{ display: "flex", flexDirection: "column", gap: "1rem", }}>
@@ -102,8 +108,7 @@ export default function SignUp() {
                 <Button variant="contained" sx={{ background: "green" }} onClick={(e) => {
                     e.preventDefault();
                     submitForm(user, setErrors, setWaiting).then((path) => {
-                        if (path)
-                            router.push(path);
+                        router.push('/auth/log-in');
                     });
                 }} disableElevation disabled={errors.length > 0}>
                     Submit
@@ -128,7 +133,7 @@ async function submitForm(user: User_Input, setErrors: (errors: string[]) => voi
     });
     if (response.ok) {
         const data = await response.json();
-        return `/user/${data.payload.user.id}`;
+        return data;
     }
     else {
         const data = await response.json();
