@@ -1,6 +1,5 @@
 "use client";
 import UserInfo from "@/components/info.user";
-import RequestButton from "@/components/request-button.connect";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Public } from "@/server/user/user.module";
 import { useEffect, useState } from "react";
@@ -19,7 +18,6 @@ export default function User({ params }: { params: { id: string } }) {
         ) : (
             <SkeletonBundle size={3} />
         )}
-        <RequestButton id={params.id} />
     </main>
     );
 }
