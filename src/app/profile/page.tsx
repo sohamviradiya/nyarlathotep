@@ -13,7 +13,7 @@ export default function Profile() {
     const [user, setUser] = useState<User_Private>();
     const [waiting, setWaiting] = useState<boolean>(true);
     useEffect(() => {
-        const token = localStorage.getItem("token") as string;
+        const token = localStorage.getItem('token') as string;
         if (!token) router.push("/auth/log-in");
         else {
             fetchProfile(token)

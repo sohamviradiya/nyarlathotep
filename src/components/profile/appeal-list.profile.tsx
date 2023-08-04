@@ -13,9 +13,9 @@ export default function AppealList({ appeals }: { appeals: string[] }) {
 function Appeal({ id }: { id: string }) {
     const [appeal, setAppeal] = useState<Appeal | null>(null);
     const [withdrawn, setWithdrawn] = useState<boolean>(false);
-    
+
     useEffect(() => {
-        const token = localStorage.getItem("token") as string;
+        const token = localStorage.getItem('token') as string;
         fetchAppeal(id, token).then((appeal) => {
             setAppeal(appeal);
         }).catch((err) => {
@@ -30,9 +30,10 @@ function Appeal({ id }: { id: string }) {
                 <h5>{appeal.status}</h5>
                 <h6>{new Date(appeal.status_changed).toLocaleString()}</h6>
                 <button onClick={() => {
-                    withdrawAppeal(id, localStorage.getItem("token") as string).then(() => {
+                    withdrawAppeal(id, localStorage.getItem('token') as string).then(() => {
                         setWithdrawn(true);
-                }) }}> Remove </button>
+                    })
+                }}> Remove </button>
             </>) :
             (<></>)
     );

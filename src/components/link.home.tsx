@@ -7,7 +7,7 @@ import { Stack, Divider, Box, Button } from "@mui/material";
 export default function HomeLink() {
     const [loggedIn, setLoggedIn] = useState(false);
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         if (token) {
             setLoggedIn(true);
         }
@@ -29,8 +29,8 @@ export default function HomeLink() {
                 </>) :
                 (<>
                     <Link href="/auth/log-in"  >
-                        <Box component="span" sx={{ padding: "3rem", backgroundColor: "#101010",  }}>
-                            Log In 
+                        <Box component="span" sx={{ padding: "3rem", backgroundColor: "#101010", }}>
+                            Log In
                         </Box>
                     </Link>
                     <Link href="/auth/sign-up" >
@@ -38,7 +38,7 @@ export default function HomeLink() {
                             Sign Up
                         </Box>
                     </Link>
-                    
+
                 </>)}
         </Stack>
     );

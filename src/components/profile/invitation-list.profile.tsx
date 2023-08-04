@@ -19,7 +19,7 @@ function Invitation({ invitation_id }: { invitation_id: string }) {
     const [invitation, setInvitation] = useState<Appeal>();
     const [status, setStatus] = useState<APPEAL_STATUS_TYPE>(APPEAL_STATUS.PENDING);
     useEffect(() => {
-        const token = localStorage.getItem("token") as string;
+        const token = localStorage.getItem('token') as string;
         fetchAppeal(invitation_id, token).then((appeal) => {
             setInvitation(appeal);
             if (appeal.status === APPEAL_STATUS.PENDING)
@@ -32,7 +32,7 @@ function Invitation({ invitation_id }: { invitation_id: string }) {
 
     useEffect(() => {
         if (status === APPEAL_STATUS.PENDING) return;
-        const token = localStorage.getItem("token") as string;
+        const token = localStorage.getItem('token') as string;
         if (status === APPEAL_STATUS.ACCEPTED) {
             acceptAppeal(invitation_id, token).then(() => {
                 fetchAppeal(invitation_id, token).then((appeal) => {
