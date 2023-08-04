@@ -17,12 +17,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
     const token = extractToken(request.headers);
     if (!token) return ApiResponse(Unauthorized({ message: "No token provided" }));
-    const body = await request.json();
+    const { message } = await request.json();
     try {
         return ApiResponse(await sendAppeal({
             receiver: params.id,
             type: APPEAL_TYPE.CONNECT,
-            message: body.message || "",
+            message: message || "",
         }, token));
     }
     catch (error: any) {
