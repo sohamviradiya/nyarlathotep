@@ -8,8 +8,8 @@ import { castToAppeal } from "@/server/appeal/appeal.util";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { establishContact } from "@/server/contact/contact.service";
-import { checkModerationAccessWithToken, getMemberRole } from "@/server/community/community.service";
-import { castToCommunityPrivate } from "@/server/community/community.util";
+import { checkModerationAccessWithToken } from "@/server/community/community.service";
+import { castToCommunityPrivate, getMemberRole } from "@/server/community/community.util";
 import { Announcement, Announcement_Document, MEMBER_ROLE, Member_Document } from "@/server/community/community.module";
 import { verifyClientToken } from "@/server/auth/auth.service";
 import AdminApp from "@/server/firebase/admin.init";
@@ -19,6 +19,37 @@ const {
     AppealCollection,
     AnnouncementCollection,
 } = AdminApp;
+
+export async function getAppeal(
+    id: string, token: string
+): Promise<Service_Response<null | {
+    appeal: Appeal
+}>> {
+    const auth_service_response = await verifyClientToken(token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+    const appealRef = await AppealCollection.doc(id);
+    const appealDoc = await appealRef.get();
+    if (!appealDoc.exists) {
+        return {
+            code: STATUS_CODES.NOT_FOUND,
+            message: "Appeal not found",
+        }
+    };
+    const appeal = castToAppeal(await appealRef.get());
+    if (appeal.sender != auth_service_response.data.email && appeal.receiver != auth_service_response.data.email) {
+        return {
+            code: STATUS_CODES.FORBIDDEN,
+            message: "You are not authorized to view this appeal",
+        }
+    }
+    return {
+        code: STATUS_CODES.OK,
+        message: "Appeal fetched",
+        data: {
+            appeal
+        }
+    };
+};
 
 export async function sendAppeal(
     appeal: Appeal_Input, token: string
@@ -90,10 +121,9 @@ export async function sendAppeal(
     }
 }
 
-export async function withdrawAppeal(receiver: string, token: string): Promise<Service_Response<null>> {
+export async function withdrawAppeal(appeal_id: string, token: string): Promise<Service_Response<null>> {
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-    const appeal_id = `${auth_service_response.data.email}~${receiver}`;
     const appealRef = AppealCollection.doc(appeal_id);
     if (!appealRef) return {
         code: STATUS_CODES.NOT_FOUND,
@@ -106,12 +136,12 @@ export async function withdrawAppeal(receiver: string, token: string): Promise<S
             message: `No appeal found with id ${appeal_id}`,
         };
     }
-    if (appeal.status != APPEAL_STATUS.PENDING) {
+
+    if (appeal.sender != auth_service_response.data.email)
         return {
             code: STATUS_CODES.FORBIDDEN,
-            message: `Appeal ${appeal_id} cannot be withdrawn`,
-        };
-    }
+            message: "You are not authorized to withdraw this appeal",
+        }
 
     const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
     senderRef.update({
@@ -291,7 +321,12 @@ export async function rejectAppeal(appeal_id: string, token: string): Promise<Se
             message: `You are not authorized to reject appeal ${appeal_id}`,
         };
     }
-
+    if (appeal.status == APPEAL_STATUS.ACCEPTED) {
+        return {
+            code: STATUS_CODES.BAD_REQUEST,
+            message: `Appeal ${appeal_id} has already been accepted`,
+        };
+    };
     var message = "";
     if (appeal.type == APPEAL_TYPE.CONNECT)
         message = "Your appeal to connect with " + appeal.receiver + " has been rejected";
