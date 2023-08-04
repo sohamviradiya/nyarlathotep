@@ -1,7 +1,7 @@
 import { UserSearch } from "@/components/search.user";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 
-export default function Home() {
+export default function UsersPage() {
     return (
         <main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "20vh", flexDirection: "column", justifyContent: "top" }}>
             <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
