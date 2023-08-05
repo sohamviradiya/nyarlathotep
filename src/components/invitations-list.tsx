@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { APPEAL_STATUS, APPEAL_STATUS_TYPE, Appeal } from "@/server/appeal/appeal.module";
-import SkeletonBundle from "../skeleton-bundle";
+import SkeletonBundle from "./skeleton-bundle";
 
 export default function InvitationList({ invitations }: { invitations: string[] }) {
     return (<>
@@ -95,7 +95,7 @@ async function fetchAppeal(id: string, token: string) {
         },
     });
     const data = await res.json();
-    if (!data.payload) throw new Error(data.message);
+    if (!data.payload) return null;
     return data.payload.appeal;
 }
 
@@ -107,7 +107,7 @@ async function acceptAppeal(id: string, token: string) {
         },
     });
     const data = await res.json();
-    if (!data.payload) throw new Error(data.message);
+    if (!data.payload) return null;
 }
 
 async function rejectAppeal(id: string, token: string) {
@@ -118,7 +118,7 @@ async function rejectAppeal(id: string, token: string) {
         },
     });
     const data = await res.json();
-    if (!data.payload) throw new Error(data.message);
+    if (!data.payload) return null;
 };
 
 async function markAppeal(id: string, token: string) {
@@ -129,5 +129,5 @@ async function markAppeal(id: string, token: string) {
         },
     });
     const data = await res.json();
-    if (!data.payload) throw new Error(data.message);
+    if (!data.payload) return null;
 }

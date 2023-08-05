@@ -195,15 +195,36 @@ export async function getCommunityAnnouncements(id: string, token: string) {
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
     const announcements = await Promise.all(communityDoc.data()?.announcements.map(async (announcement: DocumentReference) => {
         return castToAnnouncement(await announcement.get());
-    }));
+    })) as Announcement[];
     return {
         code: STATUS_CODES.OK,
         message: `Announcements found for community ${id}`,
         data: {
-            announcements,
+            announcements: announcements.sort((a, b) => Number(b.time) - Number(a.time))
         }
     };
 }
+
+export async function getCommunityAppeals(id: string, token: string) {
+    const communityDoc = await CommunityCollection.doc(id).get();
+
+    const auth_service_response = await verifyClientToken(token);
+    if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
+    const community = castToCommunityPrivate(communityDoc);
+    const role_service_response = getMemberRole(community, auth_service_response.data.email);
+    if (!role_service_response.data) return role_service_response as Service_Response<null>;
+    if (role_service_response.data.role == MEMBER_ROLE.PARTICIPANT) return {
+        code: STATUS_CODES.FORBIDDEN,
+        message: `You are not allowed to view appeals in community ${community.name}`,
+    };
+    return {
+        code: STATUS_CODES.OK,
+        message: `Appeals found for community ${id}`,
+        data: {
+            appeals: community.appeals
+        }
+    };
+};
 
 export async function getMemberRoleWithToken(id: string, token: string) {
     const community = castToCommunityPrivate(await CommunityCollection.doc(id).get());
