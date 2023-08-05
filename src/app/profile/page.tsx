@@ -2,7 +2,7 @@
 
 import AppealList from "@/components/profile/appeal-list.profile";
 import UserInfo from "@/components/user/info.user";
-import InvitationList from "@/components/profile/invitation-list.profile";
+import InvitationList from "@/components/invitations-list";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Private, User_Public } from "@/server/user/user.module";
 import { useRouter } from "next/navigation";
