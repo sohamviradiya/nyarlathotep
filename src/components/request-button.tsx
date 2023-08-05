@@ -5,19 +5,19 @@ import { useEffect, useState } from "react";
 export default function CommunityRequestButton({ id, type }: { id: string, type: APPEAL_TYPE }) {
     const [isRequested, setIsRequested] = useState<boolean>(false);
     useEffect(() => {
-        const request_id = `${localStorage.getItem('email')}~${id}`;
+        const request_id = `${localStorage.getItem('email')}~${id}.${type}`;
         fetchRequest(request_id).then((request) => {
             if (request)
                 setIsRequested(true);
             else
                 setIsRequested(false);
         });
-    }, [id]);
+    }, [id, type]);
     if (localStorage.getItem('email') == id) {
         return <></>;
     }
     if (isRequested) {
-        return (<button style={{ backgroundColor: "darkblue", padding: "2rem", width: "50%" }} onClick={() => { withdrawRequest(id).then(() => { setIsRequested(false); }); }}>
+        return (<button style={{ backgroundColor: "darkblue", padding: "2rem", width: "50%" }} onClick={() => { withdrawRequest(id, type).then(() => { setIsRequested(false); }); }}>
             Withdraw Request
         </button >);
     }
@@ -78,11 +78,12 @@ async function sendRequest(id: string, type: APPEAL_TYPE) {
         return null;
     }
     const data = await response.json();
+    console.log(data);
     return data.payload.appeal;
 }
 
-async function withdrawRequest(id: string) {
-    const request_id = `${localStorage.getItem("email")}~${id}`;
+async function withdrawRequest(id: string, type: APPEAL_TYPE) {
+    const request_id = `${localStorage.getItem("email")}~${id}.${type}`;
     const response = await fetch(`/api/appeal/${request_id}`, {
         method: "DELETE",
         headers: {

@@ -61,7 +61,8 @@ export async function sendAppeal(
     const senderRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
     if (appeal.type == "CONNECT") {
         const receiverRef = await AdminApp.UserCollection.doc(appeal.receiver as string);
-        await AppealCollection.doc(`${senderRef.id}~${receiverRef.id}`).set({
+        const appeal_id = `${senderRef.id}~${receiverRef.id}.${appeal.type}`;
+        await AppealCollection.doc(appeal_id).set({
             sender: senderRef,
             type: appeal.type,
             status: APPEAL_STATUS.PENDING,
@@ -69,7 +70,7 @@ export async function sendAppeal(
             status_changed: Timestamp.now(),
             receiver: receiverRef,
         });
-        const appealRef = await AppealCollection.doc(`${senderRef.id}~${receiverRef.id}`);
+        const appealRef = await AppealCollection.doc(appeal_id);
         senderRef.update({
             appeals: FieldValue.arrayUnion(appealRef)
         });
@@ -93,7 +94,8 @@ export async function sendAppeal(
             const role_service_response = await getMemberRole(community, senderRef.id);
             if (!role_service_response.data) return role_service_response as Service_Response<null>;
         };
-        AppealCollection.doc(`${senderRef.id}~${receiverRef.id}.${appeal.type}`).set({
+        const appeal_id = `${senderRef.id}~${receiverRef.id}.${appeal.type}`;
+        AppealCollection.doc(appeal_id).set({
             sender: senderRef,
             type: appeal.type,
             status: APPEAL_STATUS.PENDING,
@@ -102,7 +104,7 @@ export async function sendAppeal(
             receiver: receiverRef,
         });
 
-        const appealRef = await AppealCollection.doc(`${senderRef.id}~${receiverRef.id}`);
+        const appealRef = await AppealCollection.doc(appeal_id);
 
         senderRef.update({
             appeals: FieldValue.arrayUnion(appealRef)
@@ -130,6 +132,7 @@ export async function withdrawAppeal(appeal_id: string, token: string): Promise<
         message: `No appeal found with id ${appeal_id}`,
     };
     const appeal = castToAppeal(await appealRef.get());
+    console.log(appeal_id);
     if (!appeal) {
         return {
             code: STATUS_CODES.NOT_FOUND,
@@ -137,11 +140,12 @@ export async function withdrawAppeal(appeal_id: string, token: string): Promise<
         };
     }
 
-    if (appeal.sender != auth_service_response.data.email)
+    if (appeal.sender != auth_service_response.data.email) {
         return {
             code: STATUS_CODES.FORBIDDEN,
             message: "You are not authorized to withdraw this appeal",
         }
+    }
 
     const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
     senderRef.update({

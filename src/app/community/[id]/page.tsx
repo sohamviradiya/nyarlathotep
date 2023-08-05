@@ -83,6 +83,6 @@ async function fetchRole(id: string) {
             },
         });
     const data = await response.json();
-    if (!data.payload.role) return null;
+    if (!data?.payload?.role) return null;
     return data.payload.role as MEMBER_ROLE_TYPE;
 };
