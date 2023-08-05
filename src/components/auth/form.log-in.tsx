@@ -5,7 +5,7 @@ import TextField from "@mui/material/TextField";
 import { Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel } from "@mui/material";
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import ErrorList from "./error-list.form";
+import ErrorList from "@/components/error-list";
 
 const client_side_errors = ["Password must be at least 8 characters long", "Invalid Email"];
 

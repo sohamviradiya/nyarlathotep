@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Stack, Divider, Box, Button } from "@mui/material";
-
+import { Stack, Divider, Box } from "@mui/material";
 export default function HomeLink() {
     const [loggedIn, setLoggedIn] = useState(false);
     useEffect(() => {

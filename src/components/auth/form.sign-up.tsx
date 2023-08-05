@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import ErrorList from "@/components/error-list.form";
+import ErrorList from "@/components/error-list";
 import { User_Input } from "@/server/user/user.module";
 import { Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
 import Visibility from '@mui/icons-material/Visibility';

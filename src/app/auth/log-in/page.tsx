@@ -1,4 +1,4 @@
-import Login from "@/components/form.log-in";
+import Login from "@/components/auth/form.log-in";
 import { Metadata } from "next";
 
 export default function Home() {
