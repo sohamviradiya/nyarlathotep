@@ -1,14 +1,10 @@
 import { castToContact } from "@/server/contact/contact.util";
-import AdminApp from "@/server/firebase/admin.init";
+import {  ContactCollection,MessageCollection,} from "@/server/firebase/admin.init";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { MESSAGE_DIRECTION, MESSAGE_STATUS, MESSAGE_STATUS_TYPE, Message } from "@/server/message/message.module";
 import { castToMessage, checkStatus } from "@/server/message/message.util";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { verifyClientToken } from "../auth/auth.service";
-const {
-    ContactCollection,
-    MessageCollection,
-} = AdminApp;
 
 export async function getMessage(message_id: string, token: string): Promise<Service_Response<null | { message: Message }>> {
     const auth_response = await verifyClientToken(token);

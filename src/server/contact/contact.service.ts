@@ -1,4 +1,4 @@
-import AdminApp from "@/server/firebase/admin.init";
+import { AppealCollection, ContactCollection, UserCollection } from "@/server/firebase/admin.init";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { Contact } from "@/server/contact/contact.module";
@@ -6,11 +6,6 @@ import { castInputToDocument, castToContact } from "@/server/contact/contact.uti
 import { verifyClientToken } from "../auth/auth.service";
 import { Appeal, APPEAL_STATUS } from "../appeal/appeal.module";
 
-const {
-    AppealCollection,
-    ContactCollection,
-    UserCollection
-} = AdminApp;
 
 export async function establishContact(appeal: Appeal): Promise<Service_Response<null | { contact: Contact }>> {
     const senderRef = UserCollection.doc(appeal.sender);

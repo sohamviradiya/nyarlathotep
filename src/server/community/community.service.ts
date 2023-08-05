@@ -1,4 +1,4 @@
-import AdminApp from "@/server/firebase/admin.init";
+import { CommunityCollection, UserCollection, AnnouncementCollection } from "@/server/firebase/admin.init";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { castToUser } from "@/server/user/user.util";
 import { Announcement, Announcement_Input, Community_Input, Community_Private, Community_Public, Member_Document, MEMBER_ROLE, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
@@ -8,11 +8,6 @@ import { sendAppeal } from "../appeal/appeal.service";
 import { APPEAL_TYPE_ENUM, Appeal } from "../appeal/appeal.module";
 import { verifyClientToken } from "../auth/auth.service";
 
-const {
-    CommunityCollection,
-    UserCollection,
-    AnnouncementCollection
-} = AdminApp;
 
 export async function searchCommunitiesByName(search_string: string, limit: number): Promise<Service_Response<null | { communities: Community_Public[] }>> {
     const documents = await CommunityCollection

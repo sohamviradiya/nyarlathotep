@@ -1,16 +1,7 @@
-import AdminApp from "@/server/firebase/admin.init";
+import { UserCollection, adminAuth } from "@/server/firebase/admin.init";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
-import {
-    User_Input,
-    User_Private,
-    User_Public,
-} from "@/server/user/user.module";
-import {
-    castInputToUser,
-    castToProfile,
-    castToUser,
-    castToUsers
-} from "@/server/user/user.util";
+import { User_Input, User_Private, User_Public, } from "@/server/user/user.module";
+import { castInputToUser, castToProfile, castToUser, castToUsers } from "@/server/user/user.util";
 import { Timestamp } from "firebase-admin/firestore";
 import { addCredentials, verifyClientToken } from "../auth/auth.service";
 import { Appeal } from "../appeal/appeal.module";
@@ -20,13 +11,9 @@ import { castToContact } from "../contact/contact.util";
 import { castToCommunity } from "../community/community.util";
 import { Community_Public } from "../community/community.module";
 
-const {
-    UserCollection,
-    adminAuth,
-} = AdminApp;
 
 export async function searchUsersByName(search_string: string, limit: number): Promise<Service_Response<null | { users: User_Public[] }>> {
-    const documents = await AdminApp.UserCollection
+    const documents = await UserCollection
         .where("name", ">=", search_string)
         .where("name", "<=", search_string + "\uf8ff")
         .limit(limit)
@@ -52,10 +39,10 @@ export async function getProfileFromToken(token: string): Promise<Service_Respon
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const document = await AdminApp.UserCollection.doc(auth_service_response.data.email).get();
-    
-    
-    
+    const document = await UserCollection.doc(auth_service_response.data.email).get();
+
+
+
     const communities = await Promise.all((document.data()?.communities as FirebaseFirestore.DocumentReference[]).map(async (ref) => {
         return castToCommunity(await ref.get());
     })) as Community_Public[];
@@ -77,7 +64,7 @@ export async function getAppealsFromToken(token: string): Promise<Service_Respon
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const document = await AdminApp.UserCollection.doc(auth_service_response.data.email).get();
+    const document = await UserCollection.doc(auth_service_response.data.email).get();
     if (!document.exists)
         return {
             code: STATUS_CODES.NOT_FOUND,
@@ -101,7 +88,7 @@ export async function getContactsFromToken(token: string): Promise<Service_Respo
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const document = await AdminApp.UserCollection.doc(auth_service_response.data.email).get();
+    const document = await UserCollection.doc(auth_service_response.data.email).get();
     if (!document.exists)
         return {
             code: STATUS_CODES.NOT_FOUND,
@@ -130,12 +117,12 @@ export async function addUser(input: User_Input): Promise<Service_Response<null 
     if (!credentials_service_response.data)
         return credentials_service_response as Service_Response<null>;
     const user = castInputToUser(input);
-    await AdminApp.UserCollection.doc(user.email).set({
+    await UserCollection.doc(user.email).set({
         ...user,
         joined: Timestamp.now(),
         last_online: Timestamp.now(),
     });
-    const document = await AdminApp.UserCollection.doc(user.email).get();
+    const document = await UserCollection.doc(user.email).get();
     const new_user: User_Private = castToProfile(document);
     return {
         code: STATUS_CODES.OK,
@@ -150,7 +137,7 @@ export async function updateUser(input: User_Input, token: string): Promise<Serv
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const userRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
+    const userRef = await UserCollection.doc(auth_service_response.data.email);
     if (!userRef) {
         return {
             code: STATUS_CODES.NOT_FOUND,
@@ -172,7 +159,7 @@ export async function deleteUser(token: string): Promise<Service_Response<null>>
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data)
         return auth_service_response as Service_Response<null>;
-    const userRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
+    const userRef = await UserCollection.doc(auth_service_response.data.email);
     await userRef.delete();
     await adminAuth.deleteUser(auth_service_response.data.uid);
     return {
@@ -182,7 +169,7 @@ export async function deleteUser(token: string): Promise<Service_Response<null>>
 }
 
 export async function getUserByID(id: string): Promise<Service_Response<null | { user: User_Public }>> {
-    const document = await AdminApp.UserCollection.doc(id).get();
+    const document = await UserCollection.doc(id).get();
     if (!document.exists) {
         return {
             code: STATUS_CODES.NOT_FOUND,

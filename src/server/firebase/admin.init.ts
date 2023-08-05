@@ -31,7 +31,7 @@ const AppealCollection = adminDb.collection("Appeals");
 const MessageCollection = adminDb.collection("Messages");
 const ContactCollection = adminDb.collection("Contacts");
 const AnnouncementCollection = adminDb.collection("Announcements");
-const AdminApp = {
+export {
     adminAuth,
     UserCollection,
     CommunityCollection,
@@ -40,5 +40,3 @@ const AdminApp = {
     ContactCollection,
     AnnouncementCollection,
 };
-
-export default AdminApp;

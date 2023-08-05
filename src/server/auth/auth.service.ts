@@ -5,20 +5,17 @@ import {
     updatePassword,
     UserCredential,
 } from "firebase/auth";
-import AdminApp from "@/server/firebase/admin.init";
-import ClientApp from "@/server/firebase/client.init";
+import { UserCollection, adminAuth } from "@/server/firebase/admin.init";
+import { clientAuth } from "@/server/firebase/client.init";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { Credential, Verification, UpdateCredential } from "@/server/auth/auth.module";
 import { Timestamp } from "firebase-admin/firestore";
 
-const {
-    UserCollection,
-} = AdminApp;
 
 export async function verifyClientToken(token: string): Promise<Service_Response<{ uid: string; email: string } | null>> {
-    const userCredential: UserCredential = await signInWithCustomToken(ClientApp.clientAuth, token);
-    signOut(ClientApp.clientAuth);
+    const userCredential: UserCredential = await signInWithCustomToken(clientAuth, token);
+    signOut(clientAuth);
     if (!userCredential?.user?.email) throw new Error("Invalid Token");
     await UserCollection.doc(userCredential.user.email).update({
         last_online: Timestamp.now(),
@@ -36,13 +33,13 @@ export async function verifyClientToken(token: string): Promise<Service_Response
 export async function generateClientToken(credential: Credential): Promise<Service_Response<Verification | null>> {
     const { email, password } = credential;
     const userCredential: UserCredential = await signInWithEmailAndPassword(
-        ClientApp.clientAuth,
+        clientAuth,
         email,
         password
     );
     const uid = userCredential.user.uid;
-    const token = await AdminApp.adminAuth.createCustomToken(uid);
-    signOut(ClientApp.clientAuth);
+    const token = await adminAuth.createCustomToken(uid);
+    signOut(clientAuth);
     return {
         code: STATUS_CODES.OK,
         message: `Token Generated for ${email}`,
@@ -56,9 +53,9 @@ export async function generateClientToken(credential: Credential): Promise<Servi
 };
 
 export async function invalidateClientToken(token: string): Promise<Service_Response<null>> {
-    const userCredential: UserCredential = await signInWithCustomToken(ClientApp.clientAuth, token);
-    await AdminApp.adminAuth.revokeRefreshTokens(userCredential.user.uid);
-    signOut(ClientApp.clientAuth);
+    const userCredential: UserCredential = await signInWithCustomToken(clientAuth, token);
+    await adminAuth.revokeRefreshTokens(userCredential.user.uid);
+    signOut(clientAuth);
     return {
         code: STATUS_CODES.OK,
         message: `Token Invalidated for ${userCredential.user.email}`,
@@ -68,7 +65,7 @@ export async function invalidateClientToken(token: string): Promise<Service_Resp
 export async function addCredentials(credential: Credential): Promise<Service_Response<Verification | null>> {
     const { email, password } = credential;
 
-    const user = await AdminApp.UserCollection.doc(email).get();
+    const user = await UserCollection.doc(email).get();
     if (user.exists) {
         return {
             code: STATUS_CODES.BAD_REQUEST,
@@ -81,13 +78,13 @@ export async function addCredentials(credential: Credential): Promise<Service_Re
             message: "Invalid Password",
         };
     const userCredential: UserCredential = await createUserWithEmailAndPassword(
-        ClientApp.clientAuth,
+        clientAuth,
         email,
         password
     );
     const uid = userCredential.user.uid;
-    const token = await AdminApp.adminAuth.createCustomToken(uid);
-    signOut(ClientApp.clientAuth);
+    const token = await adminAuth.createCustomToken(uid);
+    signOut(clientAuth);
     return {
         code: STATUS_CODES.OK,
         message: `Credentials Added for ${email}`,
@@ -101,11 +98,11 @@ export async function addCredentials(credential: Credential): Promise<Service_Re
 };
 
 export async function updateCredentials({ email, newPassword, currentPassword }: UpdateCredential): Promise<Service_Response<Verification | null>> {
-    const userCredential: UserCredential = await signInWithEmailAndPassword(ClientApp.clientAuth, email, currentPassword);
-    signOut(ClientApp.clientAuth);
+    const userCredential: UserCredential = await signInWithEmailAndPassword(clientAuth, email, currentPassword);
+    signOut(clientAuth);
     const uid = userCredential.user.uid;
     await updatePassword(userCredential.user, newPassword);
-    const token = await AdminApp.adminAuth.createCustomToken(uid);
+    const token = await adminAuth.createCustomToken(uid);
     return {
         code: STATUS_CODES.OK,
         message: `Credentials Updated for ${email}`,

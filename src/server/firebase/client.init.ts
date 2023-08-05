@@ -15,12 +15,9 @@ if (getApps().length > 0) {
 const clientAuth = getAuth(clientApp);
 const clientDb = getFirestore(clientApp);
 
-export default {
+export {
     clientAuth,
     clientDb,
-} as {
-    clientAuth: ReturnType<typeof getAuth>,
-    clientDb: ReturnType<typeof getFirestore>,
 };
 
 

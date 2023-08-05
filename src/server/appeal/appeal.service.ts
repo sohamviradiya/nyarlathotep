@@ -10,15 +10,11 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { establishContact } from "@/server/contact/contact.service";
 import { checkModerationAccessWithToken } from "@/server/community/community.service";
 import { castToCommunityPrivate, getMemberRole } from "@/server/community/community.util";
-import { Announcement, Announcement_Document, MEMBER_ROLE, Member_Document } from "@/server/community/community.module";
+import { MEMBER_ROLE, Member_Document } from "@/server/community/community.module";
 import { verifyClientToken } from "@/server/auth/auth.service";
-import AdminApp from "@/server/firebase/admin.init";
+import { AppealCollection, AnnouncementCollection, UserCollection, CommunityCollection } from "@/server/firebase/admin.init";
 import { Contact } from "../contact/contact.module";
 
-const {
-    AppealCollection,
-    AnnouncementCollection,
-} = AdminApp;
 
 export async function getAppeal(
     id: string, token: string
@@ -58,9 +54,9 @@ export async function sendAppeal(
 }>> {
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-    const senderRef = await AdminApp.UserCollection.doc(auth_service_response.data.email);
+    const senderRef = await UserCollection.doc(auth_service_response.data.email);
     if (appeal.type == "CONNECT") {
-        const receiverRef = await AdminApp.UserCollection.doc(appeal.receiver as string);
+        const receiverRef = await UserCollection.doc(appeal.receiver as string);
         const appeal_id = `${senderRef.id}~${receiverRef.id}.${appeal.type}`;
         await AppealCollection.doc(appeal_id).set({
             sender: senderRef,
@@ -88,7 +84,7 @@ export async function sendAppeal(
         };
     }
     else {
-        const receiverRef = await AdminApp.CommunityCollection.doc(appeal.receiver as string);
+        const receiverRef = await CommunityCollection.doc(appeal.receiver as string);
         if (appeal.type == "MODERATE" || appeal.type == "ANNOUNCE") {
             const community = castToCommunityPrivate(await receiverRef.get());
             const role_service_response = await getMemberRole(community, senderRef.id);
@@ -103,15 +99,15 @@ export async function sendAppeal(
             status_changed: Timestamp.now(),
             receiver: receiverRef,
         });
-
+        console.log(appeal_id);
         const appealRef = await AppealCollection.doc(appeal_id);
-
         senderRef.update({
             appeals: FieldValue.arrayUnion(appealRef)
         });
         receiverRef.update({
             appeals: FieldValue.arrayUnion(appealRef)
         });
+
 
         return {
             code: STATUS_CODES.OK,
@@ -132,7 +128,6 @@ export async function withdrawAppeal(appeal_id: string, token: string): Promise<
         message: `No appeal found with id ${appeal_id}`,
     };
     const appeal = castToAppeal(await appealRef.get());
-    console.log(appeal_id);
     if (!appeal) {
         return {
             code: STATUS_CODES.NOT_FOUND,
@@ -147,19 +142,19 @@ export async function withdrawAppeal(appeal_id: string, token: string): Promise<
         }
     }
 
-    const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
+    const senderRef = await UserCollection.doc(appeal.sender as string);
     senderRef.update({
         appeals: FieldValue.arrayRemove(appealRef)
     });
 
     if (appeal.type == APPEAL_TYPE_ENUM.CONNECT) {
-        const receiverRef = await AdminApp.UserCollection.doc(appeal.receiver as string);
+        const receiverRef = await UserCollection.doc(appeal.receiver as string);
         receiverRef.update({
             invitations: FieldValue.arrayRemove(appealRef)
         });
     }
     else {
-        const receiverRef = await AdminApp.CommunityCollection.doc(appeal.receiver as string);
+        const receiverRef = await CommunityCollection.doc(appeal.receiver as string);
         receiverRef.update({
             appeals: FieldValue.arrayRemove(appealRef)
         });
@@ -231,13 +226,13 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
         data = contact_service_response.data;
     }
     else {
-        const communityRef = AdminApp.CommunityCollection.doc(appeal.receiver as string);
+        const communityRef = CommunityCollection.doc(appeal.receiver as string);
         const community = castToCommunityPrivate(await communityRef.get());
 
         const auth_service_response = await checkModerationAccessWithToken(community, token);
         if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
 
-        const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
+        const senderRef = await UserCollection.doc(appeal.sender as string);
 
         if (appeal.type == APPEAL_TYPE_ENUM.JOIN) {
             message = "Your appeal to join " + community.name + " has been accepted";
