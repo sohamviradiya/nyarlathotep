@@ -1,4 +1,4 @@
-import { CommunitySearch } from "@/components/search.community";
+import { CommunitySearch } from "@/components/community/search.community";
 import { Metadata } from "next";
 
 export default function Home() {
@@ -11,12 +11,6 @@ export default function Home() {
         </main>
     )
 }
-
-type Props = {
-    params: { id: string }
-    searchParams: { [key: string]: string | string[] | undefined }
-}
-
 export const metadata: Metadata = {
     title: "NyarlaThotep Community Search",
     description: "A social media platform",

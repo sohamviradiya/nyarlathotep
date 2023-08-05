@@ -1,8 +1,8 @@
 "use client";
 import MemberList from "@/components/community/member-list.community";
 import SkeletonBundle from "@/components/skeleton-bundle";
-import { Community_Public } from "@/server/community/community.module";
-import { Metadata, ResolvingMetadata } from "next";
+import { Community_Public, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function Community({ params }: { params: { id: string } }) {
@@ -20,6 +20,7 @@ export default function Community({ params }: { params: { id: string } }) {
                 <h3>{community.description}</h3>
                 <h3>Since {new Date(community.founded).toLocaleDateString()}</h3>
             </div>
+            <CommunityAction id={community.id} />
             <div style={{ backgroundColor: "darkblue", padding: "2rem", width: "70%" }}>
                 <h2>Members: </h2>
                 <MemberList members={community.members} />
@@ -32,13 +33,52 @@ export default function Community({ params }: { params: { id: string } }) {
     );
 }
 
-type Props = {
-    params: { id: string }
-    searchParams: { [key: string]: string | string[] | undefined }
-}
+function CommunityAction({ id }: { id: string }) {
+    const [role, setRole] = useState<MEMBER_ROLE_TYPE | null>(null);
+    useEffect(() => {
+        fetchRole(id).then((role) => setRole(role));
+    }, [id]);
+    if (!role || role == "BANNED") return null;
+    if (role == "PARTICIPANT") {
+        return (
+            <>
+                <Link href={`/community/${id}/announcements`}>
+                    Announcements
+                </Link>
+            </>
+        );
+    }
+    else if (role == "ADMIN" || role == "MODERATOR") {
+        return (
+            <>
+                <Link href={`/community/${id}/announcements`}>
+                    Announcements
+                </Link>
+                <Link href={`/community/${id}/appeals`}>
+                    Join Requests
+                </Link>
+            </>
+        );
+    }
+};
+
 
 export async function fetchCommunity({ id }: { id: string }): Promise<Community_Public> {
     const res = await fetch(`/api/community/${id}`);
     const community = (await res.json()).payload.community;
     return community;
 }
+
+async function fetchRole(id: string) {
+    const response = await fetch(`/api/community/${id}/role`,
+        {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem('token')}`
+            },
+        });
+    const data = await response.json();
+    if (!data.payload.role) return null;
+    return data.payload.role as MEMBER_ROLE_TYPE;
+};
