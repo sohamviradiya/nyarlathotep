@@ -5,7 +5,7 @@ import { Announcement, Announcement_Input, Community_Input, Community_Private, C
 import { castToAnnouncement, castToCommunity, castToCommunityPrivate, checkModerationAccess, getMemberRole } from "@/server/community/community.util";
 import { DocumentReference, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { sendAppeal } from "../appeal/appeal.service";
-import { APPEAL_TYPE, Appeal } from "../appeal/appeal.module";
+import { APPEAL_TYPE_ENUM, Appeal } from "../appeal/appeal.module";
 import { verifyClientToken } from "../auth/auth.service";
 
 const {
@@ -155,7 +155,7 @@ export async function announceInCommunity(announcement: Announcement_Input, toke
     if (role_service_response.data.role == MEMBER_ROLE.PARTICIPANT) {
         return await sendAppeal({
             message: announcement.content,
-            type: APPEAL_TYPE.ANNOUNCE,
+            type: APPEAL_TYPE_ENUM.ANNOUNCE,
             receiver: community_id
         }, token)
     }

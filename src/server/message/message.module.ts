@@ -5,6 +5,8 @@ export enum MESSAGE_DIRECTION {
     OUTGOING = "OUTGOING",
 };
 
+export type MESSAGE_DIRECTION_TYPE = keyof typeof MESSAGE_DIRECTION;
+
 export enum MESSAGE_STATUS {
     DRAFT = "DRAFT",
     SENT = "SENT",

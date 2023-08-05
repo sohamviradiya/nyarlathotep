@@ -1,5 +1,5 @@
 import { extractToken } from "@/server/auth/auth.util";
-import { APPEAL_TYPE } from "@/server/appeal/appeal.module";
+import { APPEAL_TYPE_ENUM } from "@/server/appeal/appeal.module";
 import { sendAppeal, withdrawAppeal } from "@/server/appeal/appeal.service";
 import { BadReq, ApiResponse, Unauthorized } from "@/server/response/response.util";
 import { getUserByID } from "@/server/user/user.service";
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     try {
         return ApiResponse(await sendAppeal({
             receiver: params.id,
-            type: APPEAL_TYPE.CONNECT,
+            type: APPEAL_TYPE_ENUM.CONNECT,
             message: message || "",
         }, token));
     }

@@ -2,11 +2,11 @@
 import { useState, useEffect } from "react";
 import { Contact } from "@/server/contact/contact.module";
 import MessageComponent from "@/components/contact/message.contact";
-import { MESSAGE_DIRECTION } from "@/server/message/message.module";
+import { MESSAGE_DIRECTION_TYPE } from "@/server/message/message.module";
 import MessageInput from "@/components/contact/input.contact";
 export default function Contact({ params }: { params: { id: string } }) {
     const [contact, setContact] = useState<Contact | null>(null);
-    const [direction, setDirection] = useState<keyof typeof MESSAGE_DIRECTION>("INCOMING");
+    const [direction, setDirection] = useState<MESSAGE_DIRECTION_TYPE>("INCOMING");
     useEffect(() => {
         fetchContact(params.id).then((contact) => setContact(contact));
     }, [params.id]);

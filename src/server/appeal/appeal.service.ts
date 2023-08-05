@@ -1,6 +1,6 @@
 import {
     APPEAL_STATUS,
-    APPEAL_TYPE,
+    APPEAL_TYPE_ENUM,
     Appeal,
     Appeal_Input,
 } from "@/server/appeal/appeal.module";
@@ -148,7 +148,7 @@ export async function withdrawAppeal(appeal_id: string, token: string): Promise<
         appeals: FieldValue.arrayRemove(appealRef)
     });
 
-    if (appeal.type == APPEAL_TYPE.CONNECT) {
+    if (appeal.type == APPEAL_TYPE_ENUM.CONNECT) {
         const receiverRef = await AdminApp.UserCollection.doc(appeal.receiver as string);
         receiverRef.update({
             invitations: FieldValue.arrayRemove(appealRef)
@@ -209,7 +209,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
     const appeal = castToAppeal(await appealRef.get());
     var message = "";
     var data = null;
-    if (appeal.type == APPEAL_TYPE.CONNECT) {
+    if (appeal.type == APPEAL_TYPE_ENUM.CONNECT) {
         const auth_service_response = await verifyClientToken(token);
         if (!auth_service_response.data)
             return auth_service_response as Service_Response<null>;
@@ -235,7 +235,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
 
         const senderRef = await AdminApp.UserCollection.doc(appeal.sender as string);
 
-        if (appeal.type == APPEAL_TYPE.JOIN) {
+        if (appeal.type == APPEAL_TYPE_ENUM.JOIN) {
             message = "Your appeal to join " + community.name + " has been accepted";
             await communityRef.update({
                 members: FieldValue.arrayRemove({
@@ -251,7 +251,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
             });
 
         }
-        else if (appeal.type == APPEAL_TYPE.MODERATE) {
+        else if (appeal.type == APPEAL_TYPE_ENUM.MODERATE) {
             message = "Your appeal to moderate " + community.name + " has been accepted";
 
             await communityRef.update({
@@ -268,7 +268,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
                 } as Member_Document)
             });
         }
-        else if (appeal.type == APPEAL_TYPE.ANNOUNCE) {
+        else if (appeal.type == APPEAL_TYPE_ENUM.ANNOUNCE) {
             const role_service_response = await getMemberRole(community, senderRef.id);
             if (!role_service_response.data) return role_service_response as Service_Response<null>;
 
@@ -328,13 +328,13 @@ export async function rejectAppeal(appeal_id: string, token: string): Promise<Se
         };
     };
     var message = "";
-    if (appeal.type == APPEAL_TYPE.CONNECT)
+    if (appeal.type == APPEAL_TYPE_ENUM.CONNECT)
         message = "Your appeal to connect with " + appeal.receiver + " has been rejected";
-    else if (appeal.type == APPEAL_TYPE.JOIN)
+    else if (appeal.type == APPEAL_TYPE_ENUM.JOIN)
         message = "Your appeal to join " + appeal.receiver + " has been rejected";
-    else if (appeal.type == APPEAL_TYPE.MODERATE)
+    else if (appeal.type == APPEAL_TYPE_ENUM.MODERATE)
         message = "Your appeal to moderate " + appeal.receiver + " has been rejected";
-    else if (appeal.type == APPEAL_TYPE.ANNOUNCE)
+    else if (appeal.type == APPEAL_TYPE_ENUM.ANNOUNCE)
         message = "Your appeal to announce in " + appeal.receiver + " has been rejected";
     else
         return {

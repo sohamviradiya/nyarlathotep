@@ -5,19 +5,21 @@ export enum APPEAL_STATUS {
     REJECTED = "REJECTED",
 };
 
-export enum APPEAL_TYPE {
+export enum APPEAL_TYPE_ENUM {
     JOIN = "JOIN",
     MODERATE = "MODERATE",
     CONNECT = "CONNECT",
     ANNOUNCE = "ANNOUNCE",
 };
 
+export type APPEAL_TYPE = keyof typeof APPEAL_TYPE_ENUM;
+
 export type APPEAL_STATUS_TYPE = keyof typeof APPEAL_STATUS;
 
 export type Appeal = {
     id: string;
     sender: string;
-    type: keyof typeof APPEAL_TYPE;
+    type: APPEAL_TYPE;
     status: APPEAL_STATUS_TYPE;
     message: string;
     status_changed: Date;

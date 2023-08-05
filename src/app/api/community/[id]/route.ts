@@ -1,6 +1,6 @@
 import { extractToken } from "@/server/auth/auth.util";
 import { getCommunityByID } from "@/server/community/community.service";
-import { APPEAL_TYPE } from "@/server/appeal/appeal.module";
+import { APPEAL_TYPE_ENUM } from "@/server/appeal/appeal.module";
 import { sendAppeal } from "@/server/appeal/appeal.service";
 import { BadReq, ApiResponse, Unauthorized } from "@/server/response/response.util";
 import { NextRequest } from "next/server";
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const body = await request.json();
     return ApiResponse(await sendAppeal({
         receiver: params.id,
-        type: APPEAL_TYPE.JOIN,
+        type: APPEAL_TYPE_ENUM.JOIN,
         message: body.message || "User wants to join your community",
     }, token));
 }
