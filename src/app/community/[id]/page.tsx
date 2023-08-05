@@ -1,5 +1,6 @@
 "use client";
 import MemberList from "@/components/community/member-list.community";
+import CommunityRequestButton from "@/components/request-button";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Community_Public, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
 import Link from "next/link";
@@ -38,13 +39,16 @@ function CommunityAction({ id }: { id: string }) {
     useEffect(() => {
         fetchRole(id).then((role) => setRole(role));
     }, [id]);
-    if (!role || role == "BANNED") return null;
+    if (!role || role == "BANNED") {
+        return <CommunityRequestButton id={id} type="JOIN" />;
+    }
     if (role == "PARTICIPANT") {
         return (
             <>
                 <Link href={`/community/${id}/announcements`}>
                     Announcements
                 </Link>
+                <CommunityRequestButton id={id} type={"MODERATE"} />
             </>
         );
     }
@@ -63,7 +67,7 @@ function CommunityAction({ id }: { id: string }) {
 };
 
 
-export async function fetchCommunity({ id }: { id: string }): Promise<Community_Public> {
+async function fetchCommunity({ id }: { id: string }): Promise<Community_Public> {
     const res = await fetch(`/api/community/${id}`);
     const community = (await res.json()).payload.community;
     return community;
