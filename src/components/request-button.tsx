@@ -1,10 +1,12 @@
 "use client";
-import { APPEAL_TYPE, APPEAL_TYPE_ENUM } from "@/server/appeal/appeal.module";
+import { APPEAL_TYPE } from "@/server/appeal/appeal.module";
 import { useEffect, useState } from "react";
 
 export default function CommunityRequestButton({ id, type }: { id: string, type: APPEAL_TYPE }) {
     const [isRequested, setIsRequested] = useState<boolean>(false);
     useEffect(() => {
+        if (localStorage.getItem('email') == id)
+            return;
         const request_id = `${localStorage.getItem('email')}~${id}.${type}`;
         fetchRequest(request_id).then((request) => {
             if (request)
@@ -78,7 +80,6 @@ async function sendRequest(id: string, type: APPEAL_TYPE) {
         return null;
     }
     const data = await response.json();
-    console.log(data);
     return data.payload.appeal;
 }
 
