@@ -16,7 +16,11 @@ import { Timestamp } from "firebase-admin/firestore";
 export async function verifyClientToken(token: string): Promise<Service_Response<{ uid: string; email: string } | null>> {
     const userCredential: UserCredential = await signInWithCustomToken(clientAuth, token);
     signOut(clientAuth);
-    if (!userCredential?.user?.email) throw new Error("Invalid Token");
+    if (!userCredential?.user?.email)
+        return {
+            code: STATUS_CODES.UNAUTHORIZED,
+            message: "Invalid Token",
+        };
     await UserCollection.doc(userCredential.user.email).update({
         last_online: Timestamp.now(),
     });

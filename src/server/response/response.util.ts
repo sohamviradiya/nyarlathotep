@@ -22,3 +22,10 @@ export function Unauthorized(error: { message: string }) : Service_Response<null
         message: error.message,
     }
 }
+
+export function Forbidden(error: { message: string }) : Service_Response<null> {
+    return {
+        code: STATUS_CODES.FORBIDDEN,
+        message: error.message,
+    }
+}

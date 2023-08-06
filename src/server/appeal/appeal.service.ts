@@ -14,6 +14,7 @@ import { MEMBER_ROLE, Member_Document } from "@/server/community/community.modul
 import { verifyClientToken } from "@/server/auth/auth.service";
 import { AppealCollection, AnnouncementCollection, UserCollection, CommunityCollection } from "@/server/firebase/admin.init";
 import { Contact } from "../contact/contact.module";
+import { Forbidden } from "../response/response.util";
 
 
 export async function getAppeal(
@@ -32,12 +33,8 @@ export async function getAppeal(
         }
     };
     const appeal = castToAppeal(await appealRef.get());
-    if (appeal.sender != auth_service_response.data.email && appeal.receiver != auth_service_response.data.email) {
-        return {
-            code: STATUS_CODES.FORBIDDEN,
-            message: "You are not authorized to view this appeal",
-        }
-    }
+    if (appeal.sender != auth_service_response.data.email && appeal.receiver != auth_service_response.data.email)
+        return Forbidden({ message: "You are not authorized to view this appeal" });
     return {
         code: STATUS_CODES.OK,
         message: "Appeal fetched",
@@ -134,12 +131,8 @@ export async function withdrawAppeal(appeal_id: string, token: string): Promise<
         };
     }
 
-    if (appeal.sender != auth_service_response.data.email) {
-        return {
-            code: STATUS_CODES.FORBIDDEN,
-            message: "You are not authorized to withdraw this appeal",
-        }
-    }
+    if (appeal.sender != auth_service_response.data.email)
+        return Forbidden({ message: "You are not authorized to withdraw this appeal" });
 
     const senderRef = await UserCollection.doc(appeal.sender as string);
     senderRef.update({
@@ -178,12 +171,8 @@ export async function markAppeal(appeal_id: string, token: string): Promise<Serv
     }
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-    if (auth_service_response.data.email != appeal.receiver) {
-        return {
-            code: STATUS_CODES.FORBIDDEN,
-            message: `You are not authorized to mark appeal ${appeal_id}`,
-        };
-    }
+    if (auth_service_response.data.email != appeal.receiver)
+        return Forbidden({ message: "You are not authorized to mark this appeal" });
     else {
         await appealRef.update({
             status: APPEAL_STATUS.UNDER_REVIEW,
@@ -212,10 +201,7 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
         if (!auth_service_response.data)
             return auth_service_response as Service_Response<null>;
         if (auth_service_response.data.email != appeal.receiver)
-            return {
-                code: STATUS_CODES.FORBIDDEN,
-                message: `You are not authorized to confirm appeal ${appeal_id}`,
-            };
+            return Forbidden({ message: "You are not authorized to accept this appeal" });
         message = "Your appeal to connect with " + appeal.receiver + " has been accepted";
 
         const contact_service_response = await establishContact(appeal);
@@ -313,12 +299,8 @@ export async function rejectAppeal(appeal_id: string, token: string): Promise<Se
     }
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-    if (auth_service_response.data.email == appeal.receiver) {
-        return {
-            code: STATUS_CODES.FORBIDDEN,
-            message: `You are not authorized to reject appeal ${appeal_id}`,
-        };
-    }
+    if (auth_service_response.data.email == appeal.receiver)
+        return Forbidden({ message: `You are not authorized to reject this appeal ${appeal_id}` });
     if (appeal.status == APPEAL_STATUS.ACCEPTED) {
         return {
             code: STATUS_CODES.BAD_REQUEST,

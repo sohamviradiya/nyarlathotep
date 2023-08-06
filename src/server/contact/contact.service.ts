@@ -5,6 +5,7 @@ import { Contact } from "@/server/contact/contact.module";
 import { castInputToDocument, castToContact } from "@/server/contact/contact.util";
 import { verifyClientToken } from "../auth/auth.service";
 import { Appeal, APPEAL_STATUS } from "../appeal/appeal.module";
+import { Forbidden } from "../response/response.util";
 
 
 export async function establishContact(appeal: Appeal): Promise<Service_Response<null | { contact: Contact }>> {
@@ -38,10 +39,7 @@ export async function deleteContact(contact_id: string, token: string): Promise<
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
     if (contact.sender !== auth_service_response.data.email && contact.receiver !== auth_service_response.data.email)
-        return {
-            code: STATUS_CODES.UNAUTHORIZED,
-            message: "Unauthorized",
-        };
+        return Forbidden({ message: "You are not authorized to delete this contact" });
 
     await UserCollection.doc(contact.sender).update({
         contacts: FieldValue.arrayRemove(contactRef),
@@ -86,10 +84,7 @@ export async function getContact(contact_id: string, token: string): Promise<Ser
         messages.outgoing = contact.messages.incoming as string[];
     }
     else
-        return {
-            code: STATUS_CODES.UNAUTHORIZED,
-            message: "Unauthorized",
-        };
+        return Forbidden({ message: `You are not a part of this contact ${contact_id}` });
 
     return {
         code: STATUS_CODES.OK,

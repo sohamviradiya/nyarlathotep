@@ -1,7 +1,7 @@
 import { MESSAGE_STATUS, MESSAGE_STATUS_TYPE } from "@/server/message/message.module";
 import { STATUS_CODES, Service_Response } from "@/server/response/response.module";
 import { Message } from "@/server/message/message.module";
-import { Unauthorized } from "../response/response.util";
+import { Forbidden } from "../response/response.util";
 import { Contact } from "../contact/contact.module";
 import { DocumentReference } from "firebase-admin/firestore";
 export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Message {
@@ -27,16 +27,16 @@ export async function checkStatus(message: Message, contact: Contact, user: stri
     const received_status_array = [MESSAGE_STATUS.READ, MESSAGE_STATUS.APPROVED, MESSAGE_STATUS.REJECTED];
 
     if (contact.sender != user && contact.receiver != user)
-        return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
+        return Forbidden({ message: `You are not authorized to update message to ${new_status}` });
 
     if (message.status == MESSAGE_STATUS.DRAFT && (new_status != MESSAGE_STATUS.SENT || contact.sender != user))
-        return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
+        return Forbidden({ message: `You are not authorized to update message to ${new_status}` });
 
     if (message.status in received_status_array && (!(new_status in received_status_array) || contact.receiver != user))
-        return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
+        return Forbidden({ message: `You are not authorized to update message to ${new_status}` });
 
     if (message.status == MESSAGE_STATUS.SENT && (new_status != MESSAGE_STATUS.READ || contact.receiver != user))
-        return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
+        return Forbidden({ message: `You are not authorized to update message to ${new_status}` });
 
     return {
         code: STATUS_CODES.OK,

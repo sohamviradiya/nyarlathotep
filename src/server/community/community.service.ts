@@ -7,6 +7,7 @@ import { DocumentReference, FieldValue, Timestamp } from "firebase-admin/firesto
 import { sendAppeal } from "../appeal/appeal.service";
 import { APPEAL_TYPE_ENUM, Appeal } from "../appeal/appeal.module";
 import { verifyClientToken } from "../auth/auth.service";
+import { Forbidden } from "../response/response.util";
 
 
 export async function searchCommunitiesByName(search_string: string, limit: number): Promise<Service_Response<null | { communities: Community_Public[] }>> {
@@ -154,12 +155,9 @@ export async function announceInCommunity(announcement: Announcement_Input, toke
             receiver: community_id
         }, token)
     }
-    if (role_service_response.data.role == MEMBER_ROLE.BANNED) {
-        return {
-            code: STATUS_CODES.FORBIDDEN,
-            message: `You are not allowed to post announcements in community ${community.name}`,
-        }
-    }
+    if (role_service_response.data.role == MEMBER_ROLE.BANNED)
+        return Forbidden({ message: `You are not allowed to post announcements in community ${community.name}`, });
+
     const id = `${community.id}.${Timestamp.now().seconds}`;
     await AnnouncementCollection.doc(id).set({
         id,
@@ -167,15 +165,16 @@ export async function announceInCommunity(announcement: Announcement_Input, toke
         user: userRef,
         time: Timestamp.now()
     });
+    const announcementRef = AnnouncementCollection.doc(id);
     communityRef.update({
-        announcements: FieldValue.arrayUnion(AnnouncementCollection.doc(id))
+        announcements: FieldValue.arrayUnion(announcementRef)
     });
 
     return {
         code: STATUS_CODES.OK,
         message: `Announcement posted in community ${community.name}`,
         data: {
-            announcement: castToAnnouncement(await AnnouncementCollection.doc(id).get())
+            announcement: castToAnnouncement(await announcementRef.get())
         }
     }
 }
@@ -208,10 +207,9 @@ export async function getCommunityAppeals(id: string, token: string) {
     const community = castToCommunityPrivate(communityDoc);
     const role_service_response = getMemberRole(community, auth_service_response.data.email);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
-    if (role_service_response.data.role == MEMBER_ROLE.PARTICIPANT) return {
-        code: STATUS_CODES.FORBIDDEN,
-        message: `You are not allowed to view appeals in community ${community.name}`,
-    };
+
+    if (role_service_response.data.role == MEMBER_ROLE.PARTICIPANT) return Forbidden({ message: `You are not allowed to view appeals in community ${community.name}`, });
+    
     return {
         code: STATUS_CODES.OK,
         message: `Appeals found for community ${id}`,
