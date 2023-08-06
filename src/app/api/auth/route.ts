@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
         );
     }
     catch (error: any) {
-        console.log(error);
         return ApiResponse(BadReq(error));
     }
 };

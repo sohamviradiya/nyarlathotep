@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
     try {
         return ApiResponse(await getProfileFromToken(token));
     } catch (error: any) {
-        console.log(error);
         return ApiResponse(BadReq(error));
     }
 };
