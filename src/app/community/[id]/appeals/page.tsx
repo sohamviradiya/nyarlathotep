@@ -12,7 +12,7 @@ export default function Appeals({ params }: { params: { id: string } }) {
     const router = useRouter();
     useEffect(() => {
         fetchAppeals(params.id).then((appeals) => {
-            if (!appeals) {
+            if (appeals === null) {
                 alert("You are not authorized to view this page.");
                 router.push(`/community/${params.id}`);
                 return;
@@ -20,7 +20,7 @@ export default function Appeals({ params }: { params: { id: string } }) {
             setAppeals(appeals);
             setLoading(false);
         });
-    });
+    }, [params.id, router]);
     if (loading) return <SkeletonBundle size={4} />;
     return (<main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "10vh", flexDirection: "column", justifyContent: "top", alignItems: "center" }} >
         <InvitationList invitations={appeals} />
@@ -30,7 +30,7 @@ export default function Appeals({ params }: { params: { id: string } }) {
 
 
 async function fetchAppeals(id: string) {
-    const response = await fetch(`/api/community/${id}/appeals`,
+    const response = await fetch(`/api/community/${id}/appeal`,
         {
             method: "GET",
             headers: {

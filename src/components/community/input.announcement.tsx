@@ -7,7 +7,7 @@ export default function AnnouncementInput({ id }: { id: string }) {
     return (
         <>
             <input type="text" value={content} onChange={(e) => setContent(e.target.value)} />
-            <button onClick={() => sendAnnouncement(id, content)}>Send</button>
+            <button onClick={() => { sendAnnouncement(id, content).then(() => { setContent(""); }); }}>Send</button>
         </>
     );
 };

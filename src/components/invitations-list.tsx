@@ -57,6 +57,7 @@ function Invitation({ invitation_id }: { invitation_id: string }) {
     return ((invitation) ? (<>
         <h4>{invitation.sender}</h4>
         <p>{invitation.message}</p>
+        <h4>{invitation.type} to {invitation.receiver} </h4>
         <h5>{invitation.status.toLocaleLowerCase()}</h5>
         <h6>{new Date(invitation.status_changed).toLocaleTimeString()}</h6>
         <InvitationActions status={status} setStatus={setStatus} />
@@ -91,6 +92,7 @@ async function fetchAppeal(id: string, token: string) {
     const res = await fetch(`/api/appeal/${id}`, {
         method: "GET",
         headers: {
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
         },
     });
@@ -125,6 +127,7 @@ async function markAppeal(id: string, token: string) {
     const res = await fetch(`/api/appeal/${id}`, {
         method: "POST",
         headers: {
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
         },
     });

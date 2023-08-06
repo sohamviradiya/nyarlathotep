@@ -39,12 +39,10 @@ export async function getAppeal(
                 return Forbidden({ message: "You are not authorized to view this appeal" });
         }
         else {
-            const community = castToCommunityPrivate(await (await appealDoc.data()?.receiver.get()).data());
-            const role_service_response = await getMemberRole(community, auth_service_response.data.email);
+            const communityRef = await appealDoc.data()?.receiver;
+            const community = castToCommunityPrivate(await communityRef.get());
+            const role_service_response = await checkModerationAccessWithToken(community, token);
             if (!role_service_response.data) return role_service_response as Service_Response<null>;
-            const role = role_service_response.data.role;
-            if (role != MEMBER_ROLE.MODERATOR && role != MEMBER_ROLE.ADMIN)
-                return Forbidden({ message: "You are not authorized to view this appeal" });
         }
     }
     return {
@@ -56,9 +54,7 @@ export async function getAppeal(
     };
 };
 
-export async function sendAppeal(
-    appeal: Appeal_Input, token: string
-): Promise<Service_Response<null | {
+export async function sendAppeal(appeal: Appeal_Input, token: string): Promise<Service_Response<null | {
     appeal: Appeal
 }>> {
     const auth_service_response = await verifyClientToken(token);
@@ -174,7 +170,9 @@ export async function markAppeal(appeal_id: string, token: string): Promise<Serv
     appeal: Appeal
 }>> {
     const appealRef = AppealCollection.doc(appeal_id);
-    const appeal = castToAppeal(await appealRef.get());
+    const appealDoc = await appealRef.get();
+    const appeal = castToAppeal(appealDoc);
+
     if (!appeal) {
         return {
             code: STATUS_CODES.NOT_FOUND,
@@ -183,21 +181,31 @@ export async function markAppeal(appeal_id: string, token: string): Promise<Serv
     }
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-    if (auth_service_response.data.email != appeal.receiver)
-        return Forbidden({ message: "You are not authorized to mark this appeal" });
-    else {
-        await appealRef.update({
-            status: APPEAL_STATUS.UNDER_REVIEW,
-            status_changed: Timestamp.now(),
-        });
-        return {
-            code: STATUS_CODES.OK,
-            message: `Appeal ${appeal_id} marked for review`,
-            data: {
-                appeal
-            }
-        };
+
+    if (appeal.sender != auth_service_response.data.email) {
+        if (appeal.type == APPEAL_TYPE_ENUM.CONNECT) {
+            if (appeal.receiver != auth_service_response.data.email)
+                return Forbidden({ message: "You are not authorized to mark this appeal" });
+        }
+        else {
+            const communityRef = await appealDoc.data()?.receiver;
+            const community = castToCommunityPrivate(await communityRef.get());
+            const role_service_response = await checkModerationAccessWithToken(community, token);
+            if (!role_service_response.data) return role_service_response as Service_Response<null>;
+        }
     }
+
+    await appealRef.update({
+        status: APPEAL_STATUS.UNDER_REVIEW,
+        status_changed: Timestamp.now(),
+    });
+    return {
+        code: STATUS_CODES.OK,
+        message: `Appeal ${appeal_id} marked for review`,
+        data: {
+            appeal
+        }
+    };
 }
 
 

@@ -21,6 +21,7 @@ export default function Announcements({ params }: { params: { id: string } }) {
     });
     if (loading) return <SkeletonBundle size={4} />;
     return (<main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "10vh", flexDirection: "column", justifyContent: "top", alignItems: "center" }} >
+        <h1> Announcements </h1>
         {announcements.map((announcement) => <AnnouncementComponent announcement={announcement} key={announcement.id} />)}
     </main>
     );
@@ -37,7 +38,7 @@ function AnnouncementComponent({ announcement }: { announcement: Announcement })
 };
 
 async function fetchAnnouncements(id: string) {
-    const response = await fetch(`/api/community/${id}/announcements`,
+    const response = await fetch(`/api/community/${id}/announce`,
         {
             method: "GET",
             headers: {

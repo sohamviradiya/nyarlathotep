@@ -1,4 +1,5 @@
 "use client";
+import AnnouncementInput from "@/components/community/input.announcement";
 import MemberList from "@/components/community/member-list.community";
 import CommunityRequestButton from "@/components/request-button";
 import SkeletonBundle from "@/components/skeleton-bundle";
@@ -45,9 +46,8 @@ function CommunityAction({ id }: { id: string }) {
     if (role == "PARTICIPANT") {
         return (
             <>
-                <Link href={`/community/${id}/announcements`}>
-                    Announcements
-                </Link>
+                <Link href={`/community/${id}/announcements`}>Announcements</Link>
+                <AnnouncementInput id={id} />
                 <CommunityRequestButton id={id} type={"MODERATE"} />
             </>
         );
@@ -55,12 +55,9 @@ function CommunityAction({ id }: { id: string }) {
     else if (role == "ADMIN" || role == "MODERATOR") {
         return (
             <>
-                <Link href={`/community/${id}/announcements`}>
-                    Announcements
-                </Link>
-                <Link href={`/community/${id}/appeals`}>
-                    Join Requests
-                </Link>
+                <AnnouncementInput id={id} />
+                <Link href={`/community/${id}/announcements`}> Announcements </Link>
+                <Link href={`/community/${id}/appeals`}>Join Requests </Link>
             </>
         );
     }
