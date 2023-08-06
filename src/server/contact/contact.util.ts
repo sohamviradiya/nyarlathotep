@@ -4,6 +4,7 @@ import { DocumentReference, Timestamp } from "firebase-admin/firestore";
 export function castToContact(document: FirebaseFirestore.DocumentSnapshot): Contact {
     const id = document.id;
     const data = document.data();
+    console.log(data);
     if (!data) return {} as Contact;
 
     return {
@@ -11,8 +12,8 @@ export function castToContact(document: FirebaseFirestore.DocumentSnapshot): Con
         sender: data.sender.id,
         receiver: data.receiver.id,
         messages: {
-            incoming: data.messages.map((message: DocumentReference) => message.id),
-            outgoing: data.messages.map((message: DocumentReference) => message.id),
+            incoming: data.messages.incoming.map((message: DocumentReference) => message.id),
+            outgoing: data.messages.outgoing.map((message: DocumentReference) => message.id),
         },
         established: new Date(data.established._seconds * 1000),
     };

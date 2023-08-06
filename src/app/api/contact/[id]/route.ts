@@ -8,7 +8,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const token = extractToken(request.headers);
     if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     try {
-        return ApiResponse(await getContact(params.id, token));
+        return ApiResponse(await getContact(decodeURIComponent(params.id), token));
     } catch (error: any) {
         return ApiResponse(BadReq(error));
     }
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { content } = await request.json();
     if (!content) return ApiResponse(BadReq({ message: "Missing content" }));
     try {
-        return ApiResponse(await addMessage(params.id, content, token));
+        return ApiResponse(await addMessage(decodeURIComponent(params.id), content, token));
     }
     catch (error: any) {
         console.error(error);
@@ -32,7 +32,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const token = extractToken(request.headers);
     if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
     try {
-        return ApiResponse(await deleteContact(params.id, token));
+        return ApiResponse(await deleteContact(decodeURIComponent(params.id), token));
     } catch (error: any) {
         return ApiResponse(BadReq(error));
     }
