@@ -19,23 +19,23 @@ export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Mess
 }
 
 export async function getMessagesFromReference(messages: DocumentReference[]) {
-    if(!messages?.length) return [];
+    if (!messages?.length) return [];
     return await Promise.all(messages.map(async (messageRef: DocumentReference) => castToMessage(await messageRef.get())));
 }
 
 export async function checkStatus(message: Message, contact: Contact, user: string, new_status: MESSAGE_STATUS_TYPE): Promise<Service_Response<null | { status: MESSAGE_STATUS_TYPE }>> {
     const received_status_array = [MESSAGE_STATUS.READ, MESSAGE_STATUS.APPROVED, MESSAGE_STATUS.REJECTED];
-    
+
     if (contact.sender != user && contact.receiver != user)
         return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
-    
-    if (message.status == MESSAGE_STATUS.DRAFT && new_status != MESSAGE_STATUS.SENT && contact.sender != user)
+
+    if (message.status == MESSAGE_STATUS.DRAFT && (new_status != MESSAGE_STATUS.SENT || contact.sender != user))
         return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
-    
-    if (message.status in received_status_array && !(new_status in received_status_array) && contact.receiver != user)
+
+    if (message.status in received_status_array && (!(new_status in received_status_array) || contact.receiver != user))
         return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
-    
-    if (message.status == MESSAGE_STATUS.SENT && new_status != MESSAGE_STATUS.READ && contact.receiver != user)
+
+    if (message.status == MESSAGE_STATUS.SENT && (new_status != MESSAGE_STATUS.READ || contact.receiver != user))
         return Unauthorized({ message: `You are not authorized to update message to ${new_status}` });
 
     return {

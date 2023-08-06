@@ -35,19 +35,20 @@ export async function addMessage(contact_id: string, content: string, token: str
         return auth_response as Service_Response<null>;
     const contactRef = ContactCollection.doc(contact_id);
     const contact = castToContact(await contactRef.get());
-
+    
     if (contact.sender === auth_response.data.email) {
-        const messageRef = await MessageCollection.add({
+        const message_id = `${contact_id}.OUTGOING.${contact.messages.outgoing.length}`; 
+        await MessageCollection.doc(message_id).set({
             content,
             contact: contactRef,
             status: MESSAGE_STATUS.DRAFT,
             status_changed: Timestamp.now(),
             direction: MESSAGE_DIRECTION.OUTGOING,
         });
+        const messageRef = MessageCollection.doc(message_id);
         await contactRef.update({
             "messages.outgoing": FieldValue.arrayUnion(messageRef)
         });
-
         return {
             code: STATUS_CODES.OK,
             message: `Message added to ${contact_id}`,
@@ -57,14 +58,15 @@ export async function addMessage(contact_id: string, content: string, token: str
         };
     }
     else if (contact.receiver === auth_response.data.email) {
-        const messageRef = await MessageCollection.add({
+        const message_id = `${contact_id}.INCOMING.${contact.messages.incoming.length}`;
+        await MessageCollection.doc(message_id).set({
             content,
             contact: contactRef,
             status: MESSAGE_STATUS.DRAFT,
             status_changed: Timestamp.now(),
             direction: MESSAGE_DIRECTION.INCOMING,
         });
-
+        const messageRef =  MessageCollection.doc(message_id);
         await contactRef.update({
             "messages.incoming": FieldValue.arrayUnion(messageRef)
         });

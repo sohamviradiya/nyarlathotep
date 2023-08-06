@@ -18,10 +18,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const token = extractToken(request.headers);
     if (!token) return ApiResponse(Unauthorized({ message: "Missing token" }));
 
-    const { state } = await request.json();
-    if (!state) return ApiResponse(BadReq({ message: "Missing state" }));
+    const { status } = await request.json();
+    if (!status) return ApiResponse(BadReq({ message: "Missing state" }));
     try {
-        return ApiResponse(await confirmMessage(params.id, state, token));
+        return ApiResponse(await confirmMessage(params.id, status, token));
     }
     catch (error: any) {
         return ApiResponse(BadReq(error));
