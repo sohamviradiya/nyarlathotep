@@ -24,7 +24,7 @@ export async function getAppeal(
 }>> {
     const auth_service_response = await verifyClientToken(token);
     if (!auth_service_response.data) return auth_service_response as Service_Response<null>;
-    const appealRef = await AppealCollection.doc(id);
+    const appealRef = AppealCollection.doc(id);
     const appealDoc = await appealRef.get();
     if (!appealDoc.exists) {
         return {
@@ -32,9 +32,21 @@ export async function getAppeal(
             message: "Appeal not found",
         }
     };
-    const appeal = castToAppeal(await appealRef.get());
-    if (appeal.sender != auth_service_response.data.email && appeal.receiver != auth_service_response.data.email)
-        return Forbidden({ message: "You are not authorized to view this appeal" });
+    const appeal = castToAppeal(appealDoc);
+    if (appeal.sender != auth_service_response.data.email) {
+        if (appeal.type == APPEAL_TYPE_ENUM.CONNECT) {
+            if (appeal.receiver != auth_service_response.data.email)
+                return Forbidden({ message: "You are not authorized to view this appeal" });
+        }
+        else {
+            const community = castToCommunityPrivate(await (await appealDoc.data()?.receiver.get()).data());
+            const role_service_response = await getMemberRole(community, auth_service_response.data.email);
+            if (!role_service_response.data) return role_service_response as Service_Response<null>;
+            const role = role_service_response.data.role;
+            if (role != MEMBER_ROLE.MODERATOR && role != MEMBER_ROLE.ADMIN)
+                return Forbidden({ message: "You are not authorized to view this appeal" });
+        }
+    }
     return {
         code: STATUS_CODES.OK,
         message: "Appeal fetched",
