@@ -4,7 +4,6 @@ import { DocumentReference, Timestamp } from "firebase-admin/firestore";
 export function castToContact(document: FirebaseFirestore.DocumentSnapshot): Contact {
     const id = document.id;
     const data = document.data();
-    console.log(data);
     if (!data) return {} as Contact;
 
     return {
