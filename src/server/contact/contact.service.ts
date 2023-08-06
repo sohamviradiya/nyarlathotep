@@ -3,9 +3,9 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { Service_Response, STATUS_CODES } from "@/server/response/response.module";
 import { Contact } from "@/server/contact/contact.module";
 import { castInputToDocument, castToContact } from "@/server/contact/contact.util";
-import { verifyClientToken } from "../auth/auth.service";
-import { Appeal, APPEAL_STATUS } from "../appeal/appeal.module";
-import { Forbidden } from "../response/response.util";
+import { verifyClientToken } from "@/server/auth/auth.service";
+import { Appeal, APPEAL_STATUS } from "@/server/appeal/appeal.module";
+import { Forbidden } from "@/server/response/response.util";
 
 
 export async function establishContact(appeal: Appeal): Promise<Service_Response<null | { contact: Contact }>> {

@@ -1,5 +1,5 @@
-import { Appeal } from "../appeal/appeal.module";
-import { Community_Public } from "../community/community.module";
+import { Appeal } from "@/server/appeal/appeal.module";
+import { Community_Public } from "@/server/community/community.module";
 
 export type User_Private = {
     id: string;

@@ -13,8 +13,8 @@ import { castToCommunityPrivate, getMemberRole } from "@/server/community/commun
 import { MEMBER_ROLE, Member_Document } from "@/server/community/community.module";
 import { verifyClientToken } from "@/server/auth/auth.service";
 import { AppealCollection, AnnouncementCollection, UserCollection, CommunityCollection } from "@/server/firebase/admin.init";
-import { Contact } from "../contact/contact.module";
-import { Forbidden } from "../response/response.util";
+import { Contact } from "@/server/contact/contact.module";
+import { Forbidden } from "@/server/response/response.util";
 
 
 export async function getAppeal(

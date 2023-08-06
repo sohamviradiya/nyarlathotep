@@ -3,7 +3,7 @@ import { Announcement, Community_Private, MEMBER_ROLE, MEMBER_ROLE_TYPE } from "
 import { Community_Public } from "@/server/community/community.module";
 
 import { DocumentReference, DocumentSnapshot } from "firebase-admin/firestore";
-import { Forbidden } from "../response/response.util";
+import { Forbidden } from "@/server/response/response.util";
 export async function checkModerationAccess(community: Community_Private, user_id: string): Promise<Service_Response<null | { role: MEMBER_ROLE_TYPE; }>> {
     const role_service_response = await getMemberRole(community, user_id);
     if (!role_service_response.data) return role_service_response as Service_Response<null>;

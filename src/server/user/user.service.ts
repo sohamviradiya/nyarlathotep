@@ -3,13 +3,13 @@ import { Service_Response, STATUS_CODES } from "@/server/response/response.modul
 import { User_Input, User_Private, User_Public, } from "@/server/user/user.module";
 import { castInputToUser, castToProfile, castToUser, castToUsers } from "@/server/user/user.util";
 import { Timestamp } from "firebase-admin/firestore";
-import { addCredentials, verifyClientToken } from "../auth/auth.service";
-import { Appeal } from "../appeal/appeal.module";
-import { castToAppeal } from "../appeal/appeal.util";
-import { Contact } from "../contact/contact.module";
-import { castToContact } from "../contact/contact.util";
-import { castToCommunity } from "../community/community.util";
-import { Community_Public } from "../community/community.module";
+import { addCredentials, verifyClientToken } from "@/server/auth/auth.service";
+import { Appeal } from "@/server/appeal/appeal.module";
+import { castToAppeal } from "@/server/appeal/appeal.util";
+import { Contact } from "@/server/contact/contact.module";
+import { castToContact } from "@/server/contact/contact.util";
+import { castToCommunity } from "@/server/community/community.util";
+import { Community_Public } from "@/server/community/community.module";
 
 
 export async function searchUsersByName(search_string: string, limit: number): Promise<Service_Response<null | { users: User_Public[] }>> {

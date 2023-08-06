@@ -1,4 +1,4 @@
-import { Contact } from "../contact/contact.module";
+import { Contact } from "@/server/contact/contact.module";
 
 export enum MESSAGE_DIRECTION {
     INCOMING = "INCOMING",

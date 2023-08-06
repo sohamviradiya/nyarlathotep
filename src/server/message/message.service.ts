@@ -4,8 +4,8 @@ import { Service_Response, STATUS_CODES } from "@/server/response/response.modul
 import { MESSAGE_DIRECTION, MESSAGE_STATUS, MESSAGE_STATUS_TYPE, Message } from "@/server/message/message.module";
 import { castToMessage, checkStatus } from "@/server/message/message.util";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { verifyClientToken } from "../auth/auth.service";
-import { Forbidden } from "../response/response.util";
+import { verifyClientToken } from "@/server/auth/auth.service";
+import { Forbidden } from "@/server/response/response.util";
 
 export async function getMessage(message_id: string, token: string): Promise<Service_Response<null | { message: Message }>> {
     const auth_response = await verifyClientToken(token);

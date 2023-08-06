@@ -1,8 +1,8 @@
 import { MESSAGE_STATUS, MESSAGE_STATUS_TYPE } from "@/server/message/message.module";
 import { STATUS_CODES, Service_Response } from "@/server/response/response.module";
 import { Message } from "@/server/message/message.module";
-import { Forbidden } from "../response/response.util";
-import { Contact } from "../contact/contact.module";
+import { Forbidden } from "@/server/response/response.util";
+import { Contact } from "@/server/contact/contact.module";
 import { DocumentReference } from "firebase-admin/firestore";
 export function castToMessage(message: FirebaseFirestore.DocumentSnapshot): Message {
     const data = message.data();

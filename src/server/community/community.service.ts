@@ -4,10 +4,10 @@ import { castToUser } from "@/server/user/user.util";
 import { Announcement, Announcement_Input, Community_Input, Community_Private, Community_Public, Member_Document, MEMBER_ROLE, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
 import { castToAnnouncement, castToCommunity, castToCommunityPrivate, checkModerationAccess, getMemberRole } from "@/server/community/community.util";
 import { DocumentReference, FieldValue, Timestamp } from "firebase-admin/firestore";
-import { sendAppeal } from "../appeal/appeal.service";
-import { APPEAL_TYPE_ENUM, Appeal } from "../appeal/appeal.module";
-import { verifyClientToken } from "../auth/auth.service";
-import { Forbidden } from "../response/response.util";
+import { sendAppeal } from "@/server/appeal/appeal.service";
+import { APPEAL_TYPE_ENUM, Appeal } from "@/server/appeal/appeal.module";
+import { verifyClientToken } from "@/server/auth/auth.service";
+import { Forbidden } from "@/server/response/response.util";
 
 
 export async function searchCommunitiesByName(search_string: string, limit: number): Promise<Service_Response<null | { communities: Community_Public[] }>> {
@@ -209,7 +209,7 @@ export async function getCommunityAppeals(id: string, token: string) {
     if (!role_service_response.data) return role_service_response as Service_Response<null>;
 
     if (role_service_response.data.role == MEMBER_ROLE.PARTICIPANT) return Forbidden({ message: `You are not allowed to view appeals in community ${community.name}`, });
-    
+
     return {
         code: STATUS_CODES.OK,
         message: `Appeals found for community ${id}`,
