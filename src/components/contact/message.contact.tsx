@@ -1,31 +1,34 @@
 "use client";
 
-import { MESSAGE_DIRECTION, MESSAGE_STATUS, MESSAGE_STATUS_TYPE, Message } from "@/server/message/message.module";
-import { useState, useEffect } from "react";
+import { MESSAGE_DIRECTION, MESSAGE_DIRECTION_TYPE, MESSAGE_STATUS, MESSAGE_STATUS_TYPE, Message } from "@/server/message/message.module";
+import { useState, useEffect, useCallback } from "react";
 import SkeletonBundle from "@/components/skeleton-bundle";
 
-export default function MessageComponent({ id }: { id: string }) {
+export default function MessageComponent({ id, direction }: { id: string, direction: MESSAGE_DIRECTION_TYPE }): JSX.Element {
     const [message, setMessage] = useState<Message | null>(null);
     const [loading, setLoading] = useState(true);
+
+
     useEffect(() => {
         fetchMessage(id).then((message) => {
             if (!message) return;
-            setMessage(message);
+            setMessage({ ...message, direction });
             setLoading(false);
         });
-    }, [id]);
+    }, [id, direction]);
+
     if (loading) return <SkeletonBundle size={1} />;
     if (!message?.content) return <></>;
     return (
-        <div style={{ alignSelf: `${message.direction == MESSAGE_DIRECTION.INCOMING ? 'start' : 'end'}` }}>
+        <div>
             <h4> {message.direction == MESSAGE_DIRECTION.INCOMING && message.status == MESSAGE_STATUS.DRAFT ? "--Not Sent--" : message.content}</h4>
             <h5> {message.status} at {new Date(message.status_changed).toLocaleTimeString()}</h5>
-            <MessageActions {...message} setMessage={setMessage} />
+            <MessageActions {...message} setMessage={() => { setMessage({ ...message, direction }); }} />
         </div>
     )
 };
 
-function MessageActions({ id, direction, status, content, setMessage }: { id: string, direction: "INCOMING" | "OUTGOING", status: MESSAGE_STATUS_TYPE, content: string, setMessage: (message: Message) => void }) {
+function MessageActions({ id, direction, status, content, setMessage: setMessage }: { id: string, direction: "INCOMING" | "OUTGOING", status: MESSAGE_STATUS_TYPE, content: string, setMessage: (message: Message) => void }): JSX.Element {
     if (direction == MESSAGE_DIRECTION.INCOMING) {
         if (status == MESSAGE_STATUS.READ)
             return (
@@ -48,10 +51,19 @@ function MessageActions({ id, direction, status, content, setMessage }: { id: st
                     <DislikeButton setMessage={setMessage} id={id} disliked={true} />
                 </>
             );
-        else
+        else if (status == MESSAGE_STATUS.SENT) {
+            markMessageRead(id).then((message) => {
+                if (!message) return;
+                setMessage(message);
+            });
             return <></>;
+        }
+        else if (status == MESSAGE_STATUS.DRAFT)
+            return <></>;
+        else
+            return <>Reload the Page</>;
     }
-    else if (status != MESSAGE_STATUS.APPROVED && status != MESSAGE_STATUS.REJECTED && status != MESSAGE_STATUS.READ) {
+    else if (status == MESSAGE_STATUS.DRAFT) {
         return (
             <>
                 <button onClick={() => {
@@ -80,8 +92,8 @@ function MessageActions({ id, direction, status, content, setMessage }: { id: st
         return <></>;
 };
 
-function LikeButton({ id, setMessage, liked }: { id: string, setMessage: (message: Message) => void, liked: boolean }) {
-    if (liked)
+function LikeButton({ id, setMessage, liked }: { id: string, setMessage: (message: Message) => void, liked: boolean }): JSX.Element {
+    if (!liked)
         return (
             <button onClick={() => {
                 likeMessage(id).then((message) => {
@@ -101,8 +113,8 @@ function LikeButton({ id, setMessage, liked }: { id: string, setMessage: (messag
         );
 };
 
-function DislikeButton({ id, setMessage, disliked }: { id: string, setMessage: (message: Message) => void, disliked: boolean }) {
-    if (disliked)
+function DislikeButton({ id, setMessage, disliked }: { id: string, setMessage: (message: Message) => void, disliked: boolean }): JSX.Element {
+    if (!disliked)
         return (
             <button onClick={() => {
                 dislikeMessage(id).then((message) => {
@@ -112,12 +124,14 @@ function DislikeButton({ id, setMessage, disliked }: { id: string, setMessage: (
             }}>Dislike</button>
         );
     else
-        <button onClick={() => {
-            markMessageRead(id).then((message) => {
-                if (!message) return;
-                setMessage(message);
-            });
-        }}>Remove Dislike</button>
+        return (
+            <button onClick={() => {
+                markMessageRead(id).then((message) => {
+                    if (!message) return;
+                    setMessage(message);
+                });
+            }}>Remove Dislike</button>
+        );
 };
 
 async function fetchMessage(id: string) {
@@ -166,6 +180,7 @@ async function deleteMessage(id: string) {
         }
     });
     const data = await response.json();
+    console.log(data);
 };
 
 async function sendMessage(id: string) {
@@ -179,7 +194,6 @@ async function sendMessage(id: string) {
     });
     const data = await response.json();
     if (!data?.payload) {
-        console.error(data);
         return;
     }
     else
@@ -187,7 +201,7 @@ async function sendMessage(id: string) {
 };
 
 async function markMessageRead(id: string) {
-    const response = await fetch(`/api/message/${id}/read`, {
+    const response = await fetch(`/api/message/${id}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -206,7 +220,7 @@ async function markMessageRead(id: string) {
 };
 
 async function likeMessage(id: string) {
-    const response = await fetch(`/api/message/${id}/read`, {
+    const response = await fetch(`/api/message/${id}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -224,7 +238,7 @@ async function likeMessage(id: string) {
 };
 
 async function dislikeMessage(id: string) {
-    const response = await fetch(`/api/message/${id}/read`, {
+    const response = await fetch(`/api/message/${id}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
