@@ -76,6 +76,7 @@ export async function getContact(contact_id: string, token: string): Promise<Ser
         incoming: [] as string[],
         outgoing: [] as string[],
     };
+
     if (contact.sender == auth_service_response.data.email) {
         messages.incoming = contact.messages.incoming as string[];
         messages.outgoing = contact.messages.outgoing as string[];

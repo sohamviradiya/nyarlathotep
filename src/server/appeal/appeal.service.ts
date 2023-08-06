@@ -99,7 +99,6 @@ export async function sendAppeal(
             status_changed: Timestamp.now(),
             receiver: receiverRef,
         });
-        console.log(appeal_id);
         const appealRef = await AppealCollection.doc(appeal_id);
         senderRef.update({
             appeals: FieldValue.arrayUnion(appealRef)
