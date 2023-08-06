@@ -44,10 +44,9 @@ async function fetchContact(id: string) {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
+                "Authorization": `Bearer ${localStorage.getItem('token')}`
             }
         });
     const data = await response.json();
-    console.log(data);
     return data.payload.contact;
 }

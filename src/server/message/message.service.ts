@@ -145,10 +145,8 @@ export async function deleteMessage(message_id: string, token: string): Promise<
     const contactRef = (await messageRef.get()).data()?.contact as FirebaseFirestore.DocumentReference;
     const contact = castToContact(await contactRef.get());
     const auth_response = await verifyClientToken(token);
-    console.log(auth_response.data);
     if (!auth_response.data)
         return auth_response as Service_Response<null>;
-    console.log(contact);
     if ((message.direction == MESSAGE_DIRECTION.OUTGOING && contact.sender !== auth_response.data.email) || (message.direction == MESSAGE_DIRECTION.INCOMING && contact.receiver !== auth_response.data.email))
         return Forbidden({ message: `You are not authorized to update messages to ${contactRef}`, });
 

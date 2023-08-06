@@ -180,7 +180,6 @@ async function deleteMessage(id: string) {
         }
     });
     const data = await response.json();
-    console.log(data);
 };
 
 async function sendMessage(id: string) {
