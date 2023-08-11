@@ -1,4 +1,3 @@
-"use client";
 import { Community_Public } from "@/server/community/community.module";
 import Link from "next/link";
 

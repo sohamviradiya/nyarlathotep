@@ -1,4 +1,3 @@
-"use client";
 import {Skeleton,Stack} from "@mui/material";
 export default function SkeletonBundle({ size }: { size: number }) {
     const array = Array(size).fill(0);

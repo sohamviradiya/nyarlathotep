@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from 'react';
 import { AppBar, Toolbar, Container, Typography, ThemeProvider } from '@mui/material';
 import { AuthActions } from '@/components/auth/auth-actions';

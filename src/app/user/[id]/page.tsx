@@ -1,10 +1,10 @@
-"use client";
 import UserInfo from "@/components/user/info.user";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Public } from "@/server/user/user.module";
 import { useEffect, useState } from "react";
+import ThemeHydrator from "@/components/mui/theme";
 
-export default function User({ params }: { params: { id: string } }) {
+function UserComponent({ params }: { params: { id: string } }) {
     const [user, setUser] = useState<User_Public>({} as User_Public);
     useEffect(() => {
         fetchUser({ id: params.id }).then((user) => setUser(user));
@@ -27,3 +27,11 @@ export async function fetchUser({ id }: { id: string }): Promise<User_Public> {
     const user = (await res.json()).payload.user;
     return user;
 }
+
+export default function ContactList({ params }: { params: { id: string } }) {
+    return (
+        <ThemeHydrator>
+            <UserComponent params={params} />
+        </ThemeHydrator>
+    );
+};

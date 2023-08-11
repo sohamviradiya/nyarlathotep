@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect } from "react";
 import { APPEAL_STATUS, APPEAL_STATUS_TYPE, Appeal } from "@/server/appeal/appeal.module";
 import SkeletonBundle from "@/components/skeleton-bundle";

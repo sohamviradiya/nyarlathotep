@@ -1,4 +1,3 @@
-import HomeLink from "@/components/link.home";
 import { Metadata, ResolvingMetadata } from "next";
 
 export default function Home() {
@@ -13,7 +12,6 @@ export default function Home() {
             <h2 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
                 Connect With Other Users
             </h2>
-            <HomeLink />
         </main>
     )
 }

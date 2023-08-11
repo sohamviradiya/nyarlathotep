@@ -1,5 +1,3 @@
-"use client";
-
 import AppealList from "@/components/profile/appeal-list.profile";
 import UserInfo from "@/components/user/info.user";
 import InvitationList from "@/components/invitations-list";
@@ -7,8 +5,9 @@ import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Private, User_Public } from "@/server/user/user.module";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ThemeHydrator from "@/components/mui/theme";
 
-export default function Profile() {
+function ProfileComponent() {
     const router = useRouter();
     const [user, setUser] = useState<User_Private>();
     const [waiting, setWaiting] = useState<boolean>(true);
@@ -49,4 +48,12 @@ async function fetchProfile(token: string): Promise<User_Private> {
     const data = await response.json();
     if (!response.ok) throw new Error(data.message);
     return data.payload.user;
+}
+
+export default function Profile() {
+    return (
+        <ThemeHydrator>
+            <ProfileComponent/>
+        </ThemeHydrator>
+    );
 }

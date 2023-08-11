@@ -1,12 +1,11 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Appeal } from "@/server/appeal/appeal.module";
 import InvitationList from "@/components/invitations-list";
+import ThemeHydrator from "@/components/mui/theme";
 
-export default function Appeals({ params }: { params: { id: string } }) {
+function AppealListComponent({ params }: { params: { id: string } }) {
     const [appeals, setAppeals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -44,3 +43,11 @@ async function fetchAppeals(id: string) {
     else
         return null;
 };
+
+export default function Appeals({ params }: { params: { id: string } }) {
+    return (
+        <ThemeHydrator>
+            <AppealListComponent params={params}/>
+        </ThemeHydrator>
+    )
+}

@@ -1,10 +1,10 @@
-"use client";
-import { Announcement, } from "@/server/community/community.module";
+import { Announcement } from "@/server/community/community.module";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SkeletonBundle from "@/components/skeleton-bundle";
+import ThemeHydrator from "@/components/mui/theme";
 
-export default function Announcements({ params }: { params: { id: string } }) {
+function AnnouncementListComponent({ params }: { params: { id: string } }) {
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -54,3 +54,12 @@ async function fetchAnnouncements(id: string) {
         return null;
     }
 }
+
+
+export default function Announcements({ params }: { params: { id: string } }) {
+    return (
+        <ThemeHydrator>
+            <AnnouncementListComponent params={params} />
+        </ThemeHydrator>
+    )
+};

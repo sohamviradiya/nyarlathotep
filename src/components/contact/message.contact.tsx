@@ -1,7 +1,5 @@
-"use client";
-
 import { MESSAGE_DIRECTION, MESSAGE_DIRECTION_TYPE, MESSAGE_STATUS, MESSAGE_STATUS_TYPE, Message } from "@/server/message/message.module";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import SkeletonBundle from "@/components/skeleton-bundle";
 
 export default function MessageComponent({ id, direction }: { id: string, direction: MESSAGE_DIRECTION_TYPE }): JSX.Element {

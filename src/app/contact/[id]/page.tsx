@@ -1,10 +1,12 @@
-"use client";
+
 import { useState, useEffect } from "react";
 import { Contact } from "@/server/contact/contact.module";
 import MessageComponent from "@/components/contact/message.contact";
 import { MESSAGE_DIRECTION, MESSAGE_DIRECTION_TYPE } from "@/server/message/message.module";
 import MessageInput from "@/components/contact/input.contact";
-export default function Contact({ params }: { params: { id: string } }) {
+import ThemeHydrator from "@/components/mui/theme";
+
+function ContactComponent({ params }: { params: { id: string } }) {
     const [contact, setContact] = useState<Contact | null>(null);
     useEffect(() => {
         fetchContact(params.id).then((contact) => setContact(contact));
@@ -49,4 +51,12 @@ async function fetchContact(id: string) {
         });
     const data = await response.json();
     return data.payload.contact;
+}
+
+export default function Contact({ params }: { params: { id: string } }) {
+    return (
+        <ThemeHydrator>
+            <ContactComponent params={params} />
+        </ThemeHydrator>
+    );
 }

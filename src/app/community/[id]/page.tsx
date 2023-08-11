@@ -1,13 +1,14 @@
-"use client";
+
 import AnnouncementInput from "@/components/community/input.announcement";
 import MemberList from "@/components/community/member-list.community";
+import ThemeHydrator from "@/components/mui/theme";
 import CommunityRequestButton from "@/components/request-button";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Community_Public, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export default function Community({ params }: { params: { id: string } }) {
+function CommunityComponent({ params }: { params: { id: string } }) {
     const [community, setCommunity] = useState<Community_Public>({} as Community_Public);
     useEffect(() => {
         fetchCommunity({ id: params.id }).then((community) => setCommunity(community));
@@ -82,4 +83,12 @@ async function fetchRole(id: string) {
     const data = await response.json();
     if (!data?.payload?.role) return null;
     return data.payload.role as MEMBER_ROLE_TYPE;
+};
+
+export default function Community({ params }: { params: { id: string } }) {
+    return (
+        <ThemeHydrator>
+            <CommunityComponent params={params} />
+        </ThemeHydrator>
+    )
 };

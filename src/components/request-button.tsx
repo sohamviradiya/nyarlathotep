@@ -1,4 +1,3 @@
-"use client";
 import { APPEAL_TYPE } from "@/server/appeal/appeal.module";
 import { useEffect, useState } from "react";
 

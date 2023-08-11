@@ -1,19 +1,34 @@
-
+import { useRouter } from "next/navigation";
 import { Metadata } from "next";
-import Logout from "@/components/auth/form.log-out";
-export default function Home() {
+import ThemeHydrator from "@/components/mui/theme";
+
+function LogoutComponent() {
+    const router = useRouter();
     return (
-        <main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "20vh", flexDirection: "column", justifyContent: "top" }}>
-            <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
-                Log out
-            </h1>
-            <Logout />
-        </main>
+        <div>
+            <h1>Are you sure you want to log out?</h1>
+            <button onClick={() => {
+                localStorage.removeItem("email");
+                localStorage.removeItem("token");
+                router.push("/");
+            }}>Yes</button>
+            <button onClick={() => {
+                router.push("/");
+            }}>No</button>
+        </div>
     )
-}
+};
 
 
 export const metadata: Metadata = {
     title: "Log In",
     description: "Log In Page for NyarlaThotep",
 };
+
+export default function Logout() {
+    return (
+        <ThemeHydrator>
+            <LogoutComponent />
+        </ThemeHydrator>
+    );
+}

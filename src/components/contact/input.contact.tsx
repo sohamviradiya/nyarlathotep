@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 
 export default function MessageInput({ id, reload }: { id: string, reload: () => void }) {

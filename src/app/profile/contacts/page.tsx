@@ -1,8 +1,8 @@
-"use client";
+import ThemeHydrator from "@/components/mui/theme";
 import { Contact } from "@/server/contact/contact.module";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-export default function ContactList() {
+function ContactListComponent() {
     const [contacts, setContacts] = useState<Contact[]>([]);
     useEffect(() => {
         fetchContacts().then(contacts => setContacts(contacts));
@@ -40,4 +40,12 @@ async function fetchContacts() {
     );
     const data = await response.json();
     return data.payload.contacts;
+};
+
+export default function ContactList() {
+    return (
+        <ThemeHydrator>
+            <ContactList />
+        </ThemeHydrator>
+    );
 };
