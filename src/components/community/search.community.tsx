@@ -1,8 +1,6 @@
 "use client";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
+
+import { TextField, Autocomplete, Container, Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { User_Public } from "@/server/user/user.module";
 import Link from "next/link";

@@ -1,10 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import TextField from "@mui/material/TextField";
-import { Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel } from "@mui/material";
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import ErrorList from "@/components/error-list";
 
 const client_side_errors = ["Password must be at least 8 characters long", "Invalid Email"];
