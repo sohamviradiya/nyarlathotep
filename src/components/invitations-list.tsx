@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { APPEAL_STATUS, APPEAL_STATUS_TYPE, Appeal } from "@/server/appeal/appeal.module";
 import SkeletonBundle from "@/components/skeleton-bundle";
-import { Button, Card, CardActions, CardHeader, Container, List, ListItem, Typography } from "@mui/material";
+import { Button, Card, CardActions, CardHeader, Container, Grid, List, ListItem, Typography } from "@mui/material";
 
 export default function InvitationList({ invitations }: { invitations: string[] }) {
     return (<Container maxWidth="xl">
-        <Typography variant="h4" gutterBottom> Appeals: </Typography>
+        <Typography variant="h4" gutterBottom> Invitations: </Typography>
         <List>
             {invitations.map((invitation) => <ListItem key={invitation}> <Invitation invitation_id={invitation} /> </ListItem>)}
         </List>
@@ -21,6 +21,8 @@ function Invitation({ invitation_id }: { invitation_id: string }) {
             setInvitation(appeal);
             if (appeal.status === APPEAL_STATUS.PENDING)
                 setStatus(APPEAL_STATUS.UNDER_REVIEW);
+            else
+                setStatus(appeal.status as APPEAL_STATUS_TYPE);
         }
         ).catch((err) => {
             console.error(err);
@@ -30,31 +32,25 @@ function Invitation({ invitation_id }: { invitation_id: string }) {
     useEffect(() => {
         if (status === APPEAL_STATUS.PENDING) return;
         const token = localStorage.getItem('token') as string;
-        if (status === APPEAL_STATUS.ACCEPTED) {
-            acceptAppeal(invitation_id, token).then(() => {
-                fetchAppeal(invitation_id, token).then((appeal) => {
-                    setInvitation(appeal);
-                });
+        var actionResponse;
+        if (status === APPEAL_STATUS.ACCEPTED)
+            actionResponse = acceptAppeal(invitation_id, token);
+        else if (status === APPEAL_STATUS.REJECTED)
+            actionResponse = rejectAppeal(invitation_id, token);
+        else if (status === APPEAL_STATUS.UNDER_REVIEW)
+            actionResponse = markAppeal(invitation_id, token);
+        if (!actionResponse) return;
+        actionResponse.then(() => {
+            fetchAppeal(invitation_id, token).then((appeal) => {
+                setInvitation(appeal);
+                setStatus(appeal.status as APPEAL_STATUS_TYPE);
             });
-        } else if (status === APPEAL_STATUS.REJECTED) {
-            rejectAppeal(invitation_id, token).then(() => {
-                fetchAppeal(invitation_id, token).then((appeal) => {
-                    setInvitation(appeal);
-                });
-            });
-        }
-        else if (status === APPEAL_STATUS.UNDER_REVIEW) {
-            markAppeal(invitation_id, token).then(() => {
-                fetchAppeal(invitation_id, token).then((appeal) => {
-                    setInvitation(appeal);
-                });
-            });
-        }
+        });
     }, [status, invitation_id]);
-    return ((invitation) ? (<Card variant="outlined">
+    return ((invitation) ? (<Card variant="outlined" sx={{ width: "100%", padding: "1rem" }}>
         <CardHeader title={`${invitation.type} from ${invitation.sender}`} subheader={`${new Date(invitation.status_changed).toUTCString()}`} />
-        <Typography variant="body1" paragraph>  {invitation.message} </Typography>
-        <Typography variant="subtitle1" gutterBottom> {invitation.status}</Typography>
+        <Typography variant="body1" paragraph>message: {invitation.message} </Typography>
+        <Typography variant="subtitle1" gutterBottom>status:  {invitation.status}</Typography>
         <CardActions disableSpacing> <InvitationActions status={status} setStatus={setStatus} /></CardActions>
     </Card>
     ) : (<SkeletonBundle size={1} />));
@@ -66,10 +62,10 @@ function InvitationActions({ status, setStatus }: { status: APPEAL_STATUS_TYPE, 
     }
     else if (status === APPEAL_STATUS.UNDER_REVIEW) {
         return (
-            <>
-                <Button variant="outlined" onClick={() => setStatus(APPEAL_STATUS.ACCEPTED)}>Accept</Button>
-                <Button variant="outlined" onClick={() => setStatus(APPEAL_STATUS.REJECTED)}>Reject</Button>
-            </>
+            <Grid container sx={{ gap: "1rem" }}>
+                <Button variant="contained" color="success" onClick={() => setStatus(APPEAL_STATUS.ACCEPTED)}>Accept</Button>
+                <Button variant="contained" color="warning" onClick={() => setStatus(APPEAL_STATUS.REJECTED)}>Reject</Button>
+            </Grid>
         );
     }
     else if (status === APPEAL_STATUS.ACCEPTED) {

@@ -5,7 +5,7 @@ import { Button, Card, CardActions, CardContent, CardHeader, Container, List, Li
 export default function AppealList({ appeals }: { appeals: string[] }) {
     return (<Container maxWidth="xl">
         <Typography variant="h4" gutterBottom> Appeals: </Typography>
-        <List >
+        <List>
             {appeals.map((appeal) => <ListItem key={appeal}><Appeal id={appeal} /></ListItem>)}
         </List>
     </Container>);
@@ -25,18 +25,14 @@ function Appeal({ id }: { id: string }) {
     }, [id]);
     return (
         (appeal && !withdrawn) ? (
-            <Card variant="outlined">
+            <Card variant="outlined" sx={{ width: "100%" }}>
                 <CardHeader title={`${appeal.type} to ${appeal.receiver}`} subheader={`${new Date(appeal.status_changed).toUTCString()}`} />
                 <CardContent>
-                    <Typography variant="body1" paragraph> {appeal.message} </Typography>
-                    <Typography variant="subtitle1" gutterBottom> {appeal.status} </Typography>
+                    <Typography variant="body1" paragraph>message: {appeal.message} </Typography>
+                    <Typography variant="h6" gutterBottom>status:  {appeal.status} </Typography>
                 </CardContent>
                 <CardActions disableSpacing>
-                    <Button variant="contained" onClick={() => {
-                        withdrawAppeal(id, localStorage.getItem('token') as string).then(() => {
-                            setWithdrawn(true);
-                        })
-                    }}> Remove </Button>
+                    <Button variant="contained" color="error" onClick={() => { withdrawAppeal(id, localStorage.getItem('token') as string).then(() => { setWithdrawn(true); }) }}> Remove </Button>
                 </CardActions>
             </Card>) :
             (<></>)
