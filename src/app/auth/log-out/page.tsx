@@ -37,11 +37,6 @@ function LogoutComponent() {
 };
 
 
-export const metadata: Metadata = {
-    title: "Log In",
-    description: "Log In Page for NyarlaThotep",
-};
-
 export default function Logout() {
     return (
         <ThemeHydrator>

@@ -18,7 +18,7 @@ function UserComponent({ params }: { params: { id: string } }) {
     );
 }
 
-export async function fetchUser({ id }: { id: string }): Promise<User_Public> {
+async function fetchUser({ id }: { id: string }): Promise<User_Public> {
     const res = await fetch(`/api/user/${id}`);
     const user = (await res.json()).payload.user;
     return user;

@@ -128,11 +128,6 @@ async function submitForm(user: User_Input, setErrors: (errors: string[]) => voi
     }
 }
 
-export const metadata: Metadata = {
-    title: "Sign Up",
-    description: "Sign Up Page for NyarlaThotep",
-};
-
 export default function SignUp() {
     return (
         <ThemeHydrator>

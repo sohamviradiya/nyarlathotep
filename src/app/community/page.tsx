@@ -49,13 +49,6 @@ async function searchCommunities(search_string: string) {
     return communities;
 }
 
-
-
-export const metadata: Metadata = {
-    title: "NyarlaThotep Community Search",
-    description: "A social media platform",
-};
-
 export default function Community() {
     return (
         <ThemeHydrator>

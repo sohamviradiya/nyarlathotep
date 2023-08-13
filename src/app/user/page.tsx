@@ -48,11 +48,6 @@ async function searchUsers(search_string: string) {
     return users;
 }
 
-export const metadata: Metadata = {
-    title: "Search for Users",
-    description: "Search for Users",
-};
-
 export default function UsersPage() {
     return (
         <ThemeHydrator>

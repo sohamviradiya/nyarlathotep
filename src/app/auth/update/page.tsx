@@ -126,12 +126,6 @@ async function submitForm(user: {
 }
 
 
-
-export const metadata: Metadata = {
-    title: "Log In",
-    description: "Log In Page for NyarlaThotep",
-};
-
 export default function Update() {
     return (
         <ThemeHydrator>

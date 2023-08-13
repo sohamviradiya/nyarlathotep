@@ -114,11 +114,6 @@ async function fetchProfile(token: string): Promise<User_Private> {
     return data.payload.user;
 }
 
-export const metadata: Metadata = {
-    title: "Sign Up",
-    description: "Sign Up Page for NyarlaThotep",
-};
-
 export default function SignUp() {
     return (
         <ThemeHydrator>

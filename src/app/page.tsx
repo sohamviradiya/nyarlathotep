@@ -52,8 +52,3 @@ export default function Home() {
 };
 
 
-export const metadata: Metadata = {
-    title: "NyarlaThotep",
-    description: "A social media platform",
-};
-
