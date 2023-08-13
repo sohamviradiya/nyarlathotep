@@ -7,7 +7,7 @@ import { User_Private, User_Public } from "@/server/user/user.module";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ThemeHydrator from "@/components/mui/theme";
-import { Container } from "@mui/material";
+import { Box, Button, Container, Grid } from "@mui/material";
 
 function ProfileComponent() {
     const router = useRouter();
@@ -29,27 +29,37 @@ function ProfileComponent() {
                 });
         }
     }, [router]);
-    return (<Container maxWidth="xl" sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "80vh"
-        }}>
+    return (<Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh", padding: "6rem" }}>
         {(waiting || !user) ? (<SkeletonBundle size={4} />) : (
-            <>
-                <UserInfo user={user as User_Public} />
-                <AppealList appeals={user.appeals as string[]} />
-                <InvitationList invitations={user.invitations as string[]} />
-            </>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <UserInfo user={user as User_Public} />
+                </Grid>
+                <Grid item xs={12}>
+                    <ProfileActions />
+                </Grid>
+                <Grid item xs={6}>
+                    <AppealList appeals={user.appeals as string[]} />
+                </Grid>
+                <Grid item xs={6}>
+                    <InvitationList invitations={user.invitations as string[]} />
+                </Grid>
+            </Grid>
         )}
     </Container>);
 };
 
+function ProfileActions() {
+    return (<Box display="flex" justifyContent="center" alignItems="center" gap={2}>
+        <Button variant="contained" color="primary" href="/profile/settings"> Edit Profile </Button>
+        <Button variant="contained" color="primary" href="/auth/update"> Change Password </Button>
+        <Button variant="contained" color="primary" href="/profile/contacts"> Manage Contacts </Button>
+    </Box>)
+};
+
 async function fetchProfile(token: string): Promise<User_Private> {
     const response = await fetch("/api/profile", {
-        method: "GET",
-        headers: {
+        method: "GET", headers: {
             "Authorization": `Bearer ${token}`
         }
     });
