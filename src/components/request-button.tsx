@@ -1,4 +1,5 @@
 import { APPEAL_TYPE } from "@/server/appeal/appeal.module";
+import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 
 export default function CommunityRequestButton({ id, type }: { id: string, type: APPEAL_TYPE }) {
@@ -18,14 +19,14 @@ export default function CommunityRequestButton({ id, type }: { id: string, type:
         return <></>;
     }
     if (isRequested) {
-        return (<button style={{ backgroundColor: "darkblue", padding: "2rem", width: "50%" }} onClick={() => { withdrawRequest(id, type).then(() => { setIsRequested(false); }); }}>
+        return (<Button variant="contained" onClick={() => { withdrawRequest(id, type).then(() => { setIsRequested(false); }); }}>
             Withdraw Request
-        </button >);
+        </Button >);
     }
     else {
-        return (<button style={{ backgroundColor: "darkblue", padding: "2rem", width: "50%" }} onClick={() => { sendRequest(id, type).then(() => { setIsRequested(true); }); }}>
+        return (<Button variant="contained" onClick={() => { sendRequest(id, type).then(() => { setIsRequested(true); }); }}>
             Request
-        </button>);
+        </Button>);
     }
 }
 

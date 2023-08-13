@@ -1,24 +1,20 @@
+"use client";
 import UserInfo from "@/components/user/info.user";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Public } from "@/server/user/user.module";
 import { useEffect, useState } from "react";
 import ThemeHydrator from "@/components/mui/theme";
+import { Container } from "@mui/material";
 
 function UserComponent({ params }: { params: { id: string } }) {
     const [user, setUser] = useState<User_Public>({} as User_Public);
     useEffect(() => {
         fetchUser({ id: params.id }).then((user) => setUser(user));
     }, [params.id]);
-    return (<main style={{ height: "100vh", display: "flex", gap: "10vh", flexDirection: "column", justifyContent: "top", alignItems: "center" }} >
-        <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "50%" }}>
-            {`${decodeURIComponent(params.id)}'s Profile Page`}
-        </h1>
-        {(user.email) ? (
-            <UserInfo user={user} />
-        ) : (
-            <SkeletonBundle size={3} />
-        )}
-    </main>
+    return (
+        <Container maxWidth="xl" sx={{height: "80vh", display: "flex", justifyContent: "center", alignItems: "center"}}>
+            {(user.email) ? <UserInfo user={user} /> : <SkeletonBundle size={3} />}
+        </Container>
     );
 }
 

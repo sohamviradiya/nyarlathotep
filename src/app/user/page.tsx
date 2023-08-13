@@ -1,5 +1,7 @@
+"use client";
+
 import { Metadata } from "next";
-import { TextField, Autocomplete, Container, Box, ThemeProvider } from "@mui/material";
+import { TextField, Autocomplete, Container, Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { User_Public } from "@/server/user/user.module";
 import Link from "next/link";
