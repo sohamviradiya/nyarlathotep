@@ -1,7 +1,8 @@
+"use client";
 import { Metadata } from "next";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
+import { Alert, Button, Container, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import ErrorList from "@/components/error-list";
 import ThemeHydrator from "@/components/mui/theme";
@@ -24,8 +25,8 @@ function LoginComponent() {
     }, []);
 
     return (
-        <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "3rem", color: "black", width: "70%", alignSelf: "center" }}>
-            <form style={{ display: "flex", flexDirection: "column", gap: "1rem", }}>
+        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+            <form style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <TextField
                     label="Email"
                     variant="filled"
@@ -78,7 +79,6 @@ function LoginComponent() {
                     e.preventDefault();
                     submitForm(user, setErrors, setWaiting).then((email) => {
                         if (email) {
-                            localStorage.setItem("email", email);
                             router.push('/profile');
                         }
                     });
@@ -87,8 +87,8 @@ function LoginComponent() {
                 </Button>
             </form>
             {(errors.length > 0) ? <ErrorList errors={errors} /> : <></>}
-            {waiting ? <p>Waiting...</p> : <></>}
-        </div>
+            {waiting ? <Alert severity="info">Wait a moment...</Alert> : <></>}
+        </Container>
     );
 
 }
@@ -114,6 +114,7 @@ async function submitForm(user: {
     if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.payload.token);
+        localStorage.setItem("email", user.email);
         return user.email;
     }
     else {
