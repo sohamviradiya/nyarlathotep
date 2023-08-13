@@ -10,10 +10,10 @@ export default function UserInfo({ user }: { user: User_Public }) {
             <Grid item xs={12} md={6}>
                 <Card variant="outlined">
                     <CardContent>
-                        <Typography variant="h5" component="h2">
+                        <Typography variant="h4" component="h2">
                             {user.name}
                         </Typography>
-                        <Typography color="textSecondary">
+                        <Typography color="h5">
                             {user.email}
                         </Typography>
                         <Typography variant="body2" component="p">
