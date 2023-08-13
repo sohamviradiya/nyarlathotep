@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Appeal } from "@/server/appeal/appeal.module";
+import { Button, Card, CardActions, CardContent, CardHeader, Container, List, ListItem, Typography } from "@mui/material";
 
 export default function AppealList({ appeals }: { appeals: string[] }) {
-    return (<>
-        <ul>
-            {appeals.map((appeal) => <li key={appeal}><Appeal id={appeal} /></li>)}
-        </ul>
-    </>);
+    return (<Container maxWidth="xl">
+        <Typography variant="h4" gutterBottom> Appeals: </Typography>
+        <List >
+            {appeals.map((appeal) => <ListItem key={appeal}><Appeal id={appeal} /></ListItem>)}
+        </List>
+    </Container>);
 }
 
 function Appeal({ id }: { id: string }) {
@@ -23,17 +25,24 @@ function Appeal({ id }: { id: string }) {
     }, [id]);
     return (
         (appeal && !withdrawn) ? (
-            <>
-                <h4>{appeal.receiver}</h4>
-                <p>{appeal.message}</p>
-                <h5>{appeal.status}</h5>
-                <h6>{new Date(appeal.status_changed).toLocaleString()}</h6>
-                <button onClick={() => {
-                    withdrawAppeal(id, localStorage.getItem('token') as string).then(() => {
-                        setWithdrawn(true);
-                    })
-                }}> Remove </button>
-            </>) :
+            <Card variant="outlined">
+                <CardHeader title={appeal.receiver} subheader={`${new Date(appeal.status_changed).toLocaleString()}`} />
+                <CardContent>
+                    <Typography variant="body1" paragraph>
+                        {appeal.message}
+                    </Typography>
+                    <Typography variant="subtitle1" gutterBottom>
+                        {appeal.status}
+                    </Typography>
+                </CardContent>
+                <CardActions disableSpacing>
+                    <Button variant="contained" onClick={() => {
+                        withdrawAppeal(id, localStorage.getItem('token') as string).then(() => {
+                            setWithdrawn(true);
+                        })
+                    }}> Remove </Button>
+                </CardActions>
+            </Card>) :
             (<></>)
     );
 }

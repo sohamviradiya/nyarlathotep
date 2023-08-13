@@ -2,20 +2,45 @@ import { User_Public } from "@/server/user/user.module";
 import CommunityList from "@/components/profile/community-list.profile";
 import { Community_Public } from "@/server/community/community.module";
 import RequestButton from "@/components/request-button";
+import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 
 export default function UserInfo({ user }: { user: User_Public }) {
     return (<>
-        <div style={{ backgroundColor: "darkblue", padding: "2rem", width: "70%" }}>
-            <h2>{user.name}</h2>
-            <h3>{user.email}</h3>
-            <h3>{user.bio}</h3>
-            <h4>{user.address}</h4>
-            <h5> Last Online: {(new Date(user.last_online)).toLocaleString()}</h5>
-        </div>
-        <RequestButton id={user.email} type={"CONNECT"} />
-        <div style={{ backgroundColor: "darkblue", padding: "2rem", width: "70%" }}>
-            <h2>Communities: </h2>
-            <CommunityList communities={user.communities as Community_Public[]} />
-        </div>
+        <Grid container spacing={2} justifyContent="center">
+            <Grid item xs={12} md={6}>
+                <Card variant="outlined">
+                    <CardContent>
+                        <Typography variant="h5" component="h2">
+                            {user.name}
+                        </Typography>
+                        <Typography color="textSecondary">
+                            {user.email}
+                        </Typography>
+                        <Typography variant="body2" component="p">
+                            {user.bio}
+                        </Typography>
+                        <Typography variant="subtitle2" color="textSecondary">
+                            {user.address}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                            Last Online: {(new Date(user.last_online)).toLocaleString()}
+                        </Typography>
+                    </CardContent>
+                </Card>
+                <Box mt={2}>
+                    <RequestButton id={user.email} type="CONNECT" />
+                </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+                <Card variant="outlined">
+                    <CardContent>
+                        <Typography variant="h5" component="h2">
+                            Communities:
+                        </Typography>
+                        <CommunityList communities={user.communities as Community_Public[]} />
+                    </CardContent>
+                </Card>
+            </Grid>
+        </Grid>
     </>);
 }
