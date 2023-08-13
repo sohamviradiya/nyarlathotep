@@ -16,19 +16,19 @@ function HomeComponent() {
                 <Typography variant="h6" >
                     Securely. Anonymously. Privately.
                 </Typography>
-                <Grid container sx={{ width: "30%" }} >
-                    <Grid item xs={6} sx={{padding: "1rem"}}>
+                <Grid container sx={{ width: "30%" }} rowSpacing={3} columnSpacing={1} >
+                    <Grid item xs={6} >
                         <Button variant="contained" size="large" color="primary" href="/auth/log-in">
                             Login
                         </Button>
                     </Grid>
-                    <Grid item xs={6} sx={{ padding: "1rem" }}>
-                        <Button variant="outlined" size="large" color="primary" href="/auth/sign-up">
+                    <Grid item xs={6}>
+                        <Button variant="contained" size="large" color="primary" href="/auth/sign-up">
                             Register
                         </Button>
                     </Grid>
                     <Grid item xs={6}>
-                        <Button variant="outlined" size="large" color="primary" href="/user">
+                        <Button variant="contained" size="large" color="primary" href="/user">
                             Find Users
                         </Button>
                     </Grid>
@@ -38,7 +38,7 @@ function HomeComponent() {
                         </Button>
                     </Grid>
                 </Grid>
-        </Paper>
+            </Paper>
         </Container >
     )
 }
