@@ -42,36 +42,32 @@ function LoginComponent() {
                         }
                     }}
                 />
-                <InputLabel htmlFor="password" >Password</InputLabel>
-                <FilledInput
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    endAdornment={
-                        <InputAdornment position="end">
-                            <IconButton
-                                aria-label="toggle password visibility"
-                                onClick={() => { setShowPassword(!showPassword) }}
-                                onMouseDown={(e) => { e.preventDefault(); }}
-                                edge="end"
-                            >
-                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                        </InputAdornment>
-                    }
-
-                    onChange={
-                        (e) => {
-                            if (e.target.value.length < 8) {
-                                if (!errors.includes("Password must be at least 8 characters long"))
-                                    setErrors([...errors, "Password must be at least 8 characters long"]);
-                            }
-                            else {
-                                setUser({ ...user, password: e.target.value });
-                                setErrors(errors.filter((error) => error !== "Password must be at least 8 characters long" && client_side_errors.includes(error)));
+                <FormControl variant="filled" sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}>
+                    <InputLabel htmlFor="password">Password</InputLabel>
+                    <FilledInput
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        endAdornment={
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => { setShowPassword(!showPassword) }} onMouseDown={(e) => { e.preventDefault(); }} edge="end">
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        }
+                        onChange={
+                            (e) => {
+                                if (e.target.value.length < 8) {
+                                    if (!errors.includes("Password must be at least 8 characters long"))
+                                        setErrors([...errors, "Password must be at least 8 characters long"]);
+                                }
+                                else {
+                                    setUser({ ...user, password: e.target.value });
+                                    setErrors(errors.filter((error) => error !== "Password must be at least 8 characters long" && client_side_errors.includes(error)));
+                                }
                             }
                         }
-                    }
-                />
+                    />
+                </FormControl>
                 <Button variant="contained" sx={{ background: "green" }} onClick={(e) => {
                     e.preventDefault();
                     submitForm(user, setErrors, setWaiting).then((email) => {
