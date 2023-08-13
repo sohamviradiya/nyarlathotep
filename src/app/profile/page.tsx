@@ -1,3 +1,4 @@
+"use client";
 import AppealList from "@/components/profile/appeal-list.profile";
 import UserInfo from "@/components/user/info.user";
 import InvitationList from "@/components/invitations-list";
@@ -6,6 +7,7 @@ import { User_Private, User_Public } from "@/server/user/user.module";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ThemeHydrator from "@/components/mui/theme";
+import { Container } from "@mui/material";
 
 function ProfileComponent() {
     const router = useRouter();
@@ -27,15 +29,21 @@ function ProfileComponent() {
                 });
         }
     }, [router]);
-    return (<>
-        {(waiting || !user) ? (<SkeletonBundle size={5} />) : (
+    return (<Container maxWidth="xl" sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "80vh"
+        }}>
+        {(waiting || !user) ? (<SkeletonBundle size={4} />) : (
             <>
                 <UserInfo user={user as User_Public} />
                 <AppealList appeals={user.appeals as string[]} />
                 <InvitationList invitations={user.invitations as string[]} />
             </>
         )}
-    </>);
+    </Container>);
 };
 
 async function fetchProfile(token: string): Promise<User_Private> {
@@ -53,7 +61,7 @@ async function fetchProfile(token: string): Promise<User_Private> {
 export default function Profile() {
     return (
         <ThemeHydrator>
-            <ProfileComponent/>
+            <ProfileComponent />
         </ThemeHydrator>
     );
 }
