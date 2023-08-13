@@ -1,4 +1,4 @@
-import { STATUS_CODES, Service_Response } from "./response.module";
+import { STATUS_CODES, Service_Response } from "@/server/response/response.module";
 import { NextResponse } from "next/server";
 export function ApiResponse(response: Service_Response<any>) {
     if (response.data)
