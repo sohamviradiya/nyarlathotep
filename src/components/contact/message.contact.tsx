@@ -1,6 +1,7 @@
 import { MESSAGE_DIRECTION, MESSAGE_DIRECTION_TYPE, MESSAGE_STATUS, MESSAGE_STATUS_TYPE, Message } from "@/server/message/message.module";
 import { useState, useEffect } from "react";
 import SkeletonBundle from "@/components/skeleton-bundle";
+import { Box, Button, Typography } from "@mui/material";
 
 export default function MessageComponent({ id, direction }: { id: string, direction: MESSAGE_DIRECTION_TYPE }): JSX.Element {
     const [message, setMessage] = useState<Message | null>(null);
@@ -18,11 +19,15 @@ export default function MessageComponent({ id, direction }: { id: string, direct
     if (loading) return <SkeletonBundle size={1} />;
     if (!message?.content) return <></>;
     return (
-        <div>
-            <h4> {message.direction == MESSAGE_DIRECTION.INCOMING && message.status == MESSAGE_STATUS.DRAFT ? "--Not Sent--" : message.content}</h4>
-            <h5> {message.status} at {new Date(message.status_changed).toLocaleTimeString()}</h5>
+        <Box>
+            <Typography variant="h6">
+                {message.direction === MESSAGE_DIRECTION.INCOMING && message.status === MESSAGE_STATUS.DRAFT ? "--Not Sent--" : message.content}
+            </Typography>
+            <Typography variant="subtitle1">
+                {message.status} at {new Date(message.status_changed).toLocaleTimeString()}
+            </Typography>
             <MessageActions {...message} setMessage={() => { setMessage({ ...message, direction }); }} />
-        </div>
+        </Box>
     )
 };
 
@@ -64,25 +69,25 @@ function MessageActions({ id, direction, status, content, setMessage: setMessage
     else if (status == MESSAGE_STATUS.DRAFT) {
         return (
             <>
-                <button onClick={() => {
+                <Button onClick={() => {
                     const newContent = prompt("Enter new content", content);
                     if (newContent != null && newContent != content)
                         editMessage(id, newContent).then((message) => {
                             if (!message) return;
                             setMessage(message);
                         });
-                }}>Edit</button>
-                <button onClick={() => {
+                }}>Edit</Button>
+                <Button onClick={() => {
                     deleteMessage(id).then(() => {
                         setMessage({} as Message);
                     })
-                }}>Delete</button>
-                <button onClick={() => {
+                }}>Delete</Button>
+                <Button onClick={() => {
                     sendMessage(id).then((message) => {
                         if (!message) return;
                         setMessage(message);
                     });
-                }}>Send</button>
+                }}>Send</Button>
             </>
         );
     }
@@ -93,42 +98,42 @@ function MessageActions({ id, direction, status, content, setMessage: setMessage
 function LikeButton({ id, setMessage, liked }: { id: string, setMessage: (message: Message) => void, liked: boolean }): JSX.Element {
     if (!liked)
         return (
-            <button onClick={() => {
+            <Button onClick={() => {
                 likeMessage(id).then((message) => {
                     if (!message) return;
                     setMessage(message);
                 });
-            }}>Like</button>
+            }}>Like</Button>
         );
     else
         return (
-            <button onClick={() => {
+            <Button onClick={() => {
                 markMessageRead(id).then((message) => {
                     if (!message) return;
                     setMessage(message);
                 });
-            }}>Remove Like</button>
+            }}>Remove Like</Button>
         );
 };
 
 function DislikeButton({ id, setMessage, disliked }: { id: string, setMessage: (message: Message) => void, disliked: boolean }): JSX.Element {
     if (!disliked)
         return (
-            <button onClick={() => {
+            <Button onClick={() => {
                 dislikeMessage(id).then((message) => {
                     if (!message) return;
                     setMessage(message);
                 });
-            }}>Dislike</button>
+            }}>Dislike</Button>
         );
     else
         return (
-            <button onClick={() => {
+            <Button onClick={() => {
                 markMessageRead(id).then((message) => {
                     if (!message) return;
                     setMessage(message);
                 });
-            }}>Remove Dislike</button>
+            }}>Remove Dislike</Button>
         );
 };
 
