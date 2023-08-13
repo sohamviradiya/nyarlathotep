@@ -1,8 +1,9 @@
+"use client";
 import { Metadata } from "next";
 import { useState, useEffect } from "react";
 import ErrorList from "@/components/error-list";
 import { User_Input } from "@/server/user/user.module";
-import { Button, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
+import { Alert, Button, Container, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRouter } from "next/navigation";
@@ -29,8 +30,8 @@ function SignUpComponent() {
     }, []);
 
     return (
-        <div style={{ backgroundColor: "white", padding: "2rem", borderRadius: "3rem", color: "black", width: "70%", alignSelf: "center" }}>
-            <form style={{ display: "flex", flexDirection: "column", gap: "1rem", }}>
+        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+            <FormControl style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <TextField
                     label="Name"
                     variant="filled"
@@ -114,10 +115,10 @@ function SignUpComponent() {
                 }} disableElevation disabled={errors.length > 0}>
                     Submit
                 </Button>
-            </form>
+            </FormControl>
             {(errors.length > 0) ? <ErrorList errors={errors} /> : <></>}
-            {waiting ? <p>Waiting...</p> : <></>}
-        </div>
+            {waiting ? <Alert severity="info">Wait a moment...</Alert> : <></>}
+        </Container>
     )
 };
 
