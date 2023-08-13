@@ -2,11 +2,10 @@
 import AnnouncementInput from "@/components/community/input.announcement";
 import MemberList from "@/components/community/member-list.community";
 import ThemeHydrator from "@/components/mui/theme";
-import CommunityRequestButton from "@/components/request-button";
+import RequestButton from "@/components/request-button";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Community_Public, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
-import { Container, Grid, Paper, Typography } from "@mui/material";
-import Link from "next/link";
+import { Button, Container, Grid, Paper, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
 function CommunityComponent({ params }: { params: { id: string } }) {
@@ -41,7 +40,7 @@ function CommunityComponent({ params }: { params: { id: string } }) {
                     <CommunityAction id={community.id} />
                 </Grid>
                 <Grid item xs={12}>
-                    <Paper elevation={3}>
+                    <Paper elevation={3} sx={{ padding: "2rem" }}>
                         <Typography variant="h6">
                             Members:
                         </Typography>
@@ -63,30 +62,24 @@ function CommunityAction({ id }: { id: string }) {
         fetchRole(id).then((role) => setRole(role));
     }, [id]);
     if (!role || role == "BANNED") {
-        return <CommunityRequestButton id={id} type="JOIN" />;
+        return <RequestButton id={id} type="JOIN" />;
     }
-    if (role == "PARTICIPANT") {
+    else if (role == "PARTICIPANT") {
         return (
             <>
-                <Typography variant="body1" gutterBottom>
-                    <Link href={`/community/${id}/announcements`} style={{ textDecoration: 'none' }}>Announcements </Link>
-                </Typography>
+                <Button variant="contained" href={`/community/${id}/announcements`} sx={{ padding: "0.5rem" }} >Announcements </Button>
                 <AnnouncementInput id={id} />
-                <CommunityRequestButton id={id} type="MODERATE" />
+                <RequestButton id={id} type="MODERATE" />
             </>
         );
     }
     else if (role == "ADMIN" || role == "MODERATOR") {
         return (
-            <>
-                <Typography variant="body1" gutterBottom>
-                    <Link href={`/community/${id}/announcements`} style={{ textDecoration: 'none' }}> Announcements </Link>
-                </Typography>
+            <Container maxWidth="xl" sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "row" }}>
+                <Button variant="contained" href={`/community/${id}/announcements`} >Announcements </Button>
                 <AnnouncementInput id={id} />
-                <Typography variant="body1" gutterBottom>
-                    <Link href={`/community/${id}/appeals`}> Requests </Link>
-                </Typography>
-            </>
+                <Button variant="contained" href={`/community/${id}/appeals`}> Requests </Button>
+            </Container>
         );
     }
 };
