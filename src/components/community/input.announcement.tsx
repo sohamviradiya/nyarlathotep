@@ -1,12 +1,17 @@
+import { Button, Grid, TextField } from "@mui/material";
 import { useState } from "react";
 
 export default function AnnouncementInput({ id }: { id: string }) {
     const [content, setContent] = useState("");
     return (
-        <>
-            <input type="text" value={content} onChange={(e) => setContent(e.target.value)} />
-            <button onClick={() => { sendAnnouncement(id, content).then(() => { setContent(""); }); }}>Send</button>
-        </>
+        <Grid container spacing={2} alignItems="center">
+            <Grid item xs={9}>
+                <TextField type="text" fullWidth variant="outlined" label="Announcement Content" value={content} onChange={(e) => setContent(e.target.value)} />
+            </Grid>
+            <Grid item xs={3}>
+                <Button onClick={() => { sendAnnouncement(id, content).then(() => { setContent(""); }); }}>Send</Button>
+            </Grid>
+        </Grid>
     );
 };
 
