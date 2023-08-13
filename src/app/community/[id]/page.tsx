@@ -5,6 +5,7 @@ import ThemeHydrator from "@/components/mui/theme";
 import CommunityRequestButton from "@/components/request-button";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Community_Public, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
+import { Container, Grid, Paper, Typography } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -13,26 +14,46 @@ function CommunityComponent({ params }: { params: { id: string } }) {
     useEffect(() => {
         fetchCommunity({ id: params.id }).then((community) => setCommunity(community));
     }, [params.id]);
-    return (<main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "10vh", flexDirection: "column", justifyContent: "top", alignItems: "center" }} >
+    return (<Container maxWidth="xl" sx={{ height: "80vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
         {(community.id) ? (<>
-            <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "70%" }}>
-                {`${community.name}'s Profile Page`}
-            </h1>
-            <div style={{ backgroundColor: "darkblue", padding: "2rem", width: "70%" }}>
-                <h2>{community.name}</h2>
-                <h3>{community.description}</h3>
-                <h3>Since {new Date(community.founded).toLocaleDateString()}</h3>
-            </div>
-            <CommunityAction id={community.id} />
-            <div style={{ backgroundColor: "darkblue", padding: "2rem", width: "70%" }}>
-                <h2>Members: </h2>
-                <MemberList members={community.members} />
-            </div>
+            <Grid container spacing={2} justifyContent="center">
+                <Grid item xs={12}>
+                    <Paper elevation={3}>
+                        <Typography variant="h4" sx={{ padding: "1rem" }}>
+                            {`${community.name}'s Profile Page`}
+                        </Typography>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12}>
+                    <Paper elevation={3} sx={{ padding: "1rem" }}>
+                        <Typography variant="h5">
+                            {community.name}
+                        </Typography>
+                        <Typography variant="body1">
+                            {community.description}
+                        </Typography>
+                        <Typography variant="body1">
+                            Since {new Date(community.founded).toUTCString()}
+                        </Typography>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} spacing={4}>
+                    <CommunityAction id={community.id} />
+                </Grid>
+                <Grid item xs={12}>
+                    <Paper elevation={3}>
+                        <Typography variant="h6">
+                            Members:
+                        </Typography>
+                        <MemberList members={community.members} />
+                    </Paper>
+                </Grid>
+            </Grid>
         </>
         ) : (
             <SkeletonBundle size={4} />
         )}
-    </main>
+    </Container>
     );
 }
 
@@ -47,18 +68,24 @@ function CommunityAction({ id }: { id: string }) {
     if (role == "PARTICIPANT") {
         return (
             <>
-                <Link href={`/community/${id}/announcements`}>Announcements</Link>
+                <Typography variant="body1" gutterBottom>
+                    <Link href={`/community/${id}/announcements`} style={{ textDecoration: 'none' }}>Announcements </Link>
+                </Typography>
                 <AnnouncementInput id={id} />
-                <CommunityRequestButton id={id} type={"MODERATE"} />
+                <CommunityRequestButton id={id} type="MODERATE" />
             </>
         );
     }
     else if (role == "ADMIN" || role == "MODERATOR") {
         return (
             <>
+                <Typography variant="body1" gutterBottom>
+                    <Link href={`/community/${id}/announcements`} style={{ textDecoration: 'none' }}> Announcements </Link>
+                </Typography>
                 <AnnouncementInput id={id} />
-                <Link href={`/community/${id}/announcements`}> Announcements </Link>
-                <Link href={`/community/${id}/appeals`}>Join Requests </Link>
+                <Typography variant="body1" gutterBottom>
+                    <Link href={`/community/${id}/appeals`}> Requests </Link>
+                </Typography>
             </>
         );
     }

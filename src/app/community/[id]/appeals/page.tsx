@@ -21,10 +21,7 @@ function AppealListComponent({ params }: { params: { id: string } }) {
         });
     }, [params.id, router]);
     if (loading) return <SkeletonBundle size={4} />;
-    return (<main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "10vh", flexDirection: "column", justifyContent: "top", alignItems: "center" }} >
-        <InvitationList invitations={appeals} />
-    </main>
-    );
+    return ( <InvitationList invitations={appeals} />);
 };
 
 
@@ -47,7 +44,7 @@ async function fetchAppeals(id: string) {
 export default function Appeals({ params }: { params: { id: string } }) {
     return (
         <ThemeHydrator>
-            <AppealListComponent params={params}/>
+            <AppealListComponent params={params} />
         </ThemeHydrator>
     )
 }
