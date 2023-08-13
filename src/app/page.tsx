@@ -16,30 +16,30 @@ function HomeComponent() {
                 <Typography variant="h6" >
                     Securely. Anonymously. Privately.
                 </Typography>
-                <Grid container spacing={2} sx={{ display: 'flex', padding: '4rem', flexDirection: 'row', width: '40%', justifyContent: 'center' }}>
-                    <Grid item xs={5}>
+                <Grid container sx={{ width: "30%" }} >
+                    <Grid item xs={6} sx={{padding: "1rem"}}>
                         <Button variant="contained" size="large" color="primary" href="/auth/log-in">
                             Login
                         </Button>
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={6} sx={{ padding: "1rem" }}>
                         <Button variant="outlined" size="large" color="primary" href="/auth/sign-up">
                             Register
                         </Button>
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={6}>
                         <Button variant="outlined" size="large" color="primary" href="/user">
                             Find Users
                         </Button>
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={6}>
                         <Button variant="contained" size="large" color="primary" href="/community">
                             Find Communities
                         </Button>
                     </Grid>
                 </Grid>
-            </Paper>
-        </Container>
+        </Paper>
+        </Container >
     )
 }
 
