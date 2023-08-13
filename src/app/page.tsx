@@ -1,3 +1,4 @@
+"use client";
 import ThemeHydrator from "@/components/mui/theme";
 import { Button, Container, Grid, Paper, Typography } from "@mui/material";
 import { Metadata } from "next";
@@ -15,7 +16,7 @@ function HomeComponent() {
                 <Typography variant="h6" >
                     Securely. Anonymously. Privately.
                 </Typography>
-                <Grid container spacing={2} sx={{ display: 'flex', padding: '4rem' , flexDirection: 'row', width: '40%', justifyContent: 'center' }}>
+                <Grid container spacing={2} sx={{ display: 'flex', padding: '4rem', flexDirection: 'row', width: '40%', justifyContent: 'center' }}>
                     <Grid item xs={5}>
                         <Button variant="contained" size="large" color="primary" href="/auth/log-in">
                             Login
@@ -33,7 +34,7 @@ function HomeComponent() {
                     </Grid>
                     <Grid item xs={5}>
                         <Button variant="contained" size="large" color="primary" href="/community">
-                            Find Communities 
+                            Find Communities
                         </Button>
                     </Grid>
                 </Grid>

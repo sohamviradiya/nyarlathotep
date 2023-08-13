@@ -1,7 +1,6 @@
 "use client";
-
 import { Metadata } from "next";
-import { TextField, Autocomplete, Container, Box } from "@mui/material";
+import { TextField, Autocomplete, Container, Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { User_Public } from "@/server/user/user.module";
 import Link from "next/link";
@@ -9,12 +8,12 @@ import ThemeHydrator from "@/components/mui/theme";
 
 function UserComponent() {
     return (
-        <main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "20vh", flexDirection: "column", justifyContent: "top" }}>
-            <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
+        <Container sx={{ height: "80vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "4rem" }}>
+            <Typography variant="h4" component="h1" gutterBottom>
                 Find Users
-            </h1>
+            </Typography>
             <UserSearch />
-        </main>
+        </Container>
     );
 };
 
@@ -27,10 +26,9 @@ export function UserSearch() {
         })
     }, [search_string]);
 
-    return (<Container sx={{ backgroundColor: "darkgray", padding: "0.5rem", width: "fit-content", borderRadius: "0.5rem" }}>
+    return (
         <Autocomplete
             disablePortal
-            id="combo-box-demo"
             options={users}
             sx={{ width: 300 }}
             getOptionLabel={(option) => (option.name)}
@@ -41,7 +39,6 @@ export function UserSearch() {
             )}
             renderInput={(params) => <TextField {...params} label="Users" onChange={(e) => { setSearchString(e.target.value) }} />}
         />
-    </Container>
     );
 };
 
