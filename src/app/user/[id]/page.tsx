@@ -12,7 +12,7 @@ function UserComponent({ params }: { params: { id: string } }) {
         fetchUser({ id: params.id }).then((user) => setUser(user));
     }, [params.id]);
     return (
-        <Container maxWidth="xl" sx={{height: "80vh", display: "flex", justifyContent: "center", alignItems: "center"}}>
+        <Container maxWidth="xl" sx={{ minHeight: "80vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
             {(user.email) ? <UserInfo user={user} /> : <SkeletonBundle size={3} />}
         </Container>
     );

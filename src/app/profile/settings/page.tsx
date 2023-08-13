@@ -44,7 +44,7 @@ function SettingsComponent() {
     }, [router]);
 
     return (
-        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
             <FormControl style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <TextField label="Name" variant="filled"
                     onChange={(e) => {
@@ -57,11 +57,11 @@ function SettingsComponent() {
                             setUser({ ...user, name: e.target.value });
                         }
                     }}
-                />
+                    value={user.name} />
 
                 <TextField label="Email" variant="filled" type="email" value={user.email} disabled />
-                <TextField label="Address" multiline variant="filled" onChange={(e) => { setUser({ ...user, address: e.target.value }); }} />
-                <TextField label="Bio" multiline variant="filled" onChange={(e) => { setUser({ ...user, bio: e.target.value }); }} />
+                <TextField label="Address" multiline variant="filled" onChange={(e) => { setUser({ ...user, address: e.target.value }); }} value={user.address} />
+                <TextField label="Bio" multiline variant="filled" onChange={(e) => { setUser({ ...user, bio: e.target.value }); }} value={user.bio} />
 
                 <Button variant="contained" sx={{ background: "green" }} onClick={(e) => {
                     e.preventDefault();

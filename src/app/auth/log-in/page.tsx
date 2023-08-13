@@ -25,7 +25,7 @@ function LoginComponent() {
     }, []);
 
     return (
-        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
             <FormControl variant="filled" sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <TextField
                     label="Email"
@@ -42,7 +42,7 @@ function LoginComponent() {
                         }
                     }}
                 />
-                <FormControl variant="filled" sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}>
+                <FormControl variant="filled">
                     <InputLabel htmlFor="password">Password</InputLabel>
                     <FilledInput
                         type={showPassword ? 'text' : 'password'}

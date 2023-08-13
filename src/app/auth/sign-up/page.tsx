@@ -30,7 +30,7 @@ function SignUpComponent() {
     }, []);
 
     return (
-        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
             <FormControl style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <TextField
                     label="Name"
@@ -62,47 +62,34 @@ function SignUpComponent() {
                         }
                     }}
                 />
-                <InputLabel htmlFor="filled-adornment-password" >Password</InputLabel>
-                <FilledInput
-                    id="filled-adornment-password"
-                    type={showPassword ? 'text' : 'password'}
-                    endAdornment={
-                        <InputAdornment position="end">
-                            <IconButton
-                                aria-label="toggle password visibility"
-                                onClick={() => { setShowPassword(!showPassword) }}
-                                onMouseDown={(e) => { e.preventDefault(); }}
-                                edge="end"
-                            >
-                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                        </InputAdornment>
-                    }
-                    onChange={
-                        (e) => {
-                            if (e.target.value.length < 8) {
-                                if (!errors.includes("Password must be at least 8 characters long"))
-                                    setErrors([...errors, "Password must be at least 8 characters long"]);
-                            }
-                            else {
-                                setUser({ ...user, password: e.target.value });
-                                setErrors(errors.filter((error) => error !== "Password must be at least 8 characters long" && client_side_errors.includes(error)));
+                <FormControl variant="filled">
+                    <InputLabel htmlFor="password" >Password</InputLabel>
+                    <FilledInput id="password" type={showPassword ? 'text' : 'password'}
+                        endAdornment={
+                            <InputAdornment position="end">
+                                <IconButton onClick={() => { setShowPassword(!showPassword) }} onMouseDown={(e) => { e.preventDefault(); }} edge="end">
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        }
+                        onChange={
+                            (e) => {
+                                if (e.target.value.length < 8) {
+                                    if (!errors.includes("Password must be at least 8 characters long"))
+                                        setErrors([...errors, "Password must be at least 8 characters long"]);
+                                }
+                                else {
+                                    setUser({ ...user, password: e.target.value });
+                                    setErrors(errors.filter((error) => error !== "Password must be at least 8 characters long" && client_side_errors.includes(error)));
+                                }
                             }
                         }
-                    }
-                />
-                <TextField
-                    label="Address" multiline
-                    variant="filled"
-                    onChange={(e) => {
-                        setUser({ ...user, address: e.target.value });
-                    }} />
-                <TextField
-                    label="Bio" multiline
-                    variant="filled"
-                    onChange={(e) => {
-                        setUser({ ...user, bio: e.target.value });
-                    }} />
+                    />
+                </FormControl>
+                <TextField label="Address" multiline variant="filled" onChange={(e) => { setUser({ ...user, address: e.target.value }); }} />
+
+                <TextField label="Bio" multiline variant="filled" onChange={(e) => { setUser({ ...user, bio: e.target.value }); }} />
+
                 <Button variant="contained" sx={{ background: "green" }} onClick={(e) => {
                     e.preventDefault();
                     submitForm(user, setErrors, setWaiting).then((path) => {

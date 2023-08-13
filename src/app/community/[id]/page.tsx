@@ -14,7 +14,7 @@ function CommunityComponent({ params }: { params: { id: string } }) {
     useEffect(() => {
         fetchCommunity({ id: params.id }).then((community) => setCommunity(community));
     }, [params.id]);
-    return (<Container maxWidth="xl" sx={{ height: "80vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+    return (<Container maxWidth="xl" sx={{ minHeight: "80vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
         {(community.id) ? (<>
             <Grid container spacing={2} justifyContent="center">
                 <Grid item xs={12}>
