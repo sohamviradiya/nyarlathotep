@@ -25,7 +25,7 @@ export default function CommunityRequestButton({ id, type }: { id: string, type:
     }
     else {
         return (<Button variant="contained" onClick={() => { sendRequest(id, type).then(() => { setIsRequested(true); }); }}>
-            Request
+            Request to {type}
         </Button>);
     }
 }
