@@ -1,20 +1,54 @@
-import { Metadata, ResolvingMetadata } from "next";
+import ThemeHydrator from "@/components/mui/theme";
+import { Button, Container, Grid, Paper, Typography } from "@mui/material";
+import { Metadata } from "next";
+
+function HomeComponent() {
+    return (
+        <Container maxWidth="xl">
+            <Paper elevation={3} sx={{ height: "80vh", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '3rem' }}>
+                <Typography variant="h4" >
+                    NyarlaThotep Secure Chat App
+                </Typography>
+                <Typography variant="h5" >
+                    Connect with anyone, anywhere, anytime.
+                </Typography>
+                <Typography variant="h6" >
+                    Securely. Anonymously. Privately.
+                </Typography>
+                <Grid container spacing={2} sx={{ display: 'flex', padding: '4rem' , flexDirection: 'row', width: '40%', justifyContent: 'center' }}>
+                    <Grid item xs={5}>
+                        <Button variant="contained" size="large" color="primary" href="/auth/log-in">
+                            Login
+                        </Button>
+                    </Grid>
+                    <Grid item xs={5}>
+                        <Button variant="outlined" size="large" color="primary" href="/auth/sign-up">
+                            Register
+                        </Button>
+                    </Grid>
+                    <Grid item xs={5}>
+                        <Button variant="outlined" size="large" color="primary" href="/user">
+                            Find Users
+                        </Button>
+                    </Grid>
+                    <Grid item xs={5}>
+                        <Button variant="contained" size="large" color="primary" href="/community">
+                            Find Communities 
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Paper>
+        </Container>
+    )
+}
 
 export default function Home() {
     return (
-        <main style={{ backgroundColor: "#202020", height: "100vh", display: "flex", gap: "10vh", flexDirection: "column", justifyContent: "top" }}>
-            <h1 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
-                Welcome To NyarlaThotep
-            </h1>
-            <h2 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
-                Join Various Communities
-            </h2>
-            <h2 style={{ backgroundColor: "darkblue", padding: "2rem", width: "100%", textAlign: "center" }}>
-                Connect With Other Users
-            </h2>
-        </main>
+        <ThemeHydrator>
+            <HomeComponent />
+        </ThemeHydrator>
     )
-}
+};
 
 
 export const metadata: Metadata = {
