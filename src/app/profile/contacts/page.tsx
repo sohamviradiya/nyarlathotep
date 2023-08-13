@@ -1,5 +1,7 @@
+"use client";
 import ThemeHydrator from "@/components/mui/theme";
 import { Contact } from "@/server/contact/contact.module";
+import { Card, CardContent, Container, List, ListItem, Typography } from "@mui/material";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 function ContactListComponent() {
@@ -8,23 +10,34 @@ function ContactListComponent() {
         fetchContacts().then(contacts => setContacts(contacts));
     }, []);
     return (
-        <>
-            <ul>
+        <Container>
+            <List>
                 {contacts.map(contact => (
-                    <ContactComponent key={contact.id} contact={contact} id={localStorage.getItem("email") || ""} />
+                    <ListItem key={contact.id}>
+                        <ContactComponent contact={contact} />
+                    </ListItem>
                 ))}
-            </ul>
-        </>
+            </List>
+        </Container>
     );
 };
 
-function ContactComponent({ contact, id }: { contact: Contact, id: string }) {
+function ContactComponent({ contact }: { contact: Contact }) {
+    const loggedInUserId = localStorage.getItem('id');
     return (
-        <li>
-            <h3>{id == contact.sender ? contact.receiver : contact.sender}</h3>
-            <h4>{new Date(contact.established).toUTCString()}</h4>
-            <Link href={`/contacts/${contact.id}`}> View </Link>
-        </li>
+        <Card variant="outlined">
+            <CardContent>
+                <Typography variant="h5">
+                    {loggedInUserId === contact.sender ? contact.receiver : contact.sender}
+                </Typography>
+                <Typography variant="subtitle1">
+                    {new Date(contact.established).toUTCString()}
+                </Typography>
+                <Link href={`/contacts/${contact.id}`} color="primary">
+                    View
+                </Link>
+            </CardContent>
+        </Card>
     );
 };
 
