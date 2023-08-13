@@ -6,7 +6,7 @@ import { Metadata } from "next";
 function HomeComponent() {
     return (
         <Container maxWidth="xl">
-            <Paper elevation={3} sx={{ height: "80vh", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '3rem' }}>
+            <Paper elevation={3} sx={{ minHeight: "80vh", display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '3rem' }}>
                 <Typography variant="h4" >
                     NyarlaThotep Secure Chat App
                 </Typography>

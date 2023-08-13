@@ -4,6 +4,7 @@ import { Contact } from "@/server/contact/contact.module";
 import { Card, CardContent, Container, List, ListItem, Typography } from "@mui/material";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+
 function ContactListComponent() {
     const [contacts, setContacts] = useState<Contact[]>([]);
     useEffect(() => {
@@ -58,7 +59,7 @@ async function fetchContacts() {
 export default function ContactList() {
     return (
         <ThemeHydrator>
-            <ContactList />
+            <ContactListComponent />
         </ThemeHydrator>
     );
 };

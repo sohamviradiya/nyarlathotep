@@ -25,10 +25,10 @@ function UpdateComponent() {
     }, [router]);
 
     return (
-        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+        <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
             <FormControl variant="filled" sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <TextField label="Email" variant="filled" type="email" disabled value={user.email} />
-                <FormControl variant="filled" sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}>
+                <FormControl variant="filled">
                     <InputLabel htmlFor="current-password" >Password</InputLabel>
                     <FilledInput id="current-password" type={showPassword ? 'text' : 'password'} endAdornment={
                         <InputAdornment position="end">
@@ -51,7 +51,7 @@ function UpdateComponent() {
                         }
                     />
                 </FormControl>
-                <FormControl variant="filled" sx={{ display: "flex", flexDirection: "row", gap: "1rem" }}>
+                <FormControl variant="filled">
                     <InputLabel htmlFor="new-password" >New Password</InputLabel>
                     <FilledInput id="new-password" type={showPassword ? 'text' : 'password'} endAdornment={
                         <InputAdornment position="end">
