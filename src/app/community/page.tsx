@@ -1,3 +1,4 @@
+"use client";
 import { Metadata } from "next";
 import { TextField, Autocomplete, Container, Box } from "@mui/material";
 import { useEffect, useState } from "react";

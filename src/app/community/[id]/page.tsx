@@ -1,4 +1,4 @@
-
+"use client";
 import AnnouncementInput from "@/components/community/input.announcement";
 import MemberList from "@/components/community/member-list.community";
 import ThemeHydrator from "@/components/mui/theme";
