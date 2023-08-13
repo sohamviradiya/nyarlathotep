@@ -22,7 +22,7 @@ function ContactComponent({ contact, id }: { contact: Contact, id: string }) {
     return (
         <li>
             <h3>{id == contact.sender ? contact.receiver : contact.sender}</h3>
-            <h4>{new Date(contact.established).toLocaleDateString()}</h4>
+            <h4>{new Date(contact.established).toUTCString()}</h4>
             <Link href={`/contacts/${contact.id}`}> View </Link>
         </li>
     );

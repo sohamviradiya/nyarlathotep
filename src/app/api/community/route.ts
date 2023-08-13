@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         const token = extractToken(request.headers);
         if (!token) return ApiResponse(Unauthorized({ message: "No token provided" }));
         const name = body.name || `Community #${generateHexString()}`;
-        const description = body.description || `${name} was created on ${new Date().toLocaleDateString()}`;
+        const description = body.description || `${name} was created on ${new Date().toUTCString()}`;
         return ApiResponse(await createCommunity({
             name,
             description,

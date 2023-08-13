@@ -18,7 +18,7 @@ export default function MemberList({ members }: { members: Member[] }) {
                                 {user.email}
                             </Link>
                             <Typography variant="body1" component="div">
-                                Last Seen: {(new Date(user.last_online)).toLocaleString()}
+                                Last Seen: {(new Date(user.last_online)).toUTCString()}
                             </Typography>
 
                         </CardContent>
