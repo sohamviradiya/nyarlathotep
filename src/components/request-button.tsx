@@ -2,7 +2,7 @@ import { APPEAL_TYPE } from "@/server/appeal/appeal.module";
 import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 
-export default function CommunityRequestButton({ id, type }: { id: string, type: APPEAL_TYPE }) {
+export default function RequestButton({ id, type }: { id: string, type: APPEAL_TYPE }) {
     const [isRequested, setIsRequested] = useState<boolean>(false);
     useEffect(() => {
         if (localStorage.getItem('email') == id)

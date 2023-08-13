@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import ThemeHydrator from "@/components/mui/theme";
-import { Container, Paper, Typography } from "@mui/material";
+import { Container, List, ListItem, Paper, Typography } from "@mui/material";
 
 function AnnouncementListComponent({ params }: { params: { id: string } }) {
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -20,22 +20,27 @@ function AnnouncementListComponent({ params }: { params: { id: string } }) {
             setAnnouncements(announcements);
             setLoading(false);
         });
-    });
-    if (loading) return <SkeletonBundle size={4} />;
+    }, [params.id, router]);
+
     return (<Container sx={{ minHeight: "80vh", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: "4rem" }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-            Announcements
-        </Typography>
-        {announcements.map((announcement) => (
-            <AnnouncementComponent announcement={announcement} key={announcement.id} />
-        ))}
+        {(!loading) ? <>
+            <Typography variant="h4" component="h1" gutterBottom>Announcements</Typography>
+            <List>
+                {announcements.map((announcement) => (
+                    <ListItem key={announcement.id}>
+                        <AnnouncementComponent announcement={announcement} />
+                    </ListItem>
+                ))}
+            </List>
+        </> : <SkeletonBundle size={4} />}
     </Container>
     );
 };
 
 function AnnouncementComponent({ announcement }: { announcement: Announcement }) {
+    console.log(announcement);
     return (
-        <Paper elevation={3}>
+        <Paper elevation={3} sx={{padding: "1rem"}}>
             <Typography variant="h6">
                 {announcement.user}
             </Typography>

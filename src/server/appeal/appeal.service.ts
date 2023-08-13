@@ -275,14 +275,14 @@ export async function acceptAppeal(appeal_id: string, token: string): Promise<Se
         else if (appeal.type == APPEAL_TYPE_ENUM.ANNOUNCE) {
             const role_service_response = await getMemberRole(community, senderRef.id);
             if (!role_service_response.data) return role_service_response as Service_Response<null>;
-
-            message = "Your appeal to announce in " + community.name + " has been accepted";
+            
             const id = `${community.id}.${Timestamp.now().seconds}`;
             await AnnouncementCollection.doc(`${community.id}.${Timestamp.now().seconds}`).set({
                 content: appeal.message,
                 user: senderRef,
                 time: Timestamp.now(),
             });
+            message = "Your appeal to announce in " + community.name + " has been accepted";
             await communityRef.update({
                 announcements: FieldValue.arrayUnion(AnnouncementCollection.doc(id))
             });

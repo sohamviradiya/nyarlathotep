@@ -30,7 +30,7 @@ function Invitation({ invitation_id }: { invitation_id: string }) {
     }, [invitation_id]);
 
     useEffect(() => {
-        if (status === APPEAL_STATUS.PENDING) return;
+        if (status === APPEAL_STATUS.PENDING || invitation?.status === status) return;
         const token = localStorage.getItem('token') as string;
         var actionResponse;
         if (status === APPEAL_STATUS.ACCEPTED)
@@ -46,7 +46,7 @@ function Invitation({ invitation_id }: { invitation_id: string }) {
                 setStatus(appeal.status as APPEAL_STATUS_TYPE);
             });
         });
-    }, [status, invitation_id]);
+    }, [status, invitation_id, invitation?.status]);
     return ((invitation) ? (<Card variant="outlined" sx={{ width: "100%", padding: "1rem" }}>
         <CardHeader title={`${invitation.type} from ${invitation.sender}`} subheader={`${new Date(invitation.status_changed).toUTCString()}`} />
         <Typography variant="body1" paragraph>message: {invitation.message} </Typography>
