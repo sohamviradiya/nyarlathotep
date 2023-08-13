@@ -11,7 +11,7 @@ function ContactListComponent() {
         fetchContacts().then(contacts => setContacts(contacts));
     }, []);
     return (
-        <Container>
+        <Container maxWidth="xl" sx= {{ padding: "6rem", minHeight: "80vh" }}>
             <List>
                 {contacts.map(contact => (
                     <ListItem key={contact.id}>
@@ -24,7 +24,7 @@ function ContactListComponent() {
 };
 
 function ContactComponent({ contact }: { contact: Contact }) {
-    const loggedInUserId = localStorage.getItem('id');
+    const loggedInUserId = localStorage.getItem("email");
     return (
         <Card variant="outlined">
             <CardContent>
@@ -34,7 +34,7 @@ function ContactComponent({ contact }: { contact: Contact }) {
                 <Typography variant="subtitle1">
                     {new Date(contact.established).toUTCString()}
                 </Typography>
-                <Link href={`/contacts/${contact.id}`} color="primary">
+                <Link href={`/contact/${contact.id}`} color="primary">
                     View
                 </Link>
             </CardContent>

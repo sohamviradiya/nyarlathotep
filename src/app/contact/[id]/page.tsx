@@ -5,7 +5,7 @@ import MessageComponent from "@/components/contact/message.contact";
 import { MESSAGE_DIRECTION, MESSAGE_DIRECTION_TYPE } from "@/server/message/message.module";
 import MessageInput from "@/components/contact/input.contact";
 import ThemeHydrator from "@/components/mui/theme";
-import { Container, Grid, List, ListItem, Typography } from "@mui/material";
+import { Box, Container, Grid, List, ListItem, Typography } from "@mui/material";
 import SkeletonBundle from "@/components/skeleton-bundle";
 
 function ContactComponent({ params }: { params: { id: string } }) {
@@ -13,39 +13,34 @@ function ContactComponent({ params }: { params: { id: string } }) {
     useEffect(() => {
         fetchContact(params.id).then((contact) => setContact(contact));
     }, [params.id]);
-
-    if (!contact)
-        return <SkeletonBundle size={6} />;
     return (
-        <Container maxWidth="xl">
-            <Typography variant="h4">{contact.sender}</Typography>
-            <Typography variant="h4">{contact.receiver}</Typography>
-            <Grid container spacing={2}>
-                <Grid item xs={6}>
-                    <Container sx={{ width: "100%" }}>
-                        <Typography variant="h5">Incoming</Typography>
-                        <MessageList
-                            messages={contact.messages.incoming as string[]}
-                            direction={MESSAGE_DIRECTION.INCOMING}
-                        />
-                    </Container>
+        <Container maxWidth="xl" sx={{ padding: "4rem", minHeight: "80vh", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            {(contact) ? <>
+                <Typography variant="h4">{contact.sender} & {contact.receiver}</Typography>
+                <Box sx={{ width: "20%", padding: "2rem" }}>
+                    <MessageInput id={contact.id} reload={() => { fetchContact(params.id).then((contact) => setContact(contact)); }} />
+                </Box>
+                <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                        <Container sx={{ width: "100%", border: "1px solid white", padding: "2rem" }}>
+                            <Typography variant="h5">Incoming</Typography>
+                            <MessageList
+                                messages={contact.messages.incoming as string[]}
+                                direction={MESSAGE_DIRECTION.INCOMING}
+                            />
+                        </Container>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Container sx={{ width: "100%", border: "1px solid white", padding: "2rem" }}>
+                            <Typography variant="h5">Outgoing</Typography>
+                            <MessageList
+                                messages={contact.messages.outgoing as string[]}
+                                direction={MESSAGE_DIRECTION.OUTGOING}
+                            />
+                        </Container>
+                    </Grid>
                 </Grid>
-                <Grid item xs={6}>
-                    <Container sx={{ width: "100%" }}>
-                        <Typography variant="h5">Outgoing</Typography>
-                        <MessageList
-                            messages={contact.messages.outgoing as string[]}
-                            direction={MESSAGE_DIRECTION.OUTGOING}
-                        />
-                    </Container>
-                </Grid>
-            </Grid>
-            <MessageInput
-                id={contact.id}
-                reload={() => {
-                    fetchContact(params.id).then((contact) => setContact(contact));
-                }}
-            />
+            </> : <SkeletonBundle size={6} />}
         </Container>
     );
 };

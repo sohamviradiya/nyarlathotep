@@ -26,20 +26,21 @@ export default function MessageComponent({ id, direction }: { id: string, direct
             <Typography variant="subtitle1">
                 {message.status} at {new Date(message.status_changed).toLocaleTimeString()}
             </Typography>
-            <MessageActions {...message} setMessage={() => { setMessage({ ...message, direction }); }} />
+            <MessageActions {...message} setMessage={setMessage} />
         </Box>
     )
 };
 
 function MessageActions({ id, direction, status, content, setMessage: setMessage }: { id: string, direction: "INCOMING" | "OUTGOING", status: MESSAGE_STATUS_TYPE, content: string, setMessage: (message: Message) => void }): JSX.Element {
     if (direction == MESSAGE_DIRECTION.INCOMING) {
-        if (status == MESSAGE_STATUS.READ)
+        if (status == MESSAGE_STATUS.READ) {
             return (
                 <>
                     <LikeButton setMessage={setMessage} id={id} liked={false} />
                     <DislikeButton setMessage={setMessage} id={id} disliked={false} />
                 </>
             );
+        }
         else if (status == MESSAGE_STATUS.APPROVED)
             return (
                 <>
@@ -64,7 +65,7 @@ function MessageActions({ id, direction, status, content, setMessage: setMessage
         else if (status == MESSAGE_STATUS.DRAFT)
             return <></>;
         else
-            return <>Reload the Page</>;
+            return <>Reload the Fookin Page</>;
     }
     else if (status == MESSAGE_STATUS.DRAFT) {
         return (
@@ -166,7 +167,6 @@ async function editMessage(id: string, content: string) {
     });
     const data = await response.json();
     if (!data?.payload) {
-        console.error(data);
         return;
     }
     else
@@ -213,7 +213,6 @@ async function markMessageRead(id: string) {
     });
     const data = await response.json();
     if (!data?.payload) {
-        console.error(data);
         return;
     }
     else
