@@ -144,7 +144,7 @@ export async function updateUser(input: User_Input, token: string): Promise<Serv
             message: "User not found",
         };
     }
-    await userRef.update(input);
+    await userRef.update({ ...input });
     const new_user = castToProfile(await userRef.get());
     return {
         code: STATUS_CODES.OK,

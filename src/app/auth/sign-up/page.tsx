@@ -62,39 +62,35 @@ function SignUpComponent() {
                         }
                     }}
                 />
-
-                <FormControl variant="filled">
-                    <InputLabel htmlFor="filled-adornment-password" >Password</InputLabel>
-                    <FilledInput
-                        id="filled-adornment-password"
-                        type={showPassword ? 'text' : 'password'}
-                        endAdornment={
-                            <InputAdornment position="end">
-                                <IconButton
-                                    aria-label="toggle password visibility"
-                                    onClick={() => { setShowPassword(!showPassword) }}
-                                    onMouseDown={(e) => { e.preventDefault(); }}
-                                    edge="end"
-                                >
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                </IconButton>
-                            </InputAdornment>
-                        }
-
-                        onChange={
-                            (e) => {
-                                if (e.target.value.length < 8) {
-                                    if (!errors.includes("Password must be at least 8 characters long"))
-                                        setErrors([...errors, "Password must be at least 8 characters long"]);
-                                }
-                                else {
-                                    setUser({ ...user, password: e.target.value });
-                                    setErrors(errors.filter((error) => error !== "Password must be at least 8 characters long" && client_side_errors.includes(error)));
-                                }
+                <InputLabel htmlFor="filled-adornment-password" >Password</InputLabel>
+                <FilledInput
+                    id="filled-adornment-password"
+                    type={showPassword ? 'text' : 'password'}
+                    endAdornment={
+                        <InputAdornment position="end">
+                            <IconButton
+                                aria-label="toggle password visibility"
+                                onClick={() => { setShowPassword(!showPassword) }}
+                                onMouseDown={(e) => { e.preventDefault(); }}
+                                edge="end"
+                            >
+                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    }
+                    onChange={
+                        (e) => {
+                            if (e.target.value.length < 8) {
+                                if (!errors.includes("Password must be at least 8 characters long"))
+                                    setErrors([...errors, "Password must be at least 8 characters long"]);
+                            }
+                            else {
+                                setUser({ ...user, password: e.target.value });
+                                setErrors(errors.filter((error) => error !== "Password must be at least 8 characters long" && client_side_errors.includes(error)));
                             }
                         }
-                    />
-                </FormControl>
+                    }
+                />
                 <TextField
                     label="Address" multiline
                     variant="filled"
@@ -118,7 +114,7 @@ function SignUpComponent() {
             </FormControl>
             {(errors.length > 0) ? <ErrorList errors={errors} /> : <></>}
             {waiting ? <Alert severity="info">Wait a moment...</Alert> : <></>}
-        </Container>
+        </Container >
     )
 };
 
