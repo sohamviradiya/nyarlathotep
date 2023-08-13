@@ -17,7 +17,7 @@ function UserComponent() {
     );
 };
 
-export function UserSearch() {
+function UserSearch() {
     const [users, setUsers] = useState<User_Public[]>([]);
     const [search_string, setSearchString] = useState<string>("");
     useEffect(() => {

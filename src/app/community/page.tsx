@@ -18,7 +18,7 @@ function CommunityComponent() {
     )
 }
 
-export function CommunitySearch() {
+function CommunitySearch() {
     const [communities, setCommunities] = useState<User_Public[]>([]);
     const [search_string, setSearchString] = useState<string>("");
     useEffect(() => {
