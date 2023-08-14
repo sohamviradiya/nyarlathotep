@@ -29,7 +29,7 @@ function LogoutComponent() {
 
                 }}>Yes</Button>
                 <Button onClick={() => {
-                    router.push("/");
+                    router.back();
                 }}>No</Button>
             </ButtonGroup>
         </Container>
