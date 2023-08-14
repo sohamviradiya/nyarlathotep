@@ -28,6 +28,9 @@ export default function Header() {
 
 function AuthActions() {
     const { email, setEmail } = useContext(AuthContext);
+    useEffect(() => {
+        setEmail(localStorage.getItem('email') || '');
+    }, [setEmail]);
     if (email?.length) {
         return (
             <>
