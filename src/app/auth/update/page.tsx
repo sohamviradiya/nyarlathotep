@@ -1,11 +1,11 @@
 "use client";
-import { Metadata } from "next";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, Button, Container, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import ErrorList from "@/components/error-list";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
+import { AuthContext } from "@/components/context/auth-context";
 
 const client_side_errors = ["Password must be at least 8 characters long", "Invalid Email"];
 
@@ -15,14 +15,16 @@ function UpdateComponent() {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [waiting, setWaiting] = useState<boolean>(false);
     const router = useRouter();
-
+    const { email, setEmail } = useContext(AuthContext);
     useEffect(() => {
-        const email = localStorage.getItem("email");
-        if (!email) router.push("/auth/log-in");
+        if (email.length === 0)
+            router.push("/auth/log-in");
         else
             setUser({ currentPassword: "", newPassword: "", email: email });
+        setEmail("");
+        localStorage.removeItem("email");
         localStorage.removeItem("token");
-    }, [router]);
+    }, [router, email, setEmail]);
 
     return (
         <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
@@ -77,8 +79,10 @@ function UpdateComponent() {
                 <Button variant="contained" sx={{ background: "green" }} onClick={(e) => {
                     e.preventDefault();
                     submitForm(user, setErrors, setWaiting).then((email) => {
-                        if (email)
+                        if (email) {
+                            setEmail(email);
                             router.push('/profile');
+                        }
                     });
                 }} disableElevation disabled={errors.length > 0}>
                     Submit
@@ -128,9 +132,9 @@ async function submitForm(user: {
 
 export default function Update() {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <UpdateComponent />
-        </GlobalContext>
+        </GlobalContextProvider>
     )
 }
 

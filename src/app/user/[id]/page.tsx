@@ -3,7 +3,7 @@ import UserInfo from "@/components/info.user";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Public } from "@/server/user/user.module";
 import { useEffect, useState } from "react";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
 import { Container } from "@mui/material";
 
 function UserComponent({ params }: { params: { id: string } }) {
@@ -26,8 +26,8 @@ async function fetchUser({ id }: { id: string }): Promise<User_Public> {
 
 export default function ContactList({ params }: { params: { id: string } }) {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <UserComponent params={params} />
-        </GlobalContext>
+        </GlobalContextProvider>
     );
 };

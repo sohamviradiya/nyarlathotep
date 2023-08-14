@@ -1,9 +1,10 @@
 "use client";
-import GlobalContext from "@/components/global-context";
+import { AuthContext } from "@/components/context/auth-context";
+import GlobalContextProvider from "@/components/context/global-context";
 import { Contact } from "@/server/contact/contact.module";
 import { Card, CardContent, Container, List, ListItem, Typography } from "@mui/material";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 
 function ContactListComponent() {
     const [contacts, setContacts] = useState<Contact[]>([]);
@@ -24,12 +25,12 @@ function ContactListComponent() {
 };
 
 function ContactComponent({ contact }: { contact: Contact }) {
-    const loggedInUserId = localStorage.getItem("email");
+    const { email, setEmail } = useContext(AuthContext);
     return (
         <Card variant="outlined">
             <CardContent>
                 <Typography variant="h5">
-                    {loggedInUserId === contact.sender ? contact.receiver : contact.sender}
+                    {email === contact.sender ? contact.receiver : contact.sender}
                 </Typography>
                 <Typography variant="subtitle1">
                     {new Date(contact.established).toLocaleString()}
@@ -58,8 +59,8 @@ async function fetchContacts() {
 
 export default function ContactList() {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <ContactListComponent />
-        </GlobalContext>
+        </GlobalContextProvider>
     );
 };

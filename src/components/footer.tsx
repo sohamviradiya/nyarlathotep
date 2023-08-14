@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { Container, Toolbar, Typography } from '@mui/material';
-import GlobalContext from '@/components/global-context';
+import GlobalContextProvider from '@/components/context/global-context';
 import { CopyrightOutlined, GitHub } from '@mui/icons-material';
 
 export default function Footer() {

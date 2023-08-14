@@ -1,7 +1,7 @@
 "use client";
 import AnnouncementInput from "@/components/community/input.announcement";
 import MemberList from "@/components/community/member-list.community";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
 import RequestButton from "@/components/request-button";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Community_Public, MEMBER_ROLE_TYPE } from "@/server/community/community.module";
@@ -107,8 +107,8 @@ async function fetchRole(id: string) {
 
 export default function Community({ params }: { params: { id: string } }) {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <CommunityComponent params={params} />
-        </GlobalContext>
+        </GlobalContextProvider>
     )
 };

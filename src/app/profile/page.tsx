@@ -6,15 +6,17 @@ import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Private, User_Public } from "@/server/user/user.module";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
 import { Box, Button, Container, Grid } from "@mui/material";
 
 function ProfileComponent() {
     const router = useRouter();
     const [user, setUser] = useState<User_Private>();
     const [waiting, setWaiting] = useState<boolean>(true);
+
+    const token = localStorage.getItem('token');
+
     useEffect(() => {
-        const token = localStorage.getItem('token') as string;
         if (!token) router.push("/auth/log-in");
         else {
             fetchProfile(token)
@@ -28,7 +30,8 @@ function ProfileComponent() {
                     router.push("/auth/log-in");
                 });
         }
-    }, [router]);
+    }, [router, token]);
+
     return (<Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh", padding: "6rem" }}>
         {(waiting || !user) ? (<SkeletonBundle size={4} />) : (
             <Grid container spacing={2}>
@@ -71,8 +74,8 @@ async function fetchProfile(token: string): Promise<User_Private> {
 
 export default function Profile() {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <ProfileComponent />
-        </GlobalContext>
+        </GlobalContextProvider>
     );
 }

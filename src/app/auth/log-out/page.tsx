@@ -1,36 +1,25 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Metadata } from "next";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
 import { Button, ButtonGroup, Container, Typography } from "@mui/material";
+import { AuthContext } from "@/components/context/auth-context";
+import { useContext } from "react";
 
 function LogoutComponent() {
     const router = useRouter();
+    const { email, setEmail } = useContext(AuthContext);
     return (
         <Container sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem',
-            height: '75vh',
-            justifyContent: 'center',
-            alignItems: 'center',
+            display: 'flex', flexDirection: 'column', gap: '1rem', height: '75vh', justifyContent: 'center', alignItems: 'center',
         }}>
-            <Typography variant="h4"
-                noWrap
-                sx={{
-                    fontWeight: 700,
-                }}
-            >Are you sure you want to log out?</Typography>
-            <ButtonGroup variant="contained">
-                <Button onClick={() => {
-                    localStorage.removeItem("email");
-                    localStorage.removeItem("token");
-                    router.push("/");
-
-                }}>Yes</Button>
-                <Button onClick={() => {
-                    router.back();
-                }}>No</Button>
+            <Typography variant="h4" noWrap sx={{ fontWeight: 700, }}>Are you sure you want to log out?</Typography>
+            <ButtonGroup variant="contained">    <Button onClick={() => {
+                setEmail("");
+                localStorage.removeItem("email");
+                localStorage.removeItem("token");
+                router.push("/");
+            }}>Yes</Button>
+                <Button onClick={() => { router.back(); }}>No</Button>
             </ButtonGroup>
         </Container>
     )
@@ -39,8 +28,8 @@ function LogoutComponent() {
 
 export default function Logout() {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <LogoutComponent />
-        </GlobalContext>
+        </GlobalContextProvider>
     );
 }

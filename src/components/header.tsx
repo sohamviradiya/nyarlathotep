@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect, useContext } from 'react';
 import { AppBar, Toolbar, Container, Typography } from '@mui/material';
-import GlobalContext from '@/components/global-context';
+import GlobalContextProvider from '@/components/context/global-context';
 import Link from 'next/link';
+import { AuthContext } from './context/auth-context';
 
 export default function Header() {
     return (
@@ -26,11 +27,8 @@ export default function Header() {
 };
 
 function AuthActions() {
-    const [user, setUser] = useState<string>("");
-    useEffect(() => {
-        setUser(localStorage.getItem("email") || "");
-    }, []);
-    if (user?.length) {
+    const { email, setEmail } = useContext(AuthContext);
+    if (email?.length) {
         return (
             <>
                 <Link href="/profile">

@@ -1,5 +1,5 @@
 "use client";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
 import { Button, Container, Grid, Paper, Typography } from "@mui/material";
 import { Metadata } from "next";
 
@@ -45,9 +45,9 @@ function HomeComponent() {
 
 export default function Home() {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <HomeComponent />
-        </GlobalContext>
+        </GlobalContextProvider>
     )
 };
 

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Appeal } from "@/server/appeal/appeal.module";
 import InvitationList from "@/components/invitations-list";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
 
 function AppealListComponent({ params }: { params: { id: string } }) {
     const [appeals, setAppeals] = useState<any[]>([]);
@@ -44,8 +44,8 @@ async function fetchAppeals(id: string) {
 
 export default function Appeals({ params }: { params: { id: string } }) {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <AppealListComponent params={params} />
-        </GlobalContext>
+        </GlobalContextProvider>
     )
 }

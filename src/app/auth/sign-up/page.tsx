@@ -1,13 +1,14 @@
 "use client";
 import { Metadata } from "next";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import ErrorList from "@/components/error-list";
-import { User_Input } from "@/server/user/user.module";
+import { User_Input, User_Private } from "@/server/user/user.module";
 import { Alert, Button, Container, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRouter } from "next/navigation";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
+import { AuthContext } from "@/components/context/auth-context";
 
 const client_side_errors = ["Password must be at least 8 characters long", "Invalid Email", "Name too short"];
 
@@ -16,18 +17,13 @@ function SignUpComponent() {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [waiting, setWaiting] = useState<boolean>(false);
     const router = useRouter();
-    const [user, setUser] = useState<User_Input>({
-        password: "",
-        email: "",
-        name: "",
-        address: "",
-        bio: "",
-    });
-
+    const [user, setUser] = useState<User_Input>({ password: "", email: "", name: "", address: "", bio: "", });
+    const { email, setEmail } = useContext(AuthContext);
     useEffect(() => {
+        setEmail("");
         localStorage.removeItem("email");
         localStorage.removeItem("token");
-    }, []);
+    }, [setEmail]);
 
     return (
         <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
@@ -92,8 +88,10 @@ function SignUpComponent() {
 
                 <Button variant="contained" sx={{ background: "green" }} onClick={(e) => {
                     e.preventDefault();
-                    submitForm(user, setErrors, setWaiting).then((path) => {
-                        router.push('/auth/log-in');
+                    submitForm(user, setErrors, setWaiting).then((data) => {
+                        if (data?.email) {
+                            router.push("/auth/log-in");
+                        }
                     });
                 }} disableElevation disabled={errors.length > 0}>
                     Submit
@@ -118,7 +116,7 @@ async function submitForm(user: User_Input, setErrors: (errors: string[]) => voi
     });
     if (response.ok) {
         const data = await response.json();
-        return data;
+        return data.payload.user as User_Private;
     }
     else {
         const data = await response.json();
@@ -130,8 +128,8 @@ async function submitForm(user: User_Input, setErrors: (errors: string[]) => voi
 
 export default function SignUp() {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <SignUpComponent />
-        </GlobalContext>
+        </GlobalContextProvider>
     );
 };

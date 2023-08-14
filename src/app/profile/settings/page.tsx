@@ -7,7 +7,7 @@ import { Alert, Button, Container, FilledInput, FormControl, IconButton, InputAd
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRouter } from "next/navigation";
-import GlobalContext from "@/components/global-context";
+import GlobalContextProvider from "@/components/context/global-context";
 
 const client_side_errors = ["Password must be at least 8 characters long", "Invalid Email", "Name too short"];
 
@@ -116,8 +116,8 @@ async function fetchProfile(token: string): Promise<User_Private> {
 
 export default function SignUp() {
     return (
-        <GlobalContext>
+        <GlobalContextProvider>
             <SettingsComponent />
-        </GlobalContext>
+        </GlobalContextProvider>
     );
 };

@@ -1,32 +1,30 @@
 import { APPEAL_TYPE } from "@/server/appeal/appeal.module";
 import { Button } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "./context/auth-context";
 
 export default function RequestButton({ id, type }: { id: string, type: APPEAL_TYPE }) {
     const [isRequested, setIsRequested] = useState<boolean>(false);
+    const { email, setEmail } = useContext(AuthContext);
     useEffect(() => {
-        if (localStorage.getItem('email') == id)
+        if (email == id)
             return;
-        const request_id = `${localStorage.getItem('email')}~${id}.${type}`;
+        const request_id = `${email}~${id}.${type}`;
         fetchRequest(request_id).then((request) => {
             if (request)
                 setIsRequested(true);
             else
                 setIsRequested(false);
         });
-    }, [id, type]);
-    if (localStorage.getItem('email') == id) {
+    }, [id, type, email]);
+
+    if (!email.length || email == id)
         return <></>;
-    }
     if (isRequested) {
-        return (<Button variant="contained" onClick={() => { withdrawRequest(id, type).then(() => { setIsRequested(false); }); }}>
-            Withdraw Request
-        </Button >);
+        return (<Button variant="contained" onClick={() => { withdrawRequest(id, type, email).then(() => { setIsRequested(false); }); }}> Withdraw Request</Button >);
     }
     else {
-        return (<Button variant="contained" onClick={() => { sendRequest(id, type).then(() => { setIsRequested(true); }); }}>
-            Request to {type}
-        </Button>);
+        return (<Button variant="contained" onClick={() => { sendRequest(id, type).then(() => { setIsRequested(true); }); }}>Request to {type}</Button>);
     }
 }
 
@@ -83,8 +81,8 @@ async function sendRequest(id: string, type: APPEAL_TYPE) {
     return data.payload.appeal;
 }
 
-async function withdrawRequest(id: string, type: APPEAL_TYPE) {
-    const request_id = `${localStorage.getItem("email")}~${id}.${type}`;
+async function withdrawRequest(id: string, type: APPEAL_TYPE, email: string) {
+    const request_id = `${email}~${id}.${type}`;
     const response = await fetch(`/api/appeal/${request_id}`, {
         method: "DELETE",
         headers: {

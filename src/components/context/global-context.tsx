@@ -2,7 +2,7 @@
 import { ThemeOptions, ThemeProvider, createTheme } from '@mui/material/styles';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
-import { createContext } from 'react';
+import AuthProvider from './auth-context';
 const themeOptions: ThemeOptions = {
     palette: {
         mode: 'dark',
@@ -28,12 +28,14 @@ const themeOptions: ThemeOptions = {
 
 const theme = createTheme(themeOptions);
 
-export default function GlobalContext({ children }: { children: React.ReactNode }) {
+export default function GlobalContextProvider({ children }: { children: React.ReactNode }) {
     return (
         <ThemeProvider theme={theme}>
+            <AuthProvider>
                 <Header />
                 {children}
                 <Footer />
+            </AuthProvider>
         </ThemeProvider>
     );
 };

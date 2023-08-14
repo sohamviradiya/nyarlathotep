@@ -14,15 +14,14 @@ export default function AppealList({ appeals }: { appeals: string[] }) {
 function Appeal({ id }: { id: string }) {
     const [appeal, setAppeal] = useState<Appeal | null>(null);
     const [withdrawn, setWithdrawn] = useState<boolean>(false);
-
+    const token = localStorage.getItem('token') as string;
     useEffect(() => {
-        const token = localStorage.getItem('token') as string;
         fetchAppeal(id, token).then((appeal) => {
             setAppeal(appeal);
         }).catch((err) => {
             console.error(err);
         });
-    }, [id]);
+    }, [id, token]);
     return (
         (appeal && !withdrawn) ? (
             <Card variant="outlined" sx={{ width: "100%" }}>
@@ -32,7 +31,7 @@ function Appeal({ id }: { id: string }) {
                     <Typography variant="h6" gutterBottom>status:  {appeal.status} </Typography>
                 </CardContent>
                 <CardActions disableSpacing>
-                    <Button variant="contained" color="error" onClick={() => { withdrawAppeal(id, localStorage.getItem('token') as string).then(() => { setWithdrawn(true); }) }}> Remove </Button>
+                    <Button variant="contained" color="error" onClick={() => { withdrawAppeal(id, token).then(() => { setWithdrawn(true); }) }}> Remove </Button>
                 </CardActions>
             </Card>) :
             (<></>)
