@@ -54,6 +54,7 @@ function ProfileActions() {
         <Button variant="contained" color="primary" href="/profile/settings"> Edit Profile </Button>
         <Button variant="contained" color="primary" href="/auth/update"> Change Password </Button>
         <Button variant="contained" color="primary" href="/profile/contacts"> Manage Contacts </Button>
+        <Button variant="contained" color="primary" href="/community/create"> Create Community </Button>
     </Box>)
 };
 
