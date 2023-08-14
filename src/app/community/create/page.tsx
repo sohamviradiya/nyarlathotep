@@ -3,7 +3,7 @@ import { useState } from "react";
 import ErrorList from "@/components/error-list";
 import { Alert, Button, Container, FormControl, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 import { Community_Input } from "@/server/community/community.module";
 
 const client_side_errors = ["Password must be at least 8 characters long", "Invalid Email", "Name too short"];

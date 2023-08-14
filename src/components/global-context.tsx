@@ -1,7 +1,8 @@
-
+"use client";
 import { ThemeOptions, ThemeProvider, createTheme } from '@mui/material/styles';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import { createContext } from 'react';
 const themeOptions: ThemeOptions = {
     palette: {
         mode: 'dark',
@@ -30,9 +31,9 @@ const theme = createTheme(themeOptions);
 export default function GlobalContext({ children }: { children: React.ReactNode }) {
     return (
         <ThemeProvider theme={theme}>
-            <Header />
-            {children}
-            <Footer />
+                <Header />
+                {children}
+                <Footer />
         </ThemeProvider>
     );
 };

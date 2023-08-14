@@ -1,5 +1,5 @@
 "use client";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 import { Button, Container, Grid, Paper, Typography } from "@mui/material";
 import { Metadata } from "next";
 

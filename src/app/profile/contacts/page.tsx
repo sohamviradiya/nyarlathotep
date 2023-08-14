@@ -1,5 +1,5 @@
 "use client";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 import { Contact } from "@/server/contact/contact.module";
 import { Card, CardContent, Container, List, ListItem, Typography } from "@mui/material";
 import Link from "next/link";

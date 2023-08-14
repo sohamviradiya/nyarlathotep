@@ -3,7 +3,7 @@ import { Announcement } from "@/server/community/community.module";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SkeletonBundle from "@/components/skeleton-bundle";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 import { Container, List, ListItem, Paper, Typography } from "@mui/material";
 
 function AnnouncementListComponent({ params }: { params: { id: string } }) {

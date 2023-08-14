@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Metadata } from "next";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 import { Button, ButtonGroup, Container, Typography } from "@mui/material";
 
 function LogoutComponent() {

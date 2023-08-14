@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Appeal } from "@/server/appeal/appeal.module";
 import InvitationList from "@/components/invitations-list";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 
 function AppealListComponent({ params }: { params: { id: string } }) {
     const [appeals, setAppeals] = useState<any[]>([]);

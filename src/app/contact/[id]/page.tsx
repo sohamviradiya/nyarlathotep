@@ -4,7 +4,7 @@ import { Contact } from "@/server/contact/contact.module";
 import MessageComponent from "@/components/contact/message.contact";
 import { MESSAGE_DIRECTION, MESSAGE_DIRECTION_TYPE } from "@/server/message/message.module";
 import MessageInput from "@/components/contact/input.contact";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 import { Box, Container, Grid, List, ListItem, Typography } from "@mui/material";
 import SkeletonBundle from "@/components/skeleton-bundle";
 

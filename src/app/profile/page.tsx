@@ -1,12 +1,12 @@
 "use client";
 import AppealList from "@/components/profile/appeal-list.profile";
-import UserInfo from "@/components/user/info.user";
+import UserInfo from "@/components/info.user";
 import InvitationList from "@/components/invitations-list";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Private, User_Public } from "@/server/user/user.module";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 import { Box, Button, Container, Grid } from "@mui/material";
 
 function ProfileComponent() {

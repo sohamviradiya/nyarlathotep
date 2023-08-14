@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { AppBar, Toolbar, Container, Typography } from '@mui/material';
-import GlobalContext from '@/components/mui/theme';
+import GlobalContext from '@/components/global-context';
 import Link from 'next/link';
 
 export default function Header() {

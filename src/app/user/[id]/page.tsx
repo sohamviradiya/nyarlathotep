@@ -1,9 +1,9 @@
 "use client";
-import UserInfo from "@/components/user/info.user";
+import UserInfo from "@/components/info.user";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Public } from "@/server/user/user.module";
 import { useEffect, useState } from "react";
-import GlobalContext from "@/components/mui/theme";
+import GlobalContext from "@/components/global-context";
 import { Container } from "@mui/material";
 
 function UserComponent({ params }: { params: { id: string } }) {
