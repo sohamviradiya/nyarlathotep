@@ -14,9 +14,10 @@ function ProfileComponent() {
     const [user, setUser] = useState<User_Private>();
     const [waiting, setWaiting] = useState<boolean>(true);
 
-    const token = localStorage.getItem('token');
+
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
         if (!token) router.push("/auth/log-in");
         else {
             fetchProfile(token)
@@ -30,7 +31,7 @@ function ProfileComponent() {
                     router.push("/auth/log-in");
                 });
         }
-    }, [router, token]);
+    }, [router]);
 
     return (<Container maxWidth="xl" sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh", padding: "6rem" }}>
         {(waiting || !user) ? (<SkeletonBundle size={4} />) : (
