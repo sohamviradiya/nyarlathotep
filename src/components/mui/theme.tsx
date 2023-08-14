@@ -1,5 +1,7 @@
+
 import { ThemeOptions, ThemeProvider, createTheme } from '@mui/material/styles';
-import { createContext } from 'react';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
 const themeOptions: ThemeOptions = {
     palette: {
         mode: 'dark',
@@ -25,10 +27,12 @@ const themeOptions: ThemeOptions = {
 
 const theme = createTheme(themeOptions);
 
-export default function ThemeHydrator({ children }: { children: React.ReactNode }) {
+export default function GlobalContext({ children }: { children: React.ReactNode }) {
     return (
         <ThemeProvider theme={theme}>
+            <Header />
             {children}
+            <Footer />
         </ThemeProvider>
     );
 };

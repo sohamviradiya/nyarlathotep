@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import SkeletonBundle from "@/components/skeleton-bundle";
 import { Appeal } from "@/server/appeal/appeal.module";
 import InvitationList from "@/components/invitations-list";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 
 function AppealListComponent({ params }: { params: { id: string } }) {
     const [appeals, setAppeals] = useState<any[]>([]);
@@ -22,7 +22,7 @@ function AppealListComponent({ params }: { params: { id: string } }) {
         });
     }, [params.id, router]);
     if (loading) return <SkeletonBundle size={4} />;
-    return ( <InvitationList invitations={appeals} />);
+    return (<InvitationList invitations={appeals} />);
 };
 
 
@@ -44,8 +44,8 @@ async function fetchAppeals(id: string) {
 
 export default function Appeals({ params }: { params: { id: string } }) {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <AppealListComponent params={params} />
-        </ThemeHydrator>
+        </GlobalContext>
     )
 }

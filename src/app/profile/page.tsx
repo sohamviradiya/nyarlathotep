@@ -6,7 +6,7 @@ import SkeletonBundle from "@/components/skeleton-bundle";
 import { User_Private, User_Public } from "@/server/user/user.module";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 import { Box, Button, Container, Grid } from "@mui/material";
 
 function ProfileComponent() {
@@ -70,8 +70,8 @@ async function fetchProfile(token: string): Promise<User_Private> {
 
 export default function Profile() {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <ProfileComponent />
-        </ThemeHydrator>
+        </GlobalContext>
     );
 }

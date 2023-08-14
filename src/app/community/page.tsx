@@ -4,7 +4,7 @@ import { TextField, Autocomplete, Container, Box, Typography } from "@mui/materi
 import { useEffect, useState } from "react";
 import { User_Public } from "@/server/user/user.module";
 import Link from "next/link";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 
 
 function CommunityComponent() {
@@ -51,8 +51,8 @@ async function searchCommunities(search_string: string) {
 
 export default function Community() {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <CommunityComponent />
-        </ThemeHydrator>
+        </GlobalContext>
     )
 };

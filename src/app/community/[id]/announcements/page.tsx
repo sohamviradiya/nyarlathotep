@@ -3,7 +3,7 @@ import { Announcement } from "@/server/community/community.module";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SkeletonBundle from "@/components/skeleton-bundle";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 import { Container, List, ListItem, Paper, Typography } from "@mui/material";
 
 function AnnouncementListComponent({ params }: { params: { id: string } }) {
@@ -40,7 +40,7 @@ function AnnouncementListComponent({ params }: { params: { id: string } }) {
 function AnnouncementComponent({ announcement }: { announcement: Announcement }) {
     console.log(announcement);
     return (
-        <Paper elevation={3} sx={{padding: "1rem"}}>
+        <Paper elevation={3} sx={{ padding: "1rem" }}>
             <Typography variant="h6">
                 {announcement.user}
             </Typography>
@@ -75,8 +75,8 @@ async function fetchAnnouncements(id: string) {
 
 export default function Announcements({ params }: { params: { id: string } }) {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <AnnouncementListComponent params={params} />
-        </ThemeHydrator>
+        </GlobalContext>
     )
 };

@@ -1,16 +1,16 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Container, Typography } from '@mui/material';
-import ThemeHydrator from '@/components/mui/theme';
+import GlobalContext from '@/components/mui/theme';
 import Link from 'next/link';
 
-function HeaderComponent() {
+export default function Header() {
     return (
         <AppBar position="static">
             <Container sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', }} maxWidth="xl">
                 <Toolbar disableGutters>
                     <Typography variant="h2" sx={{ marginRight: '20vw' }}>
-                        <Link href="/"> NyarlaThotep </Link>  
+                        <Link href="/"> NyarlaThotep </Link>
                     </Typography>
                 </Toolbar>
                 <HeaderTypoGraphy>
@@ -22,14 +22,6 @@ function HeaderComponent() {
                 <AuthActions />
             </Container>
         </AppBar>
-    );
-};
-
-export default function Header() {
-    return (
-        <ThemeHydrator>
-            <HeaderComponent />
-        </ThemeHydrator>
     );
 };
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Alert, Button, Container, FilledInput, FormControl, IconButton, InputAdornment, InputLabel, TextField } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import ErrorList from "@/components/error-list";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 
 const client_side_errors = ["Password must be at least 8 characters long", "Invalid Email"];
 
@@ -128,9 +128,9 @@ async function submitForm(user: {
 
 export default function Update() {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <UpdateComponent />
-        </ThemeHydrator>
+        </GlobalContext>
     )
 }
 

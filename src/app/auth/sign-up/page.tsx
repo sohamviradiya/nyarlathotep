@@ -7,7 +7,7 @@ import { Alert, Button, Container, FilledInput, FormControl, IconButton, InputAd
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useRouter } from "next/navigation";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 
 const client_side_errors = ["Password must be at least 8 characters long", "Invalid Email", "Name too short"];
 
@@ -130,8 +130,8 @@ async function submitForm(user: User_Input, setErrors: (errors: string[]) => voi
 
 export default function SignUp() {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <SignUpComponent />
-        </ThemeHydrator>
+        </GlobalContext>
     );
 };

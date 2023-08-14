@@ -1,5 +1,5 @@
 "use client";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 import { Contact } from "@/server/contact/contact.module";
 import { Card, CardContent, Container, List, ListItem, Typography } from "@mui/material";
 import Link from "next/link";
@@ -11,7 +11,7 @@ function ContactListComponent() {
         fetchContacts().then(contacts => setContacts(contacts));
     }, []);
     return (
-        <Container maxWidth="xl" sx= {{ padding: "6rem", minHeight: "80vh" }}>
+        <Container maxWidth="xl" sx={{ padding: "6rem", minHeight: "80vh" }}>
             <List>
                 {contacts.map(contact => (
                     <ListItem key={contact.id}>
@@ -58,8 +58,8 @@ async function fetchContacts() {
 
 export default function ContactList() {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <ContactListComponent />
-        </ThemeHydrator>
+        </GlobalContext>
     );
 };

@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Metadata } from "next";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 import { Button, ButtonGroup, Container, Typography } from "@mui/material";
 
 function LogoutComponent() {
@@ -22,14 +22,14 @@ function LogoutComponent() {
                 }}
             >Are you sure you want to log out?</Typography>
             <ButtonGroup variant="contained">
-            <Button onClick={() => {
-                localStorage.removeItem("email");
-                localStorage.removeItem("token");
+                <Button onClick={() => {
+                    localStorage.removeItem("email");
+                    localStorage.removeItem("token");
                     router.push("/");
-                    
-            }}>Yes</Button>
-            <Button onClick={() => {
-                router.push("/");
+
+                }}>Yes</Button>
+                <Button onClick={() => {
+                    router.push("/");
                 }}>No</Button>
             </ButtonGroup>
         </Container>
@@ -39,8 +39,8 @@ function LogoutComponent() {
 
 export default function Logout() {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <LogoutComponent />
-        </ThemeHydrator>
+        </GlobalContext>
     );
 }

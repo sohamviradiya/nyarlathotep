@@ -1,5 +1,5 @@
 "use client";
-import ThemeHydrator from "@/components/mui/theme";
+import GlobalContext from "@/components/mui/theme";
 import { Button, Container, Grid, Paper, Typography } from "@mui/material";
 import { Metadata } from "next";
 
@@ -45,9 +45,9 @@ function HomeComponent() {
 
 export default function Home() {
     return (
-        <ThemeHydrator>
+        <GlobalContext>
             <HomeComponent />
-        </ThemeHydrator>
+        </GlobalContext>
     )
 };
 

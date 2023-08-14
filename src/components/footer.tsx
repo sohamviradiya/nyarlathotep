@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { Container, Toolbar, Typography } from '@mui/material';
-import ThemeHydrator from '@/components/mui/theme';
+import GlobalContext from '@/components/mui/theme';
 import { CopyrightOutlined, GitHub } from '@mui/icons-material';
 
-function FooterComponent() {
+export default function Footer() {
     return (
         <Container sx={{
             display: 'flex',
@@ -31,14 +31,6 @@ function FooterComponent() {
         </Container>
     );
 };
-
-export default function Footer() {
-    return (
-        <ThemeHydrator>
-            <FooterComponent />
-        </ThemeHydrator>
-    );
-}
 
 function FooterTypoGraphy({ children }: { children: React.ReactNode }) {
     return (
