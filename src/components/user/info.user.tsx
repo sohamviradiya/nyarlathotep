@@ -23,7 +23,7 @@ export default function UserInfo({ user }: { user: User_Public }) {
                             {user.address}
                         </Typography>
                         <Typography variant="caption" color="textSecondary">
-                            Last Online: {(new Date(user.last_online)).toUTCString()}
+                            Last Online: {(new Date(user.last_online)).toLocaleString()}
                         </Typography>
                     </CardContent>
                 </Card>

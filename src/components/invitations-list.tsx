@@ -48,7 +48,7 @@ function Invitation({ invitation_id }: { invitation_id: string }) {
         });
     }, [status, invitation_id, invitation?.status]);
     return ((invitation) ? (<Card variant="outlined" sx={{ width: "100%", padding: "1rem" }}>
-        <CardHeader title={`${invitation.type} from ${invitation.sender}`} subheader={`${new Date(invitation.status_changed).toUTCString()}`} />
+        <CardHeader title={`${invitation.type} from ${invitation.sender}`} subheader={`${new Date(invitation.status_changed).toLocaleString()}`} />
         <Typography variant="body1" paragraph>message: {invitation.message} </Typography>
         <Typography variant="subtitle1" gutterBottom>status:  {invitation.status}</Typography>
         <CardActions disableSpacing> <InvitationActions status={status} setStatus={setStatus} /></CardActions>

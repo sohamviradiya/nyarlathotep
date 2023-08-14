@@ -26,7 +26,7 @@ function Appeal({ id }: { id: string }) {
     return (
         (appeal && !withdrawn) ? (
             <Card variant="outlined" sx={{ width: "100%" }}>
-                <CardHeader title={`${appeal.type} to ${appeal.receiver}`} subheader={`${new Date(appeal.status_changed).toUTCString()}`} />
+                <CardHeader title={`${appeal.type} to ${appeal.receiver}`} subheader={`${new Date(appeal.status_changed).toLocaleString()}`} />
                 <CardContent>
                     <Typography variant="body1" paragraph>message: {appeal.message} </Typography>
                     <Typography variant="h6" gutterBottom>status:  {appeal.status} </Typography>

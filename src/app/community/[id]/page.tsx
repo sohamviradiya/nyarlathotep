@@ -32,7 +32,7 @@ function CommunityComponent({ params }: { params: { id: string } }) {
                             {community.description}
                         </Typography>
                         <Typography variant="body1">
-                            Since {new Date(community.founded).toUTCString()}
+                            Since {new Date(community.founded).toLocaleString()}
                         </Typography>
                     </Paper>
                 </Grid>

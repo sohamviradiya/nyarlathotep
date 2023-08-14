@@ -48,7 +48,7 @@ function AnnouncementComponent({ announcement }: { announcement: Announcement })
                 {announcement.content}
             </Typography>
             <Typography variant="body1">
-                {new Date(announcement.time).toUTCString()}
+                {new Date(announcement.time).toLocaleString()}
             </Typography>
         </Paper>
     );

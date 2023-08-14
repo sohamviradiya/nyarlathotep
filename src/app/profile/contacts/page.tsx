@@ -32,7 +32,7 @@ function ContactComponent({ contact }: { contact: Contact }) {
                     {loggedInUserId === contact.sender ? contact.receiver : contact.sender}
                 </Typography>
                 <Typography variant="subtitle1">
-                    {new Date(contact.established).toUTCString()}
+                    {new Date(contact.established).toLocaleString()}
                 </Typography>
                 <Link href={`/contact/${contact.id}`} color="primary">
                     View

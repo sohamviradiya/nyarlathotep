@@ -57,7 +57,7 @@ function FooterDate() {
     }, []);
     return (
         <>
-            {date.toUTCString()}
+            {date.toLocaleString()}
         </>
     );
 }
