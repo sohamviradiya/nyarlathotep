@@ -38,7 +38,6 @@ function AnnouncementListComponent({ params }: { params: { id: string } }) {
 };
 
 function AnnouncementComponent({ announcement }: { announcement: Announcement }) {
-    console.log(announcement);
     return (
         <Paper elevation={3} sx={{ padding: "1rem" }}>
             <Typography variant="h6">

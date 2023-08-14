@@ -23,7 +23,7 @@ function SignUpComponent() {
         setEmail("");
         localStorage.removeItem("email");
         localStorage.removeItem("token");
-    }, [setEmail]);
+    }, []);
 
     return (
         <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>

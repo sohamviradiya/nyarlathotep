@@ -17,14 +17,10 @@ function UpdateComponent() {
     const router = useRouter();
     const { email, setEmail } = useContext(AuthContext);
     useEffect(() => {
-        if (email.length === 0)
-            router.push("/auth/log-in");
-        else
-            setUser({ currentPassword: "", newPassword: "", email: email });
-        setEmail("");
+        setUser({ currentPassword: "", newPassword: "", email: email });
         localStorage.removeItem("email");
         localStorage.removeItem("token");
-    }, [router, email, setEmail]);
+    }, [router, email]);
 
     return (
         <Container fixed maxWidth="md" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
@@ -80,8 +76,8 @@ function UpdateComponent() {
                     e.preventDefault();
                     submitForm(user, setErrors, setWaiting).then((email) => {
                         if (email) {
-                            setEmail(email);
-                            router.push('/profile');
+                            setEmail("");
+                            router.push('/auth/log-in');
                         }
                     });
                 }} disableElevation disabled={errors.length > 0}>
