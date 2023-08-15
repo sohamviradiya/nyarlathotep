@@ -64,7 +64,7 @@ async function submitForm(community: Community_Input, setErrors: (errors: string
             "Authorization": `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify({
-            community
+            ...community
         }),
     });
 
