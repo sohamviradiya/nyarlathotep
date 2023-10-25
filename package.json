@@ -22,7 +22,7 @@
     "firebase": "^10.1.0",
     "firebase-admin": "^11.10.1",
     "firebase-cli": "^1.2.0",
-    "next": "13.4.11",
+    "next": "13.5.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "typescript": "5.1.6",
